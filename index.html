@@ -12,8 +12,9 @@
     body {
       margin: 0;
       font-family: 'Kanit', 'Outfit', sans-serif;
-      background: #050814;
-      color: #fff;
+      background: linear-gradient(to right, #f8fafc 0%, #eff6ff 50%, #faf5ff 100%);
+      background-attachment: fixed;
+      color: #334155;
       min-height: 100vh;
       overflow-x: hidden;
     }
@@ -23,8 +24,8 @@
       position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(99,102,241,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(99,102,241,0.03) 1px, transparent 1px);
+        linear-gradient(rgba(99,102,241,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,102,241,0.02) 1px, transparent 1px);
       background-size: 50px 50px;
       pointer-events: none;
       z-index: 0;
@@ -41,19 +42,19 @@
     }
     .blob-1 {
       width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(99,102,241,0.22) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
       top: -150px; left: -100px;
       animation: floatBlob 10s ease-in-out infinite;
     }
     .blob-2 {
       width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.06) 0%, transparent 70%);
       top: 30%; right: -200px;
       animation: floatBlob 12s ease-in-out infinite reverse;
     }
     .blob-3 {
       width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(236,72,153,0.12) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.04) 0%, transparent 70%);
       bottom: -100px; left: 15%;
       animation: floatBlob 8s ease-in-out infinite 2s;
     }
@@ -65,7 +66,7 @@
 
     /* Glowing effect styles */
     .shimmer-text {
-      background: linear-gradient(90deg, #818cf8 0%, #a78bfa 35%, #f472b6 50%, #a78bfa 65%, #818cf8 100%);
+      background: linear-gradient(90deg, #2563eb 0%, #4f46e5 35%, #6366f1 50%, #4f46e5 65%, #2563eb 100%);
       background-size: 200% auto;
       -webkit-background-clip: text;
       background-clip: text;
@@ -84,29 +85,29 @@
       content: '';
       position: absolute;
       inset: -1px;
-      background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(124,58,237,0.4), transparent);
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(168, 85, 247, 0.15), transparent);
       border-radius: inherit;
       z-index: -1;
       opacity: 0.8;
       transition: opacity 0.3s;
     }
     .glow-border:hover::after {
-      background: linear-gradient(135deg, rgba(99,102,241,0.8), rgba(236,72,153,0.8), rgba(124,58,237,0.8));
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(168, 85, 247, 0.4), rgba(99, 102, 241, 0.4));
     }
 
     /* Glassmorphism styling */
     .glass-card {
-      background: rgba(10, 15, 30, 0.7);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(25px);
       -webkit-backdrop-filter: blur(25px);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
       transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .glass-card:hover {
       transform: translateY(-8px);
-      border-color: rgba(99, 102, 241, 0.2);
-      box-shadow: 0 30px 60px rgba(99, 102, 241, 0.15);
+      border-color: rgba(59, 130, 246, 0.25);
+      box-shadow: 0 20px 40px rgba(59, 130, 246, 0.08);
     }
 
     .hero-img-container {
@@ -117,7 +118,7 @@
       position: absolute;
       inset: 0;
       border-radius: 24px;
-      box-shadow: 0 0 50px rgba(99,102,241,0.25);
+      box-shadow: 0 0 50px rgba(59, 130, 246, 0.08);
       z-index: -1;
       animation: pulseGlow 4s infinite ease-in-out;
     }
@@ -130,7 +131,7 @@
       display: inline-block;
       width: 10px; height: 10px;
       border-radius: 50%;
-      background: #818cf8;
+      background: #3b82f6;
       animation: pingGlow 1.8s cubic-bezier(0,0,0.2,1) infinite;
     }
     @keyframes pingGlow {
@@ -146,19 +147,19 @@
       position: absolute;
       left: 23px; top: 40px; bottom: -30px;
       width: 2px;
-      background: rgba(99,102,241,0.15);
+      background: rgba(59, 130, 246, 0.15);
     }
     .timeline-step:last-child::before { display: none; }
     .step-active .timeline-step-icon {
-      background: linear-gradient(135deg, #6366f1, #d946ef);
-      box-shadow: 0 0 20px rgba(99,102,241,0.5);
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);
     }
 
     /* Custom scrollbar */
     ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #050814; }
-    ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.5); }
+    ::-webkit-scrollbar-track { background: #f8fafc; }
+    ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.4); }
   </style>
 </head>
 <body class="relative">
@@ -169,30 +170,31 @@
   <div class="blob blob-3"></div>
 
   <!-- ===== 1. NAVIGATION BAR ===== -->
-  <nav class="sticky top-0 z-50 w-full border-b border-white/5 bg-[#050814]/75 backdrop-blur-md">
+  <nav class="sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 backdrop-blur-md">
     <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
       <!-- Logo -->
       <a href="#" class="flex items-center gap-3">
-        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-pink-600 text-xl shadow-lg shadow-indigo-600/30">
-          🛡️
-        </div>
-        <span class="text-xl font-black tracking-tight text-white">TAB-<span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-400">LOCK</span></span>
+        <img src="logo.png" alt="Tab-Lock Logo" class="h-10 w-10 object-cover rounded-xl shadow-md border border-slate-100" />
+        <span class="text-xl font-black tracking-tight text-slate-800">TAB-<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600">LOCK</span></span>
       </a>
 
       <!-- Menu Items -->
       <div class="hidden items-center gap-8 md:flex">
-        <a href="#" class="text-sm font-medium text-slate-350 hover:text-white transition">หน้าแรก</a>
-        <a href="#features" class="text-sm font-medium text-slate-350 hover:text-white transition">ฟีเจอร์เด่น</a>
-        <a href="#workflow" class="text-sm font-medium text-slate-350 hover:text-white transition">วิธีการใช้งาน</a>
-        <a href="#stats" class="text-sm font-medium text-slate-350 hover:text-white transition">ความน่าเชื่อถือ</a>
+        <a href="#" class="text-sm font-medium text-slate-650 hover:text-cyan-600 transition">หน้าแรก</a>
+        <a href="#features" class="text-sm font-medium text-slate-650 hover:text-cyan-600 transition">ฟีเจอร์เด่น</a>
+        <a href="#workflow" class="text-sm font-medium text-slate-650 hover:text-cyan-600 transition">วิธีการใช้งาน</a>
+        <a href="#stats" class="text-sm font-medium text-slate-650 hover:text-cyan-600 transition">ความน่าเชื่อถือ</a>
       </div>
 
       <!-- Action Button -->
       <div class="flex items-center gap-3">
-        <a href="#portal" class="hidden rounded-full bg-white/5 border border-white/10 px-5 py-2 text-xs font-bold text-white hover:bg-white/10 transition sm:block">
-          เข้าสู่ระบบ ➡️
+        <a href="admin-login.html" class="hidden rounded-full bg-rose-50 border border-rose-200 px-5 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 transition sm:block">
+          ผู้ดูแลระบบ (Admin)
         </a>
-        <a href="#portal" class="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-2.5 text-xs font-bold text-white hover:from-indigo-500 hover:to-purple-500 transition shadow-lg shadow-indigo-600/20">
+        <a href="#portal" class="hidden rounded-full bg-slate-100 border border-slate-205 px-5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200/80 transition sm:block">
+          เข้าสู่ระบบ
+        </a>
+        <a href="#portal" class="rounded-full bg-gradient-to-r from-cyan-500 to-indigo-500 px-5 py-2.5 text-xs font-bold text-white hover:from-cyan-650 hover:to-indigo-650 transition shadow-lg shadow-cyan-500/15">
           เริ่มต้นใช้งาน
         </a>
       </div>
@@ -204,51 +206,134 @@
     <header class="grid grid-cols-1 items-center gap-12 py-16 lg:grid-cols-12 lg:py-24">
       <!-- Text details -->
       <div class="space-y-8 lg:col-span-7">
-        <div class="inline-flex items-center gap-2.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 px-4 py-1.5 text-xs font-bold text-indigo-300">
+        <div class="inline-flex items-center gap-2.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 px-4 py-1.5 text-xs font-bold text-cyan-600">
           <span class="relative flex h-2.5 w-2.5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500"></span>
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
           </span>
           SECURED EXAM ENVIRONMENT v3.0
         </div>
-        <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl leading-tight">
-          แพลตฟอร์มคุมสอบออนไลน์<br />
-          <span class="shimmer-text">ป้องกันการสลับแท็บ</span> อัจฉริยะ
+        <h1 class="text-4xl font-extrabold tracking-tight text-slate-800 sm:text-5xl md:text-6xl leading-tight">
+          แพลตฟอร์มจัดการการสอบ<br />
+          เพื่อตรวจสอบ<span class="shimmer-text">พฤติกรรมน่าสงสัย</span>ของผู้สอบ
         </h1>
-        <p class="max-w-xl text-base text-slate-400 leading-relaxed">
+        <p class="max-w-xl text-base text-slate-655 leading-relaxed">
           ยกระดับความโปร่งใสและคุณภาพการทดสอบออนไลน์ด้วย Tab-Lock ระบบควบคุมและตรวจจับประวัติการออกจากหน้าต่างสอบแบบเรียลไทม์ พร้อมรายงานผลสถิตินักเรียนและข้อสอบอัตโนมัติ
         </p>
         <div class="flex flex-wrap gap-4">
-          <a href="#portal" class="rounded-xl bg-gradient-to-r from-indigo-600 to-pink-600 px-7 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 hover:from-indigo-500 hover:to-pink-500 transition-all duration-200 hover:-translate-y-0.5">
+          <a href="#portal" class="rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 px-7 py-4 text-sm font-bold text-white shadow-lg shadow-cyan-500/15 hover:from-cyan-600 hover:to-indigo-600 transition-all duration-200 hover:-translate-y-0.5">
             เข้าใช้งานระบบสอบ
           </a>
-          <a href="#features" class="rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 px-7 py-4 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5">
-            เรียนรู้เพิ่มเติม ⬇️
+          <a href="#features" class="rounded-xl bg-slate-100 border border-slate-205 hover:bg-slate-200/80 px-7 py-4 text-sm font-bold text-slate-700 transition-all duration-200 hover:-translate-y-0.5">
+            เรียนรู้เพิ่มเติม
           </a>
         </div>
         <!-- Integrations/Badge info -->
-        <div class="flex items-center gap-4 pt-4 border-t border-white/5">
+        <div class="flex items-center gap-4 pt-4 border-t border-slate-200">
           <div class="text-xs text-slate-500 tracking-wider uppercase font-semibold">รองรับระบบหลักครบวงจร:</div>
-          <div class="flex gap-3 text-slate-400 text-xs font-bold">
-            <span class="bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">Excel Export</span>
-            <span class="bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">AI Assistant</span>
-            <span class="bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">Real-Time Monitor</span>
+          <div class="flex gap-3 text-slate-500 text-xs font-bold">
+            <span class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-205 text-slate-600">Excel Export</span>
+            <span class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-205 text-slate-600">AI Assistant</span>
+            <span class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-205 text-slate-600">Real-Time Monitor</span>
           </div>
         </div>
       </div>
 
       <!-- App mockup visualization -->
       <div class="lg:col-span-5">
-        <div class="hero-img-container rounded-3xl bg-slate-900 border border-white/10 p-2 overflow-hidden shadow-2xl">
-          <img src="hero-mockup.jpg" alt="Tab-Lock Teacher Dashboard Mockup" class="w-full rounded-2xl object-cover" />
+        <div class="hero-img-container rounded-3xl bg-slate-50 border border-slate-200 p-4 shadow-2xl relative">
+          <!-- Mockup Browser Header -->
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4 select-none">
+            <div class="flex items-center gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-rose-400"></span>
+              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+              <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+            </div>
+            <div class="bg-slate-100 border border-slate-200 rounded-lg px-4 py-1 text-[9px] text-slate-400 font-mono flex items-center gap-1.5">
+              <span class="text-emerald-500">🔒 SECURE</span> tab-lock.online/monitor
+            </div>
+            <div class="w-8"></div>
+          </div>
+          
+          <!-- Mockup Dashboard Content -->
+          <div class="space-y-4 font-sans text-left pb-4">
+            <!-- Header -->
+            <div class="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-200/60 shadow-sm">
+              <div>
+                <span class="text-[8px] font-bold text-indigo-600 uppercase tracking-widest block">กำลังควบคุมการสอบ</span>
+                <h4 class="text-xs font-bold text-slate-800">วิชา Programming 101 - Sec 2</h4>
+              </div>
+              <span class="flex items-center gap-1 bg-emerald-50 border border-emerald-250 text-emerald-700 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full animate-pulse">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> LIVE
+              </span>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-3 gap-2">
+              <div class="bg-white p-2.5 rounded-xl border border-slate-200/60 text-center">
+                <span class="text-[8px] text-slate-400 font-bold block uppercase">นักศึกษา</span>
+                <span class="text-xs font-extrabold text-slate-800">42 คน</span>
+              </div>
+              <div class="bg-white p-2.5 rounded-xl border border-slate-200/60 text-center">
+                <span class="text-[8px] text-slate-400 font-bold block uppercase">ส่งข้อสอบ</span>
+                <span class="text-xs font-extrabold text-emerald-600">38 คน</span>
+              </div>
+              <div class="bg-rose-50 p-2.5 rounded-xl border border-rose-100 text-center">
+                <span class="text-[8px] text-rose-500 font-bold block uppercase">สลับหน้าจอ</span>
+                <span class="text-xs font-extrabold text-rose-600">3 คน</span>
+              </div>
+            </div>
+
+            <!-- Monitoring Feed Mockup -->
+            <div class="bg-white p-3 rounded-2xl border border-slate-200/60 shadow-sm space-y-2">
+              <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">เหตุการณ์ผิดปกติล่าสุด</span>
+              
+              <!-- Feed Item 1 -->
+              <div class="flex justify-between items-center p-2 rounded-xl bg-rose-50 border border-rose-100/50">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-rose-100 flex items-center justify-center text-xs">🔴</span>
+                  <div>
+                    <h5 class="text-[10px] font-bold text-slate-800 leading-none">นายสมชาย รักดี</h5>
+                    <p class="text-[8px] text-rose-600 font-bold mt-1">ออกนอกหน้าต่างสอบเกิน 5 วินาที</p>
+                  </div>
+                </div>
+                <span class="text-[8px] text-rose-700 font-extrabold bg-rose-100 border border-rose-200 px-1.5 py-0.5 rounded-md">เตือนครั้งที่ 3</span>
+              </div>
+              
+              <!-- Feed Item 2 -->
+              <div class="flex justify-between items-center p-2 rounded-xl bg-amber-50 border border-amber-100/50">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-xs">🟡</span>
+                  <div>
+                    <h5 class="text-[10px] font-bold text-slate-800 leading-none">นางสาวสมศรี เรียนดี</h5>
+                    <p class="text-[8px] text-amber-600 font-bold mt-1">สลับหน้าจอกลับมาทำข้อสอบ</p>
+                  </div>
+                </div>
+                <span class="text-[8px] text-amber-700 font-extrabold bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded-md">12:45 น.</span>
+              </div>
+
+              <!-- Feed Item 3 -->
+              <div class="flex justify-between items-center p-2 rounded-xl bg-slate-50 border border-slate-100/80">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-xs">🟢</span>
+                  <div>
+                    <h5 class="text-[10px] font-bold text-slate-800 leading-none">นายปกรณ์ ใฝ่รู้</h5>
+                    <p class="text-[8px] text-slate-500 mt-1">ทำข้อสอบต่ออย่างราบรื่น</p>
+                  </div>
+                </div>
+                <span class="text-[8px] text-slate-500 bg-slate-200 border border-slate-300 px-1.5 py-0.5 rounded-md">12:44 น.</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Floating Status Badge -->
-          <div class="absolute -bottom-5 -left-5 glass-card rounded-2xl p-4 flex items-center gap-3 border border-indigo-500/25">
-            <div class="h-9 w-9 rounded-full bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+          <div class="absolute -bottom-5 -left-5 bg-white rounded-2xl p-4 flex items-center gap-3 border border-slate-200 shadow-xl z-20">
+            <div class="h-9 w-9 rounded-full bg-emerald-50 border border-emerald-250 flex items-center justify-center text-emerald-500 text-xs shadow-sm">
               ✔️
             </div>
             <div>
-              <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">ระบบความปลอดภัย</div>
-              <div class="text-xs font-extrabold text-white">ปกป้องการสอบ 100%</div>
+              <div class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">ระบบความปลอดภัย</div>
+              <div class="text-xs font-extrabold text-slate-800">ปกป้องการสอบ 100%</div>
             </div>
           </div>
         </div>
@@ -256,18 +341,18 @@
     </header>
 
     <!-- ===== 3. DYNAMIC STATS SECTION ===== -->
-    <section id="stats" class="py-12 border-y border-white/5 my-12 bg-white/2 rounded-2xl">
+    <section id="stats" class="py-12 border-y border-slate-205 my-12 bg-slate-100/50 rounded-2xl">
       <div class="grid grid-cols-1 gap-8 sm:grid-cols-3 text-center">
         <div class="space-y-2">
-          <div class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">99.9%</div>
+          <div class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600">99.9%</div>
           <div class="text-xs text-slate-500 tracking-widest font-bold uppercase">ป้องกันการเปิดเบราว์เซอร์อื่นสอบ</div>
         </div>
-        <div class="space-y-2 border-y border-white/5 py-6 sm:border-y-0 sm:border-x sm:border-white/5 sm:py-0">
-          <div class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-pink-400">&lt; 1 วินาที</div>
+        <div class="space-y-2 border-y border-slate-205 py-6 sm:border-y-0 sm:border-x sm:border-slate-205 sm:py-0">
+          <div class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">&lt; 1 วินาที</div>
           <div class="text-xs text-slate-500 tracking-widest font-bold uppercase">แจ้งเตือนสลับหน้าจอเรียลไทม์</div>
         </div>
         <div class="space-y-2">
-          <div class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-indigo-400">100% Automated</div>
+          <div class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-cyan-600">100% Automated</div>
           <div class="text-xs text-slate-500 tracking-widest font-bold uppercase">สรุปผลสอบ Z-Score & T-Score ทันที</div>
         </div>
       </div>
@@ -276,27 +361,27 @@
     <!-- ===== 4. FEATURES GRID ===== -->
     <section id="features" class="py-16 space-y-12">
       <div class="text-center max-w-2xl mx-auto space-y-4">
-        <span class="text-xs font-bold tracking-[0.3em] uppercase text-indigo-400">คุณลักษณะเด่น</span>
-        <h2 class="text-3xl font-extrabold text-white sm:text-4xl">ฟีเจอร์คุมสอบอัจฉริยะแบบครบวงจร</h2>
-        <p class="text-sm text-slate-400">พัฒนาขึ้นด้วยเทคโนโลยีสแกนหน้าต่างและประมวลผลสถิติแบบครบวงจร เพื่อตอบสนองความต้องการของผู้เข้าสอบและผู้สอนอย่างมีประสิทธิภาพ</p>
+        <span class="text-xs font-bold tracking-[0.3em] uppercase text-cyan-600">คุณลักษณะเด่น</span>
+        <h2 class="text-3xl font-extrabold text-slate-800 sm:text-4xl">ฟีเจอร์คุมสอบอัจฉริยะแบบครบวงจร</h2>
+        <p class="text-sm text-slate-500">พัฒนาขึ้นด้วยเทคโนโลยีสแกนหน้าต่างและประมวลผลสถิติแบบครบวงจร เพื่อตอบสนองความต้องการของผู้เข้าสอบและผู้สอนอย่างมีประสิทธิภาพ</p>
       </div>
 
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <!-- Feature 1 -->
         <div class="glass-card p-6 rounded-3xl space-y-4 flex flex-col justify-between">
-          <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-2xl">🔒</div>
+          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-2xl">🔒</div>
           <div class="space-y-2">
-            <h3 class="text-base font-bold text-white">ระบบล็อกแท็บ (Tab Lock)</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">ตรวจจับและแจ้งเตือนทันทีเมื่อนักศึกษาสลับหน้าต่างเบราว์เซอร์หรือกดย่อหน้าจอระบบสอบ</p>
+            <h3 class="text-base font-bold text-slate-800">ระบบล็อกแท็บ (Tab Lock)</h3>
+            <p class="text-xs text-slate-550 leading-relaxed">ตรวจจับและแจ้งเตือนทันทีเมื่อนักศึกษาสลับหน้าต่างเบราว์เซอร์หรือกดย่อหน้าจอระบบสอบ</p>
           </div>
         </div>
 
         <!-- Feature 2 -->
         <div class="glass-card p-6 rounded-3xl space-y-4 flex flex-col justify-between">
-          <div class="w-12 h-12 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-2xl">📺</div>
+          <div class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-2xl">📺</div>
           <div class="space-y-2">
-            <h3 class="text-base font-bold text-white">เฝ้าระวังเรียลไทม์ (Live Monitor)</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">อาจารย์สามารถสังเกตจำนวนการสลับหน้าจอของนักศึกษาทุกคนในห้องสอบได้พร้อมกันแบบวินาทีต่อวินาที</p>
+            <h3 class="text-base font-bold text-slate-800">เฝ้าระวังเรียลไทม์ (Live Monitor)</h3>
+            <p class="text-xs text-slate-550 leading-relaxed">อาจารย์สามารถสังเกตจำนวนการสลับหน้าจอของนักศึกษาทุกคนในห้องสอบได้พร้อมกันแบบวินาทีต่อวินาที</p>
           </div>
         </div>
 
@@ -304,8 +389,8 @@
         <div class="glass-card p-6 rounded-3xl space-y-4 flex flex-col justify-between">
           <div class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-2xl">📊</div>
           <div class="space-y-2">
-            <h3 class="text-base font-bold text-white">ประมวลผลผลลัพธ์เชิงลึก</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">คำนวณ Z-Score, T-Score, คะแนนเฉลี่ย (Mean) ส่วนเบี่ยงเบนมาตรฐาน (SD) และวิเคราะห์ข้อสอบให้เสร็จสรรพ</p>
+            <h3 class="text-base font-bold text-slate-800">ประมวลผลผลลัพธ์เชิงลึก</h3>
+            <p class="text-xs text-slate-550 leading-relaxed">คำนวณ Z-Score, T-Score, คะแนนเฉลี่ย (Mean) ส่วนเบี่ยงเบนมาตรฐาน (SD) และวิเคราะห์ข้อสอบให้เสร็จสรรพ</p>
           </div>
         </div>
 
@@ -313,8 +398,8 @@
         <div class="glass-card p-6 rounded-3xl space-y-4 flex flex-col justify-between">
           <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl">🤖</div>
           <div class="space-y-2">
-            <h3 class="text-base font-bold text-white">AI เจนเนอเรเตอร์คำถาม</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">มีระบบ AI ช่วยออกคำถามแบบปรนัยและอัตนัยอย่างชาญฉลาดโดยอิงตามหัวข้อวิชาที่เลือก</p>
+            <h3 class="text-base font-bold text-slate-800">AI เจนเนอเรเตอร์คำถาม</h3>
+            <p class="text-xs text-slate-550 leading-relaxed">มีระบบ AI ช่วยออกคำถามแบบปรนัยและอัตนัยอย่างชาญฉลาดโดยอิงตามหัวข้อวิชาที่เลือก</p>
           </div>
         </div>
       </div>
@@ -323,19 +408,19 @@
     <!-- ===== 5. WORKFLOW SECTION (HOW IT WORKS) ===== -->
     <section id="workflow" class="py-16 space-y-12">
       <div class="text-center max-w-2xl mx-auto space-y-4">
-        <span class="text-xs font-bold tracking-[0.3em] uppercase text-pink-400">ขั้นตอนการทำงาน</span>
-        <h2 class="text-3xl font-extrabold text-white sm:text-4xl">ใช้งานง่ายใน 4 ขั้นตอน</h2>
-        <p class="text-sm text-slate-400">ออกแบบอินเตอร์เฟซให้ทำงานโดยตรงบนเบราว์เซอร์ ไม่ต้องติดตั้งซอฟต์แวร์เสริมอื่นใดเพิ่มเติม</p>
+        <span class="text-xs font-bold tracking-[0.3em] uppercase text-indigo-650">ขั้นตอนการทำงาน</span>
+        <h2 class="text-3xl font-extrabold text-slate-800 sm:text-4xl">ใช้งานง่ายใน 4 ขั้นตอน</h2>
+        <p class="text-sm text-slate-555">ออกแบบอินเตอร์เฟซให้ทำงานโดยตรงบนเบราว์เซอร์ ไม่ต้องติดตั้งซอฟต์แวร์เสริมอื่นใดเพิ่มเติม</p>
       </div>
 
       <!-- Tab Switch Controls -->
       <div class="flex justify-center">
-        <div class="bg-slate-900 border border-white/5 p-1.5 rounded-2xl flex gap-1">
-          <button onclick="switchWorkflowTab('student')" id="workflow-tab-student" class="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-indigo-600 transition">
-            🎓 สำหรับผู้สอบ (นักศึกษา)
+        <div class="bg-slate-100 border border-slate-205 p-1.5 rounded-2xl flex gap-1">
+          <button onclick="switchWorkflowTab('student')" id="workflow-tab-student" class="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-indigo-500 transition shadow-sm">
+            สำหรับผู้สอบ (นักศึกษา)
           </button>
-          <button onclick="switchWorkflowTab('teacher')" id="workflow-tab-teacher" class="px-6 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition">
-            🏫 สำหรับผู้คุมสอบ (อาจารย์)
+          <button onclick="switchWorkflowTab('teacher')" id="workflow-tab-teacher" class="px-6 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition">
+            สำหรับผู้คุมสอบ (อาจารย์)
           </button>
         </div>
       </div>
@@ -345,31 +430,31 @@
         <!-- Student Workflow -->
         <div id="workflow-content-student" class="space-y-8">
           <div class="timeline-step flex gap-6 step-active">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-sm font-bold text-white">1</div>
+            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-500 border border-slate-205 flex items-center justify-center text-sm font-bold text-white">1</div>
             <div class="space-y-1">
-              <h3 class="text-base font-bold text-white">ลงชื่อเข้าสอบ (Student Login)</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">กรอกรหัสประจำตัวนักศึกษา และรหัสห้องสอบที่อาจารย์ผู้สอนมอบให้เพื่อยืนยันสิทธิ์เข้ารับการสอบ</p>
+              <h3 class="text-base font-bold text-slate-800">ลงชื่อเข้าสอบ (Student Login)</h3>
+              <p class="text-xs text-slate-550 leading-relaxed">กรอกรหัสประจำตัวนักศึกษา และรหัสห้องสอบที่อาจารย์ผู้สอนมอบให้เพื่อยืนยันสิทธิ์เข้ารับการสอบ</p>
             </div>
           </div>
           <div class="timeline-step flex gap-6">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-sm font-bold text-slate-400">2</div>
+            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-white border border-slate-205 flex items-center justify-center text-sm font-bold text-slate-500">2</div>
             <div class="space-y-1">
-              <h3 class="text-base font-bold text-white">ยืนยันและยอมรับข้อตกลงป้องกันทุจริต</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">หน้าจอแสดงคำแนะนำและระเบียบการสอบ นักศึกษายอมรับเพื่อเข้าสู่โหมดการทำข้อสอบที่มีการป้องกันหน้าต่าง</p>
+              <h3 class="text-base font-bold text-slate-800">ยืนยันและยอมรับข้อตกลงป้องกันทุจริต</h3>
+              <p class="text-xs text-slate-555 leading-relaxed">หน้าจอแสดงคำแนะนำและระเบียบการสอบ นักศึกษายอมรับเพื่อเข้าสู่โหมดการทำข้อสอบที่มีการป้องกันหน้าต่าง</p>
             </div>
           </div>
           <div class="timeline-step flex gap-6">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-sm font-bold text-slate-400">3</div>
+            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-white border border-slate-205 flex items-center justify-center text-sm font-bold text-slate-500">3</div>
             <div class="space-y-1">
-              <h3 class="text-base font-bold text-white">ทำข้อสอบภายใต้การควบคุม (Tab-Lock Monitoring)</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">ในระหว่างการทำข้อสอบ หากกดย่อหน้าต่าง สลับแท็บ หรือเปิดโปรแกรมอื่น ระบบจะจับเวลาและบันทึกประวัติการออกจากแท็บคุมสอบทันที</p>
+              <h3 class="text-base font-bold text-slate-800">ทำข้อสอบภายใต้การควบคุม (Tab-Lock Monitoring)</h3>
+              <p class="text-xs text-slate-555 leading-relaxed">ในระหว่างการทำข้อสอบ หากกดย่อหน้าต่าง สลับแท็บ หรือเปิดโปรแกรมอื่น ระบบจะจับเวลาและบันทึกประวัติการออกจากแท็บคุมสอบทันที</p>
             </div>
           </div>
           <div class="timeline-step flex gap-6">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-sm font-bold text-slate-400">4</div>
+            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-white border border-slate-205 flex items-center justify-center text-sm font-bold text-slate-500">4</div>
             <div class="space-y-1">
-              <h3 class="text-base font-bold text-white">ส่งกระดาษคำตอบและดูผลการประเมิน</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">เมื่อกดส่งกระดาษคำตอบ หน้ากระดาษสรุปผลสัมฤทธิ์และผลการประเมินการทุจริตจะถูกนำเสนอให้นักศึกษาและส่งข้อมูลเข้าเซิร์ฟเวอร์หลัก</p>
+              <h3 class="text-base font-bold text-slate-800">ส่งกระดาษคำตอบและดูผลการประเมิน</h3>
+              <p class="text-xs text-slate-555 leading-relaxed">เมื่อกดส่งกระดาษคำตอบ หน้ากระดาษสรุปผลสัมฤทธิ์และผลการประเมินการทุจริตจะถูกนำเสนอให้นักศึกษาและส่งข้อมูลเข้าเซิร์ฟเวอร์หลัก</p>
             </div>
           </div>
         </div>
@@ -377,31 +462,31 @@
         <!-- Teacher Workflow (Hidden by default) -->
         <div id="workflow-content-teacher" class="space-y-8 hidden">
           <div class="timeline-step flex gap-6 step-active">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-sm font-bold text-white">1</div>
+            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-500 border border-slate-205 flex items-center justify-center text-sm font-bold text-white">1</div>
             <div class="space-y-1">
-              <h3 class="text-base font-bold text-white">สร้างห้องสอบและข้อสอบ (Create Exam)</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">อาจารย์เปิดห้องคุมสอบ ตั้งชื่อการสอบ ใส่รายการข้อสอบด้วยตนเอง หรืออัพโหลดผ่านไฟล์ Excel หรือเรียกใช้ AI คำสั่งเขียนข้อสอบอัตโนมัติ</p>
+              <h3 class="text-base font-bold text-slate-800">สร้างห้องสอบและข้อสอบ (Create Exam)</h3>
+              <p class="text-xs text-slate-555 leading-relaxed">อาจารย์เปิดห้องคุมสอบ ตั้งชื่อการสอบ ใส่รายการข้อสอบด้วยตนเอง หรืออัพโหลดผ่านไฟล์ Excel หรือเรียกใช้ AI คำสั่งเขียนข้อสอบอัตโนมัติ</p>
             </div>
           </div>
           <div class="timeline-step flex gap-6">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-sm font-bold text-slate-400">2</div>
+            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-white border border-slate-205 flex items-center justify-center text-sm font-bold text-slate-500">2</div>
             <div class="space-y-1">
-              <h3 class="text-base font-bold text-white">แจกจ่ายโค้ดเข้าสอบ (Generate Room Code)</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">ระบบจะสร้างโค้ดห้องสอบเพื่อให้ผู้เรียนนำไปกรอก และอาจารย์สามารถกำหนดช่วงเริ่มสอบ ปิดข้อสอบ หรือส่งสาส์นเตือนให้นักศึกษาได้จากในหน้าเว็บ</p>
+              <h3 class="text-base font-bold text-slate-800">แจกจ่ายโค้ดเข้าสอบ (Generate Room Code)</h3>
+              <p class="text-xs text-slate-555 leading-relaxed">ระบบจะสร้างโค้ดห้องสอบเพื่อให้ผู้เรียนนำไปกรอก และอาจารย์สามารถกำหนดช่วงเริ่มสอบ ปิดข้อสอบ หรือส่งสาส์นเตือนให้นักศึกษาได้จากในหน้าเว็บ</p>
             </div>
           </div>
           <div class="timeline-step flex gap-6">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-sm font-bold text-slate-400">3</div>
+            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-white border border-slate-205 flex items-center justify-center text-sm font-bold text-slate-500">3</div>
             <div class="space-y-1">
-              <h3 class="text-base font-bold text-white">ติดตามความประพฤติแบบสด (Live Monitor Dashboard)</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">สังเกตข้อมูลนักศึกษาที่พฤติกรรมเสี่ยงสูง (สลับแท็บบ่อยเกินกำหนด) ส่งการแจ้งเตือนพฤติกรรมไปยังหน้าจอของผู้สอบได้ทันที</p>
+              <h3 class="text-base font-bold text-slate-800">ติดตามความประพฤติแบบสด (Live Monitor Dashboard)</h3>
+              <p class="text-xs text-slate-555 leading-relaxed">สังเกตข้อมูลนักศึกษาที่พฤติกรรมเสี่ยงสูง (สลับแท็บบ่อยเกินกำหนด) ส่งการแจ้งเตือนพฤติกรรมไปยังหน้าจอของผู้สอบได้ทันที</p>
             </div>
           </div>
           <div class="timeline-step flex gap-6">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-sm font-bold text-slate-400">4</div>
+            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-white border border-slate-205 flex items-center justify-center text-sm font-bold text-slate-500">4</div>
             <div class="space-y-1">
-              <h3 class="text-base font-bold text-white">รายงานสถิติและคะแนน (Export Report)</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">เมื่อจบกระบวนการสอบ อาจารย์สามารถเข้าดูการจัดจำแนกคะแนน วิเคราะห์ตัวชี้วัดข้อสอบ Z-Score, T-Score, ประมวลกราฟ และออกเอกสาร Excel ได้ในคลิกเดียว</p>
+              <h3 class="text-base font-bold text-slate-800">รายงานสถิติและคะแนน (Export Report)</h3>
+              <p class="text-xs text-slate-555 leading-relaxed">เมื่อจบกระบวนการสอบ อาจารย์สามารถเข้าดูการจัดจำแนกคะแนน วิเคราะห์ตัวชี้วัดข้อสอบ Z-Score, T-Score, ประมวลกราฟ และออกเอกสาร Excel ได้ในคลิกเดียว</p>
             </div>
           </div>
         </div>
@@ -411,95 +496,98 @@
     <!-- ===== 6. PORTAL GATEWAY SECTION ===== -->
     <section id="portal" class="py-16 space-y-12">
       <div class="text-center max-w-2xl mx-auto space-y-4">
-        <span class="text-xs font-bold tracking-[0.3em] uppercase text-indigo-400">เข้าใช้งานแผงควบคุม</span>
-        <h2 class="text-3xl font-extrabold text-white sm:text-4xl">ยินดีต้อนรับสู่ระบบ Tab-Lock</h2>
-        <p class="text-sm text-slate-400">กรุณาเลือกช่องทางการเข้าสู่ระบบตามสิทธิ์ผู้ใช้งานของคุณ</p>
+        <span class="text-xs font-bold tracking-[0.3em] uppercase text-cyan-600">เข้าใช้งานแผงควบคุม</span>
+        <h2 class="text-3xl font-extrabold text-slate-800 sm:text-4xl">ยินดีต้อนรับสู่ระบบ Tab-Lock</h2>
+        <p class="text-sm text-slate-500">กรุณาเลือกช่องทางการเข้าสู่ระบบตามสิทธิ์ผู้ใช้งานของคุณ</p>
       </div>
 
       <!-- Portal Cards Grid -->
       <div class="grid grid-cols-1 gap-8 md:grid-cols-2 max-w-4xl mx-auto">
         <!-- Student Card -->
         <a href="Student-login.html" class="glass-card glow-border p-8 rounded-3xl flex flex-col items-center justify-between text-center relative overflow-hidden" id="student-card">
-          <div class="absolute -top-10 -right-10 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl"></div>
+          <div class="absolute -top-10 -right-10 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl"></div>
           <div class="space-y-6 w-full flex flex-col items-center">
-            <div class="h-16 w-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-3xl">🎓</div>
+            <img src="student_avatar.jpg" alt="Student Avatar" class="h-16 w-16 rounded-2xl object-cover border border-cyan-500/20 shadow-md shadow-cyan-500/10" />
             <div class="space-y-2">
-              <h3 class="text-2xl font-bold text-white">พอร์ทัลนักศึกษา</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">ลงทะเบียนเข้าห้องสอบด้วยรหัสวิชา ทำข้อสอบผ่านโปรแกรมเบราว์เซอร์ที่มีระบบควบคุมการสลับแท็บ</p>
+              <h3 class="text-2xl font-bold text-slate-800">พอร์ทัลนักศึกษา</h3>
+              <p class="text-xs text-slate-555 leading-relaxed">ลงทะเบียนเข้าห้องสอบด้วยรหัสวิชา ทำข้อสอบผ่านโปรแกรมเบราว์เซอร์ที่มีระบบควบคุมการสลับแท็บ</p>
             </div>
             <div class="flex flex-wrap gap-2 justify-center">
-              <span class="text-[10px] px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-bold">🔒 ปลอดภัย</span>
-              <span class="text-[10px] px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-bold">⚡ ตรวจสอบเรียลไทม์</span>
+              <span class="text-[10px] px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-700 font-bold">🔒 ปลอดภัย</span>
+              <span class="text-[10px] px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-700 font-bold">⚡ ตรวจสอบเรียลไทม์</span>
             </div>
           </div>
-          <button class="mt-8 w-full py-4.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 font-bold text-sm text-white hover:from-indigo-500 hover:to-indigo-600 transition flex items-center justify-center gap-2">
-            เข้าสู่ระบบนักศึกษา 🎓
+          <button class="mt-8 w-full py-4.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 font-bold text-sm text-white hover:from-cyan-600 hover:to-indigo-600 transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/15">
+            เข้าสู่ระบบนักศึกษา
           </button>
         </a>
 
         <!-- Teacher Card -->
         <a href="teacher-login.html" class="glass-card glow-border p-8 rounded-3xl flex flex-col items-center justify-between text-center relative overflow-hidden" id="teacher-card">
-          <div class="absolute -top-10 -right-10 w-24 h-24 bg-pink-500/10 rounded-full blur-2xl"></div>
+          <div class="absolute -top-10 -right-10 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl"></div>
           <div class="space-y-6 w-full flex flex-col items-center">
-            <div class="h-16 w-16 rounded-2xl bg-pink-500/10 border border-pink-500/20 flex items-center justify-center text-3xl">🏫</div>
+            <img src="teacher_avatar.jpg" alt="Teacher Avatar" class="h-16 w-16 rounded-2xl object-cover border border-indigo-500/20 shadow-md shadow-indigo-500/10" />
             <div class="space-y-2">
-              <h3 class="text-2xl font-bold text-white">แผงควบคุมอาจารย์</h3>
-              <p class="text-xs text-slate-400 leading-relaxed">จัดการข้อมูลข้อสอบ วิเคราะห์ความประพฤติผู้สอบเรียลไทม์ และสรุปรายงานความยากง่ายข้อสอบ (Item Analysis)</p>
+              <h3 class="text-2xl font-bold text-slate-800">แผงควบคุมอาจารย์</h3>
+              <p class="text-xs text-slate-555 leading-relaxed">จัดการข้อมูลข้อสอบ วิเคราะห์ความประพฤติผู้สอบเรียลไทม์ และสรุปรายงานความยากง่ายข้อสอบ (Item Analysis)</p>
             </div>
             <div class="flex flex-wrap gap-2 justify-center">
-              <span class="text-[10px] px-2.5 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-300 font-bold">📋 จัดการห้องสอบ</span>
-              <span class="text-[10px] px-2.5 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-300 font-bold">📊 ผลลัพธ์เชิงสถิติ</span>
+              <span class="text-[10px] px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 font-bold">📋 จัดการห้องสอบ</span>
+              <span class="text-[10px] px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 font-bold">📊 ผลลัพธ์เชิงสถิติ</span>
             </div>
           </div>
-          <button class="mt-8 w-full py-4.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 font-bold text-sm text-white hover:from-purple-500 hover:to-pink-500 transition flex items-center justify-center gap-2">
-            เข้าสู่ระบบอาจารย์ 🏫
+          <button class="mt-8 w-full py-4.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 font-bold text-sm text-white hover:from-indigo-600 hover:to-violet-600 transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/15">
+            เข้าสู่ระบบอาจารย์
           </button>
+        </a>
+      </div>
+      <div class="text-center mt-6">
+        <a href="admin-login.html" class="text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline transition">
+          🔐 สำหรับผู้ดูแลระบบสูงสุด (Super Admin Portal)
         </a>
       </div>
     </section>
 
     <!-- ===== 7. FOOTER ===== -->
-    <footer class="mt-16 border-t border-white/5 py-12 space-y-8">
+    <footer class="mt-16 border-t border-slate-205 py-12 space-y-8">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div class="space-y-4">
           <div class="flex items-center gap-3">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-600 to-pink-600 text-base shadow">
-              🛡️
-            </div>
-            <span class="text-base font-extrabold tracking-tight text-white">TAB-<span class="text-indigo-400">LOCK</span></span>
+            <img src="logo.png" alt="Tab-Lock Logo" class="h-8 w-8 object-cover rounded-lg shadow-sm border border-slate-100" />
+            <span class="text-base font-extrabold tracking-tight text-slate-800">TAB-<span class="text-cyan-600">LOCK</span></span>
           </div>
-          <p class="text-xs text-slate-500 leading-relaxed">แพลตฟอร์มจัดการและควบคุมการสอบออนไลน์ ป้องกันการทุจริต ยกระดับการศึกษาอย่างยุติธรรมในทุกระดับชั้น</p>
+          <p class="text-xs text-slate-555 leading-relaxed">แพลตฟอร์มจัดการและควบคุมการสอบออนไลน์ ป้องกันการทุจริต ยกระดับการศึกษาอย่างยุติธรรมในทุกระดับชั้น</p>
         </div>
 
         <div class="space-y-4">
-          <h4 class="text-xs font-bold text-white uppercase tracking-wider">สำหรับครูและสถาบัน</h4>
-          <ul class="space-y-2 text-xs text-slate-500">
-            <li><a href="teacher-login.html" class="hover:text-slate-350 transition">เข้าสู่ระบบอาจารย์</a></li>
-            <li><a href="register-teacher.html" class="hover:text-slate-350 transition">ลงทะเบียนบัญชีผู้สอน</a></li>
-            <li><a href="admin-login.html" class="hover:text-slate-350 transition">ทางเข้าสำหรับผู้ดูแลระบบ</a></li>
+          <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">สำหรับครูและสถาบัน</h4>
+          <ul class="space-y-2 text-xs text-slate-555">
+            <li><a href="teacher-login.html" class="hover:text-cyan-600 transition">เข้าสู่ระบบอาจารย์</a></li>
+            <li><a href="register-teacher.html" class="hover:text-cyan-600 transition">ลงทะเบียนบัญชีผู้สอน</a></li>
+            <li><a href="admin-login.html" class="hover:text-cyan-600 transition">ทางเข้าสำหรับผู้ดูแลระบบ</a></li>
           </ul>
         </div>
 
         <div class="space-y-4">
-          <h4 class="text-xs font-bold text-white uppercase tracking-wider">ลิงก์นำทาง</h4>
-          <ul class="space-y-2 text-xs text-slate-500">
-            <li><a href="#" class="hover:text-slate-350 transition">หน้าแรกแนะนำระบบ</a></li>
-            <li><a href="#features" class="hover:text-slate-350 transition">ฟีเจอร์เด่น</a></li>
-            <li><a href="#workflow" class="hover:text-slate-350 transition">ขั้นตอนการทำงาน</a></li>
+          <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">ลิงก์นำทาง</h4>
+          <ul class="space-y-2 text-xs text-slate-555">
+            <li><a href="#" class="hover:text-cyan-600 transition">หน้าแรกแนะนำระบบ</a></li>
+            <li><a href="#features" class="hover:text-cyan-600 transition">ฟีเจอร์เด่น</a></li>
+            <li><a href="#workflow" class="hover:text-cyan-600 transition">ขั้นตอนการทำงาน</a></li>
           </ul>
         </div>
 
         <div class="space-y-4">
-          <h4 class="text-xs font-bold text-white uppercase tracking-wider">ความปลอดภัย</h4>
-          <p class="text-xs text-slate-500 leading-relaxed">ระบบจัดเก็บฐานข้อมูลอย่างรัดกุมผ่านระบบ SQLite3 มีการส่งข้อมูลแบบเข้ารหัส HTTPS ปกป้องข้อมูลข้อสอบและประวัตินักเรียนอย่างสูงสุด</p>
+          <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">ความปลอดภัย</h4>
+          <p class="text-xs text-slate-555 leading-relaxed">ระบบจัดเก็บฐานข้อมูลอย่างรัดกุมผ่านระบบ SQLite3 มีการส่งข้อมูลแบบเข้ารหัส HTTPS ปกป้องข้อมูลข้อสอบและประวัตินักเรียนอย่างสูงสุด</p>
         </div>
       </div>
 
-      <div class="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-white/5 text-[10px] text-slate-600">
+      <div class="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-slate-205 text-[10px] text-slate-500">
         <div>&copy; 2026 Tab-Lock Online Exam Platform. All rights reserved. สงวนลิขสิทธิ์ทั้งหมด</div>
         <div class="flex gap-4 mt-4 sm:mt-0">
-          <a href="admin-login.html" class="admin-pill px-3 py-1.5 rounded-full text-slate-500 hover:text-slate-400 flex items-center gap-1.5" id="admin-link">
-            🔑 Admin Access
+          <a href="admin-login.html" class="admin-pill px-3 py-1.5 rounded-full text-slate-500 hover:text-rose-600 transition font-bold flex items-center gap-1.5" id="admin-link">
+            Admin Access
           </a>
           <span>SECURED v3.0</span>
         </div>
@@ -516,18 +604,14 @@
       const contentTeacher = document.getElementById('workflow-content-teacher');
 
       if (type === 'student') {
-        btnStudent.classList.add('bg-indigo-600', 'text-white');
-        btnStudent.classList.remove('text-slate-400');
-        btnTeacher.classList.remove('bg-indigo-600', 'text-white');
-        btnTeacher.classList.add('text-slate-400');
+        btnStudent.className = 'px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-indigo-500 transition shadow-sm';
+        btnTeacher.className = 'px-6 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition';
         
         contentStudent.classList.remove('hidden');
         contentTeacher.classList.add('hidden');
       } else {
-        btnTeacher.classList.add('bg-indigo-600', 'text-white');
-        btnTeacher.classList.remove('text-slate-400');
-        btnStudent.classList.remove('bg-indigo-600', 'text-white');
-        btnStudent.classList.add('text-slate-400');
+        btnTeacher.className = 'px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-indigo-500 transition shadow-sm';
+        btnStudent.className = 'px-6 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition';
 
         contentTeacher.classList.remove('hidden');
         contentStudent.classList.add('hidden');

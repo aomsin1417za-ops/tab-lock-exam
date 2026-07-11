@@ -1,37 +1,43 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+    <script>
+        if (window.location.protocol === 'file:') {
+            const fileName = window.location.pathname.split('/').pop() || 'index.html';
+            window.location.href = 'http://localhost:5000/' + fileName;
+        }
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tab-Lock — ระบบสอบออนไลน์ (นักศึกษา)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Kanit', 'Inter', sans-serif; background: #050B18; -webkit-user-select:none; user-select:none; }
-        .glass { background: rgba(15,23,42,0.65); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.07); }
-        .glass-light { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
-        .input-dark { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; }
-        .input-dark:focus { outline: none; border-color: #6366f1; background: rgba(99,102,241,0.08); }
-        .input-dark::placeholder { color: #475569; }
-        .btn-primary { background: linear-gradient(135deg, #6366f1, #7c3aed); box-shadow: 0 0 20px rgba(99,102,241,0.25); transition: all 0.3s; }
-        .btn-primary:hover { box-shadow: 0 0 30px rgba(99,102,241,0.45); transform: translateY(-1px); }
-        .btn-green { background: linear-gradient(135deg, #059669, #047857); box-shadow: 0 0 20px rgba(5,150,105,0.3); }
-        .btn-green:hover { box-shadow: 0 0 30px rgba(5,150,105,0.5); transform: translateY(-1px); }
-        .tab-active { background: linear-gradient(135deg, #6366f1, #7c3aed); color: white; box-shadow: 0 4px 15px rgba(99,102,241,0.3); }
+        body { font-family: 'Kanit', 'Inter', sans-serif; background: linear-gradient(to right, #f8fafc 0%, #eff6ff 50%, #faf5ff 100%); background-attachment: fixed; color: #334155; -webkit-user-select:none; user-select:none; }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04); }
+        .glass-light { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(226, 232, 240, 0.5); }
+        .input-dark { background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(226, 232, 240, 1); color: #1e293b; }
+        .input-dark:focus { outline: none; border-color: #06b6d4; background: #ffffff; box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15); }
+        .input-dark::placeholder { color: #94a3b8; }
+        .btn-primary { background: linear-gradient(135deg, #06b6d4, #8b5cf6); box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2); transition: all 0.3s; }
+        .btn-primary:hover { box-shadow: 0 4px 20px rgba(6, 182, 212, 0.35); transform: translateY(-1px); }
+        .btn-green { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
+        .btn-green:hover { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35); transform: translateY(-1px); }
+        .tab-active { background: linear-gradient(135deg, #06b6d4, #8b5cf6); color: white; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.25); }
         @keyframes blob { 0%{transform:translate(0,0) scale(1)} 50%{transform:translate(30px,-40px) scale(1.1)} 100%{transform:translate(-20px,20px) scale(0.9)} }
         .animate-blob { animation: blob 12s infinite alternate ease-in-out; }
         .animate-blob-delay { animation: blob 15s infinite alternate-reverse ease-in-out; animation-delay: 3s; }
-        .progress-bar { background: linear-gradient(90deg, #6366f1, #7c3aed, #a855f7); transition: width 0.4s ease; }
-        select.input-dark option { background: #0f172a; color: white; }
-        .exam-title-badge { background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(124,58,237,0.2)); border: 1px solid rgba(99,102,241,0.4); }
+        .progress-bar { background: linear-gradient(90deg, #06b6d4, #8b5cf6); transition: width 0.4s ease; }
+        select.input-dark option { background: #ffffff; color: #1e293b; }
+        .exam-title-badge { background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1)); border: 1px solid rgba(6, 182, 212, 0.2); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col relative overflow-x-hidden">
 
     <!-- Animated Background Blobs -->
-    <div class="fixed w-[500px] h-[500px] bg-indigo-600/8 blur-[120px] rounded-full -top-20 -left-20 pointer-events-none animate-blob"></div>
-    <div class="fixed w-[550px] h-[550px] bg-violet-600/8 blur-[130px] rounded-full -bottom-20 -right-20 pointer-events-none animate-blob-delay"></div>
-    <div class="fixed inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.03)_0%,transparent_70%)] pointer-events-none"></div>
+    <div class="fixed w-[500px] h-[500px] bg-cyan-500/5 blur-[120px] rounded-full -top-20 -left-20 pointer-events-none animate-blob"></div>
+    <div class="fixed w-[550px] h-[550px] bg-violet-500/5 blur-[130px] rounded-full -bottom-20 -right-20 pointer-events-none animate-blob-delay"></div>
+    <div class="fixed inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.02)_0%,transparent_70%)] pointer-events-none"></div>
 
     <!-- Main center wrapper -->
     <div class="w-full flex-grow flex items-center justify-center py-10 px-4 relative z-10">
@@ -41,55 +47,40 @@
 
             <!-- Logo Header -->
             <div class="text-center space-y-3">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl text-3xl select-none relative group cursor-default" style="background: linear-gradient(135deg, #6366f1, #7c3aed); box-shadow: 0 0 30px rgba(99,102,241,0.4);">
-                    <span class="absolute inset-0 rounded-2xl blur-md opacity-60" style="background: linear-gradient(135deg, #6366f1, #7c3aed);"></span>
-                    <span class="relative animate-pulse">🛡️</span>
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl select-none relative group cursor-default shadow-lg border border-slate-100/60 overflow-hidden bg-white">
+                    <img src="logo.png" alt="Tab-Lock Logo" class="w-full h-full object-cover rounded-2xl" />
                 </div>
                 <div>
-                    <h1 class="text-2xl font-black text-white tracking-tight">Tab-<span style="background: linear-gradient(to right,#818cf8,#a78bfa,#c084fc); -webkit-background-clip:text; background-clip:text; color:transparent;">Lock</span></h1>
-                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">SECURED STUDENT EXAM TERMINAL</p>
+                    <h1 class="text-2xl font-black text-slate-800 tracking-tight">Tab-<span style="background: linear-gradient(to right,#06b6d4,#6366f1,#8b5cf6); -webkit-background-clip:text; background-clip:text; color:transparent;">Lock</span></h1>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">SECURED STUDENT EXAM TERMINAL</p>
                 </div>
             </div>
 
-            <!-- Tab Switcher -->
-            <div class="flex p-1 glass-light rounded-2xl gap-1 select-none">
-                <button id="exam-tab-btn" onclick="switchTab('exam')" class="tab-active w-1/2 py-2.5 rounded-xl text-xs font-bold transition-all duration-300">
-                    <span class="flex items-center justify-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        ทำข้อสอบ
-                    </span>
-                </button>
-                <button id="history-tab-btn" onclick="switchTab('history')" class="w-1/2 py-2.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-300">
-                    <span class="flex items-center justify-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        ประวัติการสอบ
-                    </span>
-                </button>
-            </div>
+
 
             <!-- Exam Tab Content -->
             <div id="exam-tab-content" class="space-y-4">
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1.5">
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">ชื่อจริง</label>
-                        <input type="text" id="student-firstname" class="input-dark w-full px-3 py-2.5 rounded-xl text-sm placeholder-slate-600 focus:ring-0 transition-all" placeholder="ชื่อจริง">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">ชื่อจริง</label>
+                        <input type="text" id="student-firstname" class="input-dark w-full px-3 py-2.5 rounded-xl text-sm placeholder-slate-400 focus:ring-0 transition-all" placeholder="ชื่อจริง">
                     </div>
                     <div class="space-y-1.5">
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">นามสกุล</label>
-                        <input type="text" id="student-lastname" class="input-dark w-full px-3 py-2.5 rounded-xl text-sm placeholder-slate-600 transition-all" placeholder="นามสกุล">
+                        <label class="block text-[10px] font-bold text-slate-550 uppercase tracking-wider">นามสกุล</label>
+                        <input type="text" id="student-lastname" class="input-dark w-full px-3 py-2.5 rounded-xl text-sm placeholder-slate-400 transition-all" placeholder="นามสกุล">
                     </div>
                 </div>
                 <div class="space-y-1.5">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">รหัสนักศึกษา</label>
+                    <label class="block text-[10px] font-bold text-slate-550 uppercase tracking-wider">รหัสนักศึกษา</label>
                     <input type="text" id="student-id" class="input-dark w-full px-3 py-2.5 rounded-xl text-sm font-mono transition-all" placeholder="กรอกรหัสประจำตัวนักศึกษา">
                 </div>
                 <div class="space-y-1.5">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">ชั้นเรียน / กลุ่มเรียน</label>
+                    <label class="block text-[10px] font-bold text-slate-550 uppercase tracking-wider">ชั้นเรียน / กลุ่มเรียน</label>
                     <input type="text" id="student-class" class="input-dark w-full px-3 py-2.5 rounded-xl text-sm transition-all" placeholder="เช่น TEC3N">
                 </div>
                 <!-- Teacher & Room Selector -->
                 <div class="space-y-1.5">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">เลือกอาจารย์ผู้สอน</label>
+                    <label class="block text-[10px] font-bold text-slate-550 uppercase tracking-wider">เลือกอาจารย์ผู้สอน</label>
                     <div class="relative">
                         <select id="teacher-selector" onchange="onTeacherChange()" class="input-dark w-full px-3 py-2.5 rounded-xl text-sm appearance-none cursor-pointer">
                             <option value="">กำลังโหลดรายชื่ออาจารย์...</option>
@@ -98,7 +89,7 @@
                     </div>
                 </div>
                 <div class="space-y-1.5">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">เลือกห้องสอบ</label>
+                    <label class="block text-[10px] font-bold text-slate-550 uppercase tracking-wider">เลือกห้องสอบ</label>
                     <div class="relative">
                         <select id="room-selector" onchange="updateRoomIdVar()" class="input-dark w-full px-3 py-2.5 rounded-xl text-sm appearance-none cursor-pointer">
                             <option value="">กรุณาเลือกอาจารย์ก่อน...</option>
@@ -112,28 +103,7 @@
                 </button>
             </div>
 
-            <!-- History Tab Content -->
-            <div id="history-tab-content" class="hidden space-y-4">
-                <div class="space-y-1.5">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">รหัสนักศึกษา</label>
-                    <div class="flex gap-2">
-                        <input type="text" id="search-student-id" class="input-dark flex-grow px-3 py-2.5 rounded-xl text-sm transition-all" placeholder="ป้อนรหัสนักศึกษา">
-                        <button onclick="searchExamHistory()" class="btn-primary text-white px-4 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                            ค้นหา
-                        </button>
-                    </div>
-                </div>
-                <div class="border-t border-white/5 pt-4 space-y-2">
-                    <h4 class="text-xs font-bold text-indigo-400 flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                        ประวัติคะแนนสอบรายบุคคล
-                    </h4>
-                    <div id="history-timeline-container" class="space-y-2 overflow-y-auto max-h-[280px] divide-y divide-white/5">
-                        <div class="text-center py-10 text-slate-500 text-xs">ป้อนรหัสแล้วกดค้นหาด้านบนครับ</div>
-                    </div>
-                </div>
-            </div>
+
         </div>
 
         <!-- ===== EXAM SCREEN ===== -->
@@ -145,18 +115,18 @@
                     <div class="space-y-2">
                         <div class="flex items-center gap-2 flex-wrap">
                             <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#6366f1,#7c3aed);">
+                                <div class="w-8 h-8 rounded-xl flex items-center justify-center" style="background:linear-gradient(135deg,#06b6d4,#8b5cf6);">
                                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 </div>
-                                <h2 class="text-lg font-black text-white">สมุดข้อสอบออนไลน์</h2>
+                                <h2 class="text-lg font-black text-slate-800">สมุดข้อสอบออนไลน์</h2>
                             </div>
-                            <span id="exam-title-display" class="hidden exam-title-badge px-3 py-1 rounded-xl text-xs font-bold text-indigo-300 animate-pulse"></span>
-                            <span class="px-2.5 py-1 rounded-xl text-[9px] font-bold text-rose-400 border border-rose-500/30 bg-rose-500/10 uppercase tracking-wider animate-pulse flex items-center gap-1">
+                            <span id="exam-title-display" class="hidden exam-title-badge px-3 py-1 rounded-xl text-xs font-bold text-cyan-600 animate-pulse"></span>
+                            <span class="px-2.5 py-1 rounded-xl text-[9px] font-bold text-rose-600 border border-rose-500/20 bg-rose-500/5 uppercase tracking-wider animate-pulse flex items-center gap-1">
                                 <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
                                 ระบบความปลอดภัยกำลังทำงาน
                             </span>
                         </div>
-                        <p id="student-identity-display" class="text-slate-400 text-xs font-medium">ผู้เข้าสอบ: ...</p>
+                        <p id="student-identity-display" class="text-slate-500 text-xs font-medium">ผู้เข้าสอบ: ...</p>
                     </div>
                     <!-- Progress -->
                     <div class="w-full md:w-48 space-y-1.5">
@@ -164,39 +134,39 @@
                             <span>ความคืบหน้า</span>
                             <span id="progress-percentage-label">0%</span>
                         </div>
-                        <div class="w-full bg-white/5 border border-white/10 h-2 rounded-full overflow-hidden">
+                        <div class="w-full bg-slate-100 border border-slate-205 h-2 rounded-full overflow-hidden">
                             <div id="progress-bar-fill" class="progress-bar h-full rounded-full" style="width:0%"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Announcement Banner -->
-                <div id="announcement-banner" class="hidden flex items-start gap-3 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl">
+                <div id="announcement-banner" class="hidden flex items-start gap-3 p-4 bg-rose-50 border border-rose-200 rounded-2xl">
                     <span class="text-xl shrink-0 animate-bounce">📢</span>
                     <div>
-                        <div class="text-[10px] font-bold text-rose-400 uppercase tracking-widest">ประกาศจากผู้คุมสอบ</div>
-                        <p id="announcement-text" class="text-xs text-rose-300 font-semibold mt-0.5 leading-relaxed"></p>
+                        <div class="text-[10px] font-bold text-rose-600 uppercase tracking-widest">ประกาศจากผู้คุมสอบ</div>
+                        <p id="announcement-text" class="text-xs text-rose-700 font-semibold mt-0.5 leading-relaxed"></p>
                     </div>
                 </div>
 
                 <!-- Timer Banner -->
-                <div id="timer-banner" class="hidden flex items-center justify-between p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
+                <div id="timer-banner" class="hidden flex items-center justify-between p-4 bg-indigo-50 border border-indigo-200 rounded-2xl">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center">
-                            <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="w-8 h-8 rounded-xl bg-indigo-100/50 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                         <div>
-                            <div class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">เวลาที่เหลืออยู่</div>
+                            <div class="text-[10px] font-bold text-indigo-650 uppercase tracking-widest">เวลาที่เหลืออยู่</div>
                             <div class="text-[9px] text-slate-500 font-medium mt-0.5">ส่งคำตอบก่อนระบบล็อกกระดาษ</div>
                         </div>
                     </div>
-                    <div id="countdown-clock" class="text-xl font-mono font-black text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-4 py-2 rounded-xl">00:00:00</div>
+                    <div id="countdown-clock" class="text-xl font-mono font-black text-indigo-700 bg-indigo-100 border border-indigo-200 px-4 py-2 rounded-xl">00:00:00</div>
                 </div>
             </div>
 
             <!-- Questions Card -->
             <div class="glass p-8 rounded-3xl shadow-2xl">
-                <div id="questions-container" class="space-y-8 divide-y divide-white/5"></div>
+                <div id="questions-container" class="space-y-8 divide-y divide-slate-200"></div>
             </div>
 
             <!-- Submit Button -->
@@ -208,21 +178,21 @@
     </div>
 
     <!-- Footer -->
-    <footer class="text-center py-5 text-[10px] text-slate-600 font-bold uppercase tracking-widest z-10 relative">
+    <footer class="text-center py-5 text-[10px] text-slate-500 font-bold uppercase tracking-widest z-10 relative">
         Tab-Lock Online Exam Platform &bull; &copy; 2026 สงวนลิขสิทธิ์ทั้งหมด
     </footer>
 
     <!-- Warning Modal -->
-    <div id="warning-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden p-4" style="background:rgba(0,0,0,0.92); backdrop-filter:blur(16px);">
+    <div id="warning-modal" class="fixed inset-0 z-[100] flex items-center justify-center hidden p-4" style="background:rgba(15,23,42,0.6); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);">
         <div class="w-full max-w-md glass p-8 rounded-3xl text-center space-y-6 shadow-2xl border-t-4 border-rose-500">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 text-3xl animate-pulse">⚠️</div>
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-rose-50 border border-rose-200 text-rose-500 text-3xl animate-pulse">⚠️</div>
             <div class="space-y-2">
-                <h2 class="text-lg font-black text-white uppercase tracking-wide">สัญญาณคำเตือนจากผู้คุมสอบ</h2>
-                <p class="text-xs text-rose-400 font-semibold">กรุณาปฏิบัติตามคำชี้แจงด้านล่างอย่างเคร่งครัด</p>
+                <h2 class="text-lg font-black text-slate-800 uppercase tracking-wide">สัญญาณคำเตือนจากผู้คุมสอบ</h2>
+                <p class="text-xs text-rose-600 font-semibold">กรุณาปฏิบัติตามคำชี้แจงด้านล่างอย่างเคร่งครัด</p>
             </div>
-            <div class="glass-light p-4 rounded-xl text-left text-xs text-rose-300 font-semibold leading-relaxed" id="warning-modal-message">กรุณาอย่าสลับหน้าจอ ระบบกำลังบันทึกพฤติกรรม</div>
-            <button onclick="acknowledgeWarning()" class="w-full py-3.5 text-white font-black text-xs rounded-2xl tracking-wider transition-all active:scale-[0.98]" style="background:linear-gradient(135deg,#dc2626,#b91c1c); box-shadow:0 0 20px rgba(220,38,38,0.3);">
-                รับทราบคำเตือนและเข้าสอบต่อ ✓
+            <div class="bg-rose-50 border border-rose-200 p-4 rounded-xl text-left text-xs text-rose-700 font-semibold leading-relaxed" id="warning-modal-message">กรุณาอย่าสลับหน้าจอ ระบบกำลังบันทึกพฤติกรรม</div>
+            <button onclick="acknowledgeWarning()" class="w-full py-3.5 text-white font-black text-xs rounded-2xl tracking-wider transition-all active:scale-[0.98] shadow-lg shadow-rose-500/20" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
+                รับทราบคำเตือนและเข้าสอบต่อ
             </button>
         </div>
     </div>
@@ -243,38 +213,7 @@
 
         const choiceLetters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'];
 
-        function switchTab(tab) {
-            document.getElementById('exam-tab-btn').classList.toggle('tab-active', tab === 'exam');
-            document.getElementById('exam-tab-btn').classList.toggle('text-slate-400', tab !== 'exam');
-            document.getElementById('history-tab-btn').classList.toggle('tab-active', tab === 'history');
-            document.getElementById('history-tab-btn').classList.toggle('text-slate-400', tab === 'exam');
-            document.getElementById('exam-tab-content').classList.toggle('hidden', tab !== 'exam');
-            document.getElementById('history-tab-content').classList.toggle('hidden', tab !== 'history');
-        }
 
-        async function searchExamHistory() {
-            const studentId = document.getElementById('search-student-id').value.trim();
-            const container = document.getElementById('history-timeline-container');
-            if (!studentId) { alert("กรุณากรอกรหัสนักศึกษา"); return; }
-            try {
-                const response = await fetch(`/api/student-history?studentId=${studentId}`);
-                const history = await response.json();
-                if (history.length === 0) {
-                    container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">📭 ไม่พบประวัติการสอบของรหัสนี้</div>`;
-                    return;
-                }
-                container.innerHTML = history.map(log => {
-                    const cleanDate = log.date ? log.date.replace("วัน","") : "-";
-                    return `<div class="flex justify-between items-center py-3 first:pt-0">
-                        <div>
-                            <h5 class="text-xs font-bold text-white">${escapeHtml(log.roomName)} <span class="text-[9px] text-slate-500">(${escapeHtml(log.roomId)})</span></h5>
-                            <div class="text-[10px] text-slate-500 font-mono mt-0.5">${log.time} | ${cleanDate}</div>
-                        </div>
-                        <span class="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-extrabold text-[10px] px-2.5 py-1 rounded-xl">${log.score} / ${log.maxScore} คะแนน</span>
-                    </div>`;
-                }).join('');
-            } catch(err) { alert("ไม่สามารถค้นหาประวัติได้"); }
-        }
 
         function shuffleArray(array) {
             const arr = [...array];
@@ -374,7 +313,7 @@
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('exam-screen').classList.remove('hidden');
 
-                document.getElementById('student-identity-display').innerHTML = `ผู้ทำข้อสอบ: <strong class="text-white">${escapeHtml(currentStudentName)}</strong> | รหัส: <strong class="text-white">${escapeHtml(currentStudentId)}</strong> | ชั้นเรียน: <strong class="text-white">${escapeHtml(currentStudentClass)}</strong>`;
+                document.getElementById('student-identity-display').innerHTML = `ผู้ทำข้อสอบ: <strong class="text-slate-800">${escapeHtml(currentStudentName)}</strong> | รหัส: <strong class="text-slate-800">${escapeHtml(currentStudentId)}</strong> | ชั้นเรียน: <strong class="text-slate-800">${escapeHtml(currentStudentClass)}</strong>`;
 
                 initAntiCheatProtection();
                 initTabSwitchMonitoring();
@@ -400,21 +339,21 @@
                 });
                 const shuffledChoices = shouldRandomizeChoices ? shuffleArray(activeChoices) : activeChoices;
                 const choicesHtml = shuffledChoices.map(choice => `
-                    <label class="flex flex-col gap-2 p-3.5 glass-light rounded-2xl cursor-pointer hover:border-indigo-500/40 active:scale-[0.99] transition-all duration-200 group" style="border:1px solid rgba(255,255,255,0.08);">
+                    <label class="flex flex-col gap-2 p-3.5 glass-light rounded-2xl cursor-pointer hover:border-blue-500/40 active:scale-[0.99] transition-all duration-200 group" style="border:1px solid rgba(148, 163, 184, 0.25);">
                         <div class="flex items-center gap-3">
-                            <input type="radio" name="q_${q.id}" value="${choice.key}" onchange="updateProgressBar()" class="w-4 h-4 accent-indigo-500">
-                            <span class="text-xs text-slate-300 group-hover:text-white font-medium transition">${escapeHtml(choice.text)}</span>
+                            <input type="radio" name="q_${q.id}" value="${choice.key}" onchange="updateProgressBar()" class="w-4 h-4 accent-blue-500">
+                            <span class="text-xs text-slate-600 group-hover:text-slate-900 font-medium transition">${escapeHtml(choice.text)}</span>
                         </div>
-                        ${choice.img ? `<div class="pl-7"><img src="${choice.img}" class="max-h-24 rounded-xl border border-white/10 object-contain bg-white/5"></div>` : ''}
+                        ${choice.img ? `<div class="pl-7"><img src="${choice.img}" class="max-h-24 rounded-xl border border-slate-200 object-contain bg-slate-100"></div>` : ''}
                     </label>
                 `).join('');
                 return `
                     <div class="space-y-4 ${qIndex > 0 ? 'pt-8' : ''}">
-                        <p class="font-bold text-sm text-white flex items-start gap-2.5">
-                            <span class="bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold select-none shrink-0 mt-0.5">ข้อที่ ${qIndex+1}</span>
+                        <p class="font-bold text-sm text-slate-800 flex items-start gap-2.5">
+                            <span class="bg-blue-500/10 border border-blue-500/20 text-blue-600 px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold select-none shrink-0 mt-0.5">ข้อที่ ${qIndex+1}</span>
                             <span class="pt-0.5 leading-relaxed">${escapeHtml(q.question)}</span>
                         </p>
-                        ${q.question_img ? `<div class="pl-10"><img src="${q.question_img}" class="max-h-48 rounded-xl border border-white/10 object-contain bg-white/5"></div>` : ''}
+                        ${q.question_img ? `<div class="pl-10"><img src="${q.question_img}" class="max-h-48 rounded-xl border border-slate-200 object-contain bg-slate-100"></div>` : ''}
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">${choicesHtml}</div>
                     </div>
                 `;
@@ -505,7 +444,7 @@
                 const s = timeLeftSeconds%60;
                 const clockEl = document.getElementById('countdown-clock');
                 clockEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-                if (timeLeftSeconds <= 60) { clockEl.style.color = '#f87171'; } else { clockEl.style.color = '#818cf8'; }
+                if (timeLeftSeconds <= 60) { clockEl.style.color = '#ef4444'; } else { clockEl.style.color = '#3b82f6'; }
             };
             updateClock();
             examTimerInterval = setInterval(() => {

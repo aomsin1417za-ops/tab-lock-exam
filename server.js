@@ -1,8 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
+const path = require('path');
+const fs = require('fs');
+
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors({
     origin: '*', 
@@ -13,10 +16,16 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(__dirname));
 
-// 🗄️ เชื่อมต่อฐานข้อมูล SQLite (ระบบจะสร้างไฟล์ exam_system.db ให้อัตโนมัติ)
-const db = new sqlite3.Database('./exam_system.db', (err) => {
+// 🗄️ เชื่อมต่อฐานข้อมูล SQLite (สร้างโฟลเดอร์ .data เพื่อเก็บข้อมูลถาวรบน Glitch)
+const dbDir = path.join(__dirname, '.data');
+if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir);
+}
+const dbPath = path.join(dbDir, 'exam_system.db');
+
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) console.error('❌ เชื่อมต่อ SQLite ล้มเหลว:', err.message);
-    else console.log('🟢 เชื่อมต่อฐานข้อมูล SQLite สำเร็จ (ไฟล์: exam_system.db)');
+    else console.log('🟢 เชื่อมต่อฐานข้อมูล SQLite สำเร็จ (ไฟล์: .data/exam_system.db)');
 });
 
 // 🛠️ สร้างตารางข้อมูลทั้งหมด และทำการ Migration ตารางเดิมอย่างปลอดภัย
@@ -165,6 +174,9 @@ db.serialize(() => {
     });
     db.run("ALTER TABLE teacher_rooms ADD COLUMN show_score INTEGER DEFAULT 1", (err) => {
         if (!err) console.log("✔ Added column 'show_score' to teacher_rooms table");
+    });
+    db.run("ALTER TABLE teacher_rooms ADD COLUMN show_leaderboard INTEGER DEFAULT 1", (err) => {
+        if (!err) console.log("✔ Added column 'show_leaderboard' to teacher_rooms table");
     });
     db.run("ALTER TABLE teacher_rooms ADD COLUMN exam_title TEXT DEFAULT ''", (err) => {
         if (!err) console.log("✔ Added column 'exam_title' to teacher_rooms table");
@@ -601,13 +613,36 @@ app.delete('/api/clear-results', (req, res) => {
     const { roomId } = req.body;
     if (!roomId) return res.status(400).json({ message: "กรุณาระบุรหัสห้องสอบ" });
 
-    db.run('DELETE FROM exam_results WHERE roomId = ?', [roomId], (err) => {
+    let sql1, sql2, sql3, sql4, params;
+    if (roomId === 'ALL') {
+        sql1 = 'DELETE FROM exam_results';
+        sql2 = 'DELETE FROM cheat_logs';
+        sql3 = 'DELETE FROM student_warnings';
+        sql4 = 'DELETE FROM student_logins';
+        params = [];
+    } else {
+        sql1 = 'DELETE FROM exam_results WHERE roomId = ?';
+        sql2 = 'DELETE FROM cheat_logs WHERE roomId = ?';
+        sql3 = 'DELETE FROM student_warnings WHERE roomId = ?';
+        sql4 = 'DELETE FROM student_logins WHERE roomId = ?';
+        params = [roomId];
+    }
+
+    db.run(sql1, params, (err) => {
         if (err) return res.status(500).json({ message: err.message });
         
-        db.run('DELETE FROM cheat_logs WHERE roomId = ?', [roomId], (err) => {
+        db.run(sql2, params, (err) => {
             if (err) return res.status(500).json({ message: err.message });
-            console.log(`🧹 ล้างประวัติผลสอบและประวัติทุจริตของห้อง ${roomId} เรียบร้อยแล้ว`);
-            res.json({ success: true });
+            
+            db.run(sql3, params, (err) => {
+                if (err) return res.status(500).json({ message: err.message });
+                
+                db.run(sql4, params, (err) => {
+                    if (err) return res.status(500).json({ message: err.message });
+                    console.log(`🧹 ล้างประวัติผลสอบ ประวัติทุจริต การแจ้งเตือน และล็อกอินนักศึกษาของห้อง ${roomId} เรียบร้อยแล้ว`);
+                    res.json({ success: true });
+                });
+            });
         });
     });
 });
@@ -673,29 +708,32 @@ app.get('/api/room-settings', (req, res) => {
     const roomId = req.query.roomId;
     if (!roomId) return res.status(400).json({ message: "กรุณาระบุ roomId" });
 
-    db.get('SELECT randomize, duration, announcement, show_score FROM teacher_rooms WHERE roomId = ?', [roomId], (err, row) => {
+    db.get('SELECT randomize, duration, announcement, show_score, show_leaderboard, exam_title FROM teacher_rooms WHERE roomId = ?', [roomId], (err, row) => {
         if (err) return res.status(500).json({ message: err.message });
         res.json({
             randomize: row ? row.randomize : 1,
             duration: row ? row.duration : 0,
             announcement: row ? row.announcement : '',
-            showScore: row ? (row.show_score !== undefined ? row.show_score : 1) : 1
+            showScore: row ? (row.show_score !== undefined ? row.show_score : 1) : 1,
+            showLeaderboard: row ? (row.show_leaderboard !== undefined ? row.show_leaderboard : 1) : 1,
+            examTitle: row ? row.exam_title : ''
         });
     });
 });
 
 // อัปเดตการตั้งค่าห้องสอบ
 app.post('/api/teacher/update-room-settings', (req, res) => {
-    const { roomId, randomize, duration, announcement, showScore } = req.body;
+    const { roomId, randomize, duration, announcement, showScore, showLeaderboard } = req.body;
     if (!roomId) return res.status(400).json({ message: "กรุณาระบุ roomId" });
 
     db.run(
-        'UPDATE teacher_rooms SET randomize = ?, duration = ?, announcement = ?, show_score = ? WHERE roomId = ?',
+        'UPDATE teacher_rooms SET randomize = ?, duration = ?, announcement = ?, show_score = ?, show_leaderboard = ? WHERE roomId = ?',
         [
             randomize !== undefined ? randomize : 1, 
             duration !== undefined ? duration : 0, 
             announcement || '', 
             showScore !== undefined ? showScore : 1, 
+            showLeaderboard !== undefined ? showLeaderboard : 1, 
             roomId
         ],
         function(err) {

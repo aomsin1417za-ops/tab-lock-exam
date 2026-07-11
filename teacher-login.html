@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+  <script>
+    if (window.location.protocol === 'file:') {
+      const fileName = window.location.pathname.split('/').pop() || 'index.html';
+      window.location.href = 'http://localhost:5000/' + fileName;
+    }
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>เข้าสู่ระบบอาจารย์ - Tab-Lock</title>
@@ -12,8 +18,8 @@
     body {
       margin: 0;
       font-family: 'Kanit', 'Inter', sans-serif;
-      background: #050B18;
-      color: #fff;
+      background: linear-gradient(to right, #f8fafc 0%, #eff6ff 50%, #faf5ff 100%);
+      color: #334155;
       min-height: 100vh;
       overflow-x: hidden;
     }
@@ -22,8 +28,8 @@
     .grid-overlay {
       position: fixed; inset: 0;
       background-image:
-        linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+        linear-gradient(rgba(99,102,241,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,102,241,0.02) 1px, transparent 1px);
       background-size: 60px 60px;
       pointer-events: none; z-index: 0;
     }
@@ -33,13 +39,13 @@
     }
     .blob-1 {
       width: 550px; height: 550px;
-      background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, transparent 70%);
       top: -180px; left: -180px;
       animation: radial-pulse 8s ease-in-out infinite;
     }
     .blob-2 {
       width: 450px; height: 450px;
-      background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.04) 0%, transparent 70%);
       bottom: -130px; right: -130px;
       animation: radial-pulse 10s ease-in-out infinite reverse;
     }
@@ -51,19 +57,20 @@
     .content-layer { position: relative; z-index: 10; }
 
     .glass-card {
-      background: rgba(15,23,42,0.75);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255,255,255,0.07);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      border-top: 1px solid rgba(6, 182, 212, 0.25);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
       border-radius: 28px;
-      border-top: 1px solid rgba(99,102,241,0.35);
     }
 
     /* Glass inputs */
     .glass-input {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      color: #fff;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(226, 232, 240, 1);
+      color: #1e293b;
       border-radius: 12px;
       padding: 13px 14px 13px 44px;
       width: 100%;
@@ -72,23 +79,23 @@
       outline: none;
       transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
     }
-    .glass-input::placeholder { color: #475569; }
+    .glass-input::placeholder { color: #94a3b8; }
     .glass-input:focus {
-      border-color: #6366f1;
-      background: rgba(99,102,241,0.08);
-      box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+      border-color: #06b6d4;
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
     }
 
     /* Submit button */
     .btn-submit {
-      background: linear-gradient(135deg, #6366f1 0%, #7c3aed 60%, #6d28d9 100%);
-      box-shadow: 0 8px 32px rgba(99,102,241,0.45);
+      background: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%);
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
       transition: all 0.3s ease;
       border: none;
       cursor: pointer;
     }
     .btn-submit:hover:not(:disabled) {
-      box-shadow: 0 14px 44px rgba(99,102,241,0.7);
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.35);
       transform: translateY(-2px);
     }
     .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
@@ -99,31 +106,31 @@
       color: #64748b; padding: 0;
       transition: color 0.2s;
     }
-    .toggle-pass:hover { color: #a5b4fc; }
+    .toggle-pass:hover { color: #06b6d4; }
 
     /* Links */
-    .link-primary { color: #818cf8; transition: color 0.2s; }
-    .link-primary:hover { color: #a5b4fc; }
-    .link-secondary { color: #475569; transition: color 0.2s; font-size: 0.8rem; }
-    .link-secondary:hover { color: #94a3b8; }
+    .link-primary { color: #06b6d4; transition: color 0.2s; }
+    .link-primary:hover { color: #22d3ee; }
+    .link-secondary { color: #64748b; transition: color 0.2s; font-size: 0.8rem; }
+    .link-secondary:hover { color: #cbd5e1; }
 
     /* Back link */
     .back-link {
       display: inline-flex; align-items: center; gap: 6px;
-      color: #475569; font-size: 0.8rem; transition: color 0.2s;
+      color: #64748b; font-size: 0.8rem; transition: color 0.2s;
     }
-    .back-link:hover { color: #94a3b8; }
+    .back-link:hover { color: #cbd5e1; }
 
     /* Divider line */
     .divider {
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      background: linear-gradient(90deg, transparent, rgba(226, 232, 240, 0.8), transparent);
     }
 
     /* Shield badge */
     .shield-badge {
-      background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(124,58,237,0.25));
-      border: 1px solid rgba(99,102,241,0.3);
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(139, 92, 246, 0.1));
+      border: 1px solid rgba(6, 182, 212, 0.2);
       border-radius: 16px;
       padding: 12px;
       display: inline-flex;
@@ -159,15 +166,17 @@
 
         <!-- Header -->
         <div class="flex flex-col items-center text-center mb-8">
-          <div class="shield-badge mb-4">🛡️</div>
-          <div class="text-xs font-bold tracking-[0.3em] text-indigo-400 uppercase mb-1">TAB-LOCK</div>
-          <h1 class="text-2xl font-bold text-white mb-1">ระบบเข้าสู่ระบบอาจารย์ผู้สอน</h1>
+          <div class="shield-badge mb-4 overflow-hidden bg-white p-2 flex items-center justify-center w-16 h-16 rounded-2xl">
+            <img src="logo.png" alt="Tab-Lock Logo" class="w-full h-full object-cover rounded-xl" />
+          </div>
+          <div class="text-xs font-bold tracking-[0.3em] text-cyan-600 uppercase mb-1">TAB-LOCK</div>
+          <h1 class="text-2xl font-bold text-slate-800 mb-1">ระบบเข้าสู่ระบบอาจารย์ผู้สอน</h1>
           <p class="text-slate-500 text-sm">กรุณาใส่ข้อมูลเพื่อเข้าสู่ระบบ</p>
         </div>
 
         <!-- Error msg -->
-        <div id="error-msg" class="hidden mb-5 p-3.5 rounded-xl text-sm font-medium text-rose-400 flex items-center gap-2"
-             style="background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.2);">
+        <div id="error-msg" class="hidden mb-5 p-3.5 rounded-xl text-sm font-medium text-rose-600 flex items-center gap-2"
+             style="background:rgba(244,63,94,0.05);border:1px solid rgba(244,63,94,0.2);">
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
@@ -178,7 +187,7 @@
         <div class="space-y-4 mb-6">
           <!-- Username -->
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1.5">ชื่อผู้ใช้ (Username)</label>
+            <label class="block text-sm font-medium text-slate-550 mb-1.5">ชื่อผู้ใช้ (Username)</label>
             <div class="input-wrapper">
               <span class="input-icon">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,7 +200,7 @@
 
           <!-- Password -->
           <div>
-            <label class="block text-sm font-medium text-slate-300 mb-1.5">รหัสผ่าน (Password)</label>
+            <label class="block text-sm font-medium text-slate-550 mb-1.5">รหัสผ่าน (Password)</label>
             <div class="input-wrapper">
               <span class="input-icon">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,7 +223,7 @@
         <!-- Submit button -->
         <button id="login-btn" onclick="login()" class="btn-submit w-full py-3.5 rounded-xl text-white font-bold text-sm flex items-center justify-center gap-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3h7a3 3 0 013 3v1"/>
           </svg>
           เข้าสู่ระบบ
         </button>
@@ -240,7 +249,7 @@
       </div>
 
       <!-- Footer -->
-      <p class="text-center text-slate-700 text-xs mt-6 tracking-wider">Tab-Lock Online Exam Platform</p>
+      <p class="text-center text-slate-450 text-xs mt-6 tracking-wider">Tab-Lock Online Exam Platform</p>
     </div>
   </div>
 

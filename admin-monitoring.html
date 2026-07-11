@@ -4,35 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ตรวจสอบพฤติกรรมน่าสงสัย - Tab-Lock Online Exam Platform</title>
-    <meta name="description" content="ศูนย์เฝ้าระวังพฤติกรรมการทุจริตสอบแบบเรียลไทม์ Tab-Lock">
+    <meta name="description" content="ศูนย์ตรวจสอบพฤติกรรมน่าสงสัยแบบเรียลไทม์ Tab-Lock">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
-        body { font-family: 'Kanit', 'Inter', sans-serif; background: #0A0F1E; color: #e2e8f0; }
-        #sidebar { background: #060B15; width: 256px; min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; border-right: 1px solid rgba(255,255,255,0.04); flex-shrink: 0; }
-        #sidebar::before { content: ''; position: absolute; top: -60px; left: -60px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%); border-radius: 50%; animation: blobPulse 6s ease-in-out infinite; pointer-events: none; z-index: 0; }
-        #sidebar::after { content: ''; position: absolute; bottom: -60px; right: -40px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(124,58,237,0.10) 0%, transparent 70%); border-radius: 50%; animation: blobPulse 8s ease-in-out infinite reverse; pointer-events: none; z-index: 0; }
+        body { font-family: 'Kanit', 'Inter', sans-serif; background: linear-gradient(to right, #f8fafc 0%, #eff6ff 50%, #faf5ff 100%); background-attachment: fixed; color: #334155; }
+        #sidebar { background: #ffffff; width: 256px; min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; border-right: 1px solid rgba(226,232,240,0.8); flex-shrink: 0; }
+        #sidebar::before { content: ''; position: absolute; top: -60px; left: -60px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(6, 182, 212, 0.04) 0%, transparent 70%); border-radius: 50%; animation: blobPulse 6s ease-in-out infinite; pointer-events: none; z-index: 0; }
+        #sidebar::after { content: ''; position: absolute; bottom: -60px; right: -40px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(139, 92, 246, 0.03) 0%, transparent 70%); border-radius: 50%; animation: blobPulse 8s ease-in-out infinite reverse; pointer-events: none; z-index: 0; }
         @keyframes blobPulse { 0%, 100% { transform: scale(1) translate(0,0); opacity: 0.6; } 33% { transform: scale(1.15) translate(10px,-10px); opacity: 1; } 66% { transform: scale(0.9) translate(-5px,8px); opacity: 0.7; } }
         .sidebar-inner { position: relative; z-index: 1; }
-        .logo-gradient { background: linear-gradient(135deg, #818cf8, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .logo-shield { background: linear-gradient(135deg, #6366f1, #7c3aed); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 0 20px rgba(99,102,241,0.4); flex-shrink: 0; }
-        .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; font-size: 13px; font-weight: 500; color: #94a3b8; text-decoration: none; transition: all 0.2s ease; }
-        .nav-link:hover { color: #ffffff; background: rgba(255,255,255,0.05); }
-        .nav-link.active { background: linear-gradient(135deg, #6366f1, #7c3aed); color: #ffffff; font-weight: 600; box-shadow: 0 0 20px rgba(99,102,241,0.3); }
+        .logo-gradient { background: linear-gradient(135deg, #06b6d4, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .logo-shield { background: linear-gradient(135deg, #06b6d4, #8b5cf6); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 0 20px rgba(6, 182, 212, 0.4); flex-shrink: 0; }
+        .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; font-size: 13px; font-weight: 500; color: #64748b; text-decoration: none; transition: all 0.2s ease; }
+        .nav-link:hover { color: #1e293b; background: rgba(15,23,42,0.04); }
+        .nav-link.active { background: linear-gradient(135deg, #06b6d4, #8b5cf6); color: #ffffff; font-weight: 600; box-shadow: 0 0 20px rgba(6, 182, 212, 0.2); }
         .nav-link svg { width: 16px; height: 16px; flex-shrink: 0; }
-        #main-area { flex: 1; background: #0A0F1E; background-image: linear-gradient(to right, rgba(99,102,241,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(99,102,241,0.03) 1px, transparent 1px); background-size: 32px 32px; display: flex; flex-direction: column; overflow-x: hidden; }
-        #top-header { background: rgba(6,11,21,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; }
-        @keyframes onlinePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); } 50% { box-shadow: 0 0 0 6px rgba(16,185,129,0); } }
+        #main-area { flex: 1; background: #f8fafc; background-image: linear-gradient(to right, rgba(99,102,241,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(99,102,241,0.03) 1px, transparent 1px); background-size: 32px 32px; display: flex; flex-direction: column; overflow-x: hidden; }
+        #top-header { background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(226,232,240,0.8); padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; }
+        @keyframes onlinePulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); } 50% { box-shadow: 0 0 0 6px rgba(16,185,129,0); } }
         .online-dot { animation: onlinePulse 2s ease-in-out infinite; }
         @keyframes sidebarDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         .sidebar-online-dot { animation: sidebarDot 2s ease-in-out infinite; }
         @keyframes pulse-ring { 0% { transform: scale(0.95); opacity: 0.5; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.5; } }
         .pulse-active { animation: pulse-ring 2s infinite; }
-        select { background: #0f1729 !important; color: #e2e8f0 !important; border-color: rgba(255,255,255,0.1) !important; }
-        select option { background: #0f1729; color: #e2e8f0; }
+        select { background: #ffffff !important; color: #1e293b !important; border-color: rgba(226,232,240,1) !important; border-radius: 10px; padding: 8px 12px; font-family: 'Kanit', sans-serif; outline: none; transition: border-color 0.2s; }
+        select:focus { border-color: rgba(6,182,212,0.5) !important; }
+        select option { background: #ffffff; color: #1e293b; }
         @media (max-width: 768px) { #sidebar { display: none; } }
-        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 4px; }
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.2); border-radius: 4px; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -41,9 +42,11 @@
     <aside id="sidebar">
         <div class="sidebar-inner p-5 space-y-6 flex-1">
             <div class="flex items-center gap-3 pb-2">
-                <div class="logo-shield">🛡️</div>
+                <div class="logo-shield overflow-hidden bg-white p-1 border border-slate-100">
+                    <img src="logo.png" alt="Tab-Lock Logo" class="w-full h-full object-cover rounded-lg" />
+                </div>
                 <div class="leading-tight">
-                    <div class="font-extrabold text-base tracking-tight text-white">Tab-<span class="logo-gradient">Lock</span></div>
+                    <div class="font-extrabold text-base tracking-tight text-slate-800">Tab-<span class="logo-gradient">Lock</span></div>
                     <div class="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Exam Platform</div>
                 </div>
             </div>
@@ -70,19 +73,19 @@
                 </a>
             </nav>
         </div>
-        <div class="sidebar-inner p-5 border-t border-white/5 space-y-3">
+        <div class="sidebar-inner p-5 border-t border-slate-200 space-y-3">
             <div class="flex items-center gap-2.5">
                 <div class="relative">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-xs font-bold text-white">อ</div>
-                    <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-[#060B15] sidebar-online-dot"></span>
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-slate-800">อ</div>
+                    <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white sidebar-online-dot"></span>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div class="text-xs font-semibold text-white truncate" id="sidebar-teacher-name">อาจารย์ผู้ดูแล</div>
+                    <div class="text-xs font-semibold text-slate-800 truncate" id="sidebar-teacher-name">อาจารย์ผู้ดูแล</div>
                     <div class="text-[10px] text-slate-500 font-medium">ออนไลน์ • ผู้ดูแลระบบ</div>
                 </div>
             </div>
             <a href="teacher-login.html" onclick="localStorage.clear(); sessionStorage.clear();"
-               class="flex items-center justify-center gap-2 w-full py-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-xl text-xs font-bold transition-all duration-200">
+               class="flex items-center justify-center gap-2 w-full py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-all duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
                 ออกจากระบบ
             </a>
@@ -96,16 +99,16 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
                 <div class="flex items-center gap-3">
                     <span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-500 pulse-active shadow-md"></span>
-                    <h1 class="text-base font-extrabold text-white">ศูนย์เฝ้าระวังพฤติกรรมการทุจริตสอบ (Real-Time)</h1>
+                    <h1 class="text-base font-extrabold text-slate-800">ศูนย์ตรวจสอบพฤติกรรมน่าสงสัย (Real-Time)</h1>
                 </div>
                 <div class="flex items-center gap-3">
                     <div class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 online-dot"></span>
-                        <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">System Online</span>
+                        <span class="text-xs font-bold text-emerald-600 uppercase tracking-wider">System Online</span>
                     </div>
                     <span class="text-xs font-bold text-slate-500">เลือกห้องสอบ:</span>
                     <select id="room-selector" onchange="loadCheatLogs()"
-                        class="px-3 py-2 rounded-xl font-bold text-xs focus:outline-none transition cursor-pointer" style="background:#0f1729;border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;">
+                        class="px-3 py-2 rounded-xl font-bold text-xs focus:outline-none transition cursor-pointer" style="background:#ffffff;border:1px solid rgba(226,232,240,1);color:#1e293b;">
                     </select>
                 </div>
             </div>
@@ -115,24 +118,24 @@
         <main class="p-6 md:p-8 flex-grow max-w-4xl w-full mx-auto space-y-6 overflow-y-auto">
             
             <!-- Real-time Status Card banner -->
-            <div class="bg-white border border-slate-200 p-6 rounded-3xl flex items-center justify-between shadow-sm">
+            <div class="glass-card p-6 flex items-center justify-between shadow-sm">
                 <div class="space-y-1">
-                    <span class="text-[10px] font-bold text-indigo-650 uppercase tracking-widest">สถานะระบบตรวจจับความปลอดภัย</span>
-                    <h2 class="text-lg font-extrabold text-slate-900">ตรวจจับประวัติการสลับสับเปลี่ยนแท็บเว็บบนเบราว์เซอร์</h2>
+                    <span class="text-[10px] font-bold text-cyan-600 uppercase tracking-widest">สถานะระบบตรวจจับความปลอดภัย</span>
+                    <h2 class="text-lg font-extrabold text-slate-800">ตรวจจับประวัติการสลับสับเปลี่ยนแท็บเว็บบนเบราว์เซอร์</h2>
                 </div>
-                <div class="flex items-center gap-2.5 bg-indigo-50 border border-indigo-150 px-4 py-2 rounded-2xl">
-                    <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 pulse-active"></span>
-                    <span class="text-xs font-bold text-indigo-750 font-mono" id="log-count-badge">0 รายการ</span>
+                <div class="flex items-center gap-2.5 bg-cyan-500/10 border border-cyan-500/20 px-4 py-2 rounded-2xl">
+                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-500 pulse-active"></span>
+                    <span class="text-xs font-bold text-cyan-600 font-mono" id="log-count-badge">0 รายการ</span>
                 </div>
             </div>
 
             <!-- 🚨 รายชื่อกลุ่มเสี่ยงสูง -->
-            <div id="high-risk-panel" class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-md text-white space-y-4 hidden select-none">
+            <div id="high-risk-panel" class="bg-slate-900/40 border border-slate-205 rounded-3xl p-6 shadow-md text-slate-800 space-y-4 hidden select-none">
                 <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                    <span class="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-2">
+                    <span class="text-xs font-bold text-rose-450 uppercase tracking-wider flex items-center gap-2">
                         🚨 นักศึกษากลุ่มความเสี่ยงสูง (สลับหน้าจอตั้งแต่ 3 ครั้งขึ้นไป)
                     </span>
-                    <span class="bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] font-extrabold px-2.5 py-1 rounded-lg animate-pulse" id="high-risk-count">0 คน</span>
+                    <span class="bg-rose-500/10 border border-rose-500/20 text-rose-450 text-[10px] font-extrabold px-2.5 py-1 rounded-lg animate-pulse" id="high-risk-count">0 คน</span>
                 </div>
                 <div id="high-risk-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- รายชื่อกลุ่มเสี่ยงจะถูกวาดที่นี่ -->
@@ -140,19 +143,19 @@
             </div>
 
             <!-- Streaming logs timeline box -->
-            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
-                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+            <div class="glass-card p-6 shadow-sm space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
                         📋 บันทึกประวัติพฤติกรรม (สตรีมมิ่งสดทุก 3 วินาที)
                     </span>
-                    <button onclick="clearCheatLogs()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-sm">
+                    <button onclick="clearCheatLogs()" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 px-3.5 py-1.5 rounded-xl font-bold text-xs transition shadow-sm">
                         🧹 ล้างบันทึกทั้งหมด
                     </button>
                 </div>
 
                 <!-- Timeline Container -->
-                <div id="live-logs-container" class="space-y-4 max-h-[500px] overflow-y-auto pr-2 divide-y divide-slate-100">
-                    <div class="text-center py-16 text-slate-400 font-semibold">
+                <div id="live-logs-container" class="space-y-4 max-h-[500px] overflow-y-auto pr-2 divide-y divide-white/5">
+                    <div class="text-center py-16 text-slate-500 font-semibold">
                         📭 ไม่พบประวัติพฤติกรรมต้องสงสัยของห้องสอบนี้ในขณะนี้
                     </div>
                 </div>
@@ -161,8 +164,8 @@
         </main>
 
         <!-- Footer -->
-        <footer class="border-t border-white/5 py-4 px-8 text-center">
-            <p class="text-[10px] text-slate-600">&copy; 2026 Tab-Lock Online Exam Platform · ตรวจสอบพฤติกรรมน่าสงสัย · สงวนลิขสิทธิ์</p>
+        <footer class="border-t border-slate-200 py-4 px-8 text-center">
+            <p class="text-[10px] text-slate-500">&copy; 2026 Tab-Lock Online Exam Platform · ตรวจสอบพฤติกรรมน่าสงสัย · สงวนลิขสิทธิ์</p>
         </footer>
     </div>
 
@@ -233,7 +236,7 @@
                 if (logs.length === 0) {
                     document.getElementById('high-risk-panel').classList.add('hidden');
                     container.innerHTML = `
-                        <div class="text-center py-16 text-slate-400 font-semibold">
+                        <div class="text-center py-16 text-slate-500 font-semibold">
                             📭 ไม่พบประวัติพฤติกรรมต้องสงสัยของห้องสอบนี้ในขณะนี้
                         </div>`;
                     return;
@@ -265,16 +268,16 @@
                 if (highRiskStudents.length > 0) {
                     hrCount.textContent = `${highRiskStudents.length} คน`;
                     hrList.innerHTML = highRiskStudents.map(student => `
-                        <div class="bg-red-950/60 border border-red-800/80 p-4 rounded-2xl flex items-center justify-between shadow-inner animate-pulse">
+                        <div class="bg-rose-50 border border-rose-100 p-4 rounded-2xl flex items-center justify-between shadow-sm animate-pulse">
                             <div class="space-y-1">
                                 <div class="flex items-center gap-2">
-                                    <strong class="text-white text-xs">${escapeHtml(student.name)}</strong>
-                                    <span class="text-[9px] text-red-300 font-mono bg-red-900/60 px-2 py-0.5 rounded-full">${escapeHtml(student.studentId)}</span>
+                                    <strong class="text-rose-800 text-xs">${escapeHtml(student.name)}</strong>
+                                    <span class="text-[9px] text-rose-700 font-mono bg-rose-100 border border-rose-200/50 px-2 py-0.5 rounded-full">${escapeHtml(student.studentId)}</span>
                                 </div>
-                                <div class="text-[10px] text-red-400 font-bold">⚠️ ตรวจพบการสลับหน้าจอสะสม ${student.count} ครั้ง</div>
+                                <div class="text-[10px] text-rose-600 font-bold">⚠️ ตรวจพบการสลับหน้าจอสะสม ${student.count} ครั้ง</div>
                             </div>
                             <button onclick="sendDirectWarning('${student.studentId}', '${escapeHtml(student.name)}')" 
-                                class="px-3 py-1.5 bg-red-600 hover:bg-red-500 border border-red-500 text-white rounded-lg text-[9px] font-black tracking-wider transition active:scale-95">
+                                class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[9px] font-bold tracking-wider transition active:scale-95 shadow-sm">
                                 💬 ส่งเตือน
                             </button>
                         </div>
@@ -291,19 +294,19 @@
                     
                     // หากเป็นกลุ่มเสี่ยงสูง ให้แสดงแถบสีแดงเข้ม (Red styling)
                     const rowClass = isHighRisk 
-                        ? "flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-2xl bg-red-500/5 border border-red-500/25 gap-3 transition" 
-                        : "flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 first:pt-0 gap-3 border-slate-100 transition";
+                        ? "flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-2xl bg-rose-50 border border-rose-100/70 gap-3 transition" 
+                        : "flex flex-col sm:flex-row items-start sm:items-center justify-between py-4 first:pt-0 gap-3 border-slate-250 transition";
 
                     return `
                         <div class="${rowClass}">
                             <div class="flex items-start gap-3.5">
-                                <span class="text-2xl shrink-0 p-2 rounded-2xl ${isHighRisk ? 'bg-red-500/10 border border-red-500/20 text-red-500' : 'bg-rose-50 border border-rose-100 text-rose-500'}">🚨</span>
+                                <span class="text-2xl shrink-0 p-2 rounded-2xl ${isHighRisk ? 'bg-red-500/10 border border-red-500/20 text-red-550' : 'bg-rose-500/10 border border-rose-500/20 text-rose-500'}">🚨</span>
                                 <div class="space-y-1">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <strong class="text-slate-900 font-bold text-sm">${escapeHtml(log.name)}</strong>
-                                        <span class="text-[10px] font-bold text-slate-400 font-mono bg-slate-100 px-2 py-0.5 rounded-full">${escapeHtml(log.studentId)}</span>
-                                        <span class="text-[10px] font-extrabold text-indigo-650 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-xl">${escapeHtml(log.class || '-')}</span>
-                                        ${isHighRisk ? '<span class="text-[9px] font-black bg-red-600 text-white px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse">High Risk</span>' : ''}
+                                        <strong class="text-slate-800 font-bold text-sm">${escapeHtml(log.name)}</strong>
+                                        <span class="text-[10px] font-bold text-slate-700 font-mono bg-slate-100 border border-slate-200/60 px-2 py-0.5 rounded-full">${escapeHtml(log.studentId)}</span>
+                                        <span class="text-[10px] font-extrabold text-cyan-800 bg-cyan-50 border border-cyan-200 px-2 py-0.5 rounded-xl">${escapeHtml(log.class || '-')}</span>
+                                        ${isHighRisk ? '<span class="text-[9px] font-black bg-red-650 text-white px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse">High Risk</span>' : ''}
                                     </div>
                                     <p class="text-rose-600 text-xs font-semibold leading-relaxed">${escapeHtml(log.action)}</p>
                                 </div>
@@ -311,10 +314,10 @@
                             <div class="flex items-center gap-4 self-end sm:self-center shrink-0">
                                 <div class="text-right font-mono">
                                     <div class="text-slate-800 text-xs font-bold">${log.time}</div>
-                                    <div class="text-slate-400 text-[10px] mt-0.5">${cleanDate}</div>
+                                    <div class="text-slate-500 text-[10px] mt-0.5">${cleanDate}</div>
                                 </div>
                                 <button onclick="sendDirectWarning('${log.studentId}', '${escapeHtml(log.name)}')" 
-                                    class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-[10px] font-bold border border-slate-700 transition active:scale-95">
+                                    class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 rounded-xl text-[10px] font-extrabold transition active:scale-95 shadow-sm">
                                     💬 ส่งเตือน
                                 </button>
                             </div>
