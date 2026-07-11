@@ -330,25 +330,25 @@
             </div>
 
             <!-- Answer Sheet Review Modal -->
-            <div id="answer-sheet-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300 p-4">
-                <div class="bg-slate-900 border border-slate-205 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl transform scale-95 transition-transform duration-300 text-slate-800">
+            <div id="answer-sheet-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300 p-4">
+                <div class="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl transform scale-95 transition-transform duration-300 text-slate-800">
                     <!-- Modal Header -->
-                    <div class="p-6 border-b border-slate-200 flex items-center justify-between bg-transparent/5 rounded-t-3xl">
+                    <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 rounded-t-3xl">
                         <div>
-                            <h3 class="font-extrabold text-slate-800 text-base" id="modal-student-name">กระดาษคำตอบของนักศึกษา</h3>
-                            <p class="text-[11px] text-slate-450 font-bold uppercase tracking-wider mt-0.5" id="modal-student-info">รหัส: - | ชั้นเรียน: -</p>
+                            <h3 class="font-extrabold text-slate-900 text-base" id="modal-student-name">กระดาษคำตอบของนักศึกษา</h3>
+                            <p class="text-[11px] text-slate-500 font-extrabold uppercase tracking-wider mt-0.5" id="modal-student-info">รหัส: - | ชั้นเรียน: -</p>
                         </div>
-                        <button onclick="closeAnswerSheetModal()" class="text-slate-450 hover:text-slate-800 bg-white/5 border border-white/10 p-2.5 rounded-xl text-xs font-bold transition active:scale-[0.97]">
+                        <button onclick="closeAnswerSheetModal()" class="text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200/60 p-2.5 rounded-xl text-xs font-bold transition active:scale-[0.97]">
                             ✕ ปิดหน้าต่าง
                         </button>
                     </div>
                     <!-- Modal Body -->
-                    <div class="p-6 overflow-y-auto space-y-4 flex-grow bg-slate-950/40" id="modal-answer-sheet-content">
+                    <div class="p-6 overflow-y-auto space-y-4 flex-grow bg-slate-50/30" id="modal-answer-sheet-content">
                         <!-- Questions list loaded here -->
                     </div>
                     <!-- Modal Footer -->
-                    <div class="p-4 border-t border-slate-200 flex justify-end bg-transparent/5 rounded-b-3xl">
-                        <button onclick="closeAnswerSheetModal()" class="bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-600 hover:to-indigo-600 text-slate-800 px-5 py-2.5 rounded-2xl text-xs font-bold transition active:scale-[0.98] shadow-sm">
+                    <div class="p-4 border-t border-slate-100 flex justify-end bg-slate-50/50 rounded-b-3xl">
+                        <button onclick="closeAnswerSheetModal()" class="bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700 text-white px-6 py-2.5 rounded-2xl text-xs font-bold transition active:scale-[0.98] shadow-md shadow-cyan-600/10">
                             ตกลง
                         </button>
                     </div>
@@ -927,8 +927,8 @@
 
                     // สถิติข้อนี้
                     const questionHeaderStatus = isCorrect 
-                        ? `<span class="bg-emerald-500/10 border-emerald-500/20 text-emerald-400 font-extrabold text-[10px] px-2.5 py-0.5 rounded-lg select-none shrink-0">ถูกต้อง ✓ (+1 คะแนน)</span>`
-                        : `<span class="bg-rose-500/10 border-rose-500/20 text-rose-700 font-extrabold text-[10px] px-2.5 py-0.5 rounded-lg select-none shrink-0">ตอบผิด ✗ (0 คะแนน)</span>`;
+                        ? `<span class="bg-emerald-50 border border-emerald-200 text-emerald-800 font-extrabold text-[10px] px-2.5 py-0.5 rounded-lg select-none shrink-0">ถูกต้อง ✓ (+1 คะแนน)</span>`
+                        : `<span class="bg-rose-50 border border-rose-200 text-rose-800 font-extrabold text-[10px] px-2.5 py-0.5 rounded-lg select-none shrink-0">ตอบผิด ✗ (0 คะแนน)</span>`;
 
                     // วาดช้อยส์
                     const choicesHtml = choiceKeys.map((key) => {
@@ -939,26 +939,26 @@
                         const isAnsCorrect = correctAns === key;
                         const choiceImg = q[key + '_img'] || '';
 
-                        let containerStyle = 'bg-transparent border-t border-white/10 text-slate-600';
-                        let badgeStyle = 'bg-transparent/10 text-slate-500';
+                        let containerStyle = 'bg-slate-50/50 border border-slate-200/60 hover:bg-slate-50 text-slate-700';
+                        let badgeStyle = 'bg-slate-200 text-slate-700';
                         let checkStatus = '';
 
                         if (isAnsCorrect) {
-                            containerStyle = 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold';
-                            badgeStyle = 'bg-emerald-500 text-slate-800';
-                            checkStatus = `<span class="bg-emerald-500/10 text-emerald-400 font-bold text-[9px] px-1.5 py-0.5 rounded border border-emerald-500/20">เฉลยที่ถูกต้อง ✓</span>`;
+                            containerStyle = 'bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold';
+                            badgeStyle = 'bg-emerald-500 text-white';
+                            checkStatus = `<span class="bg-emerald-100 text-emerald-800 font-bold text-[9px] px-2 py-0.5 rounded border border-emerald-200/80">เฉลยที่ถูกต้อง ✓</span>`;
                         } else if (isSelected && !isAnsCorrect) {
-                            containerStyle = 'bg-rose-500/10 border border-rose-500/20 text-rose-450 font-bold';
-                            badgeStyle = 'bg-rose-500 text-slate-800';
-                            checkStatus = `<span class="bg-rose-500/10 text-rose-450 font-bold text-[9px] px-1.5 py-0.5 rounded border border-rose-500/20">นักศึกษาเลือกข้อนี้ ✗</span>`;
+                            containerStyle = 'bg-rose-50 border border-rose-200 text-rose-900 font-bold';
+                            badgeStyle = 'bg-rose-500 text-white';
+                            checkStatus = `<span class="bg-rose-100 text-rose-800 font-bold text-[9px] px-2 py-0.5 rounded border border-rose-200/80">นักศึกษาเลือกข้อนี้ ✗</span>`;
                         } else if (isSelected) {
-                            containerStyle = 'bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 font-bold';
-                            badgeStyle = 'bg-cyan-500 text-slate-800';
-                            checkStatus = `<span class="bg-cyan-500/10 text-cyan-600 font-bold text-[9px] px-1.5 py-0.5 rounded border border-cyan-500/20">นักศึกษาเลือกข้อนี้</span>`;
+                            containerStyle = 'bg-cyan-50 border border-cyan-200 text-cyan-900 font-bold';
+                            badgeStyle = 'bg-cyan-500 text-white';
+                            checkStatus = `<span class="bg-cyan-100 text-cyan-800 font-bold text-[9px] px-2 py-0.5 rounded border border-cyan-200/80">นักศึกษาเลือกข้อนี้</span>`;
                         }
 
                         return `
-                            <div class="flex flex-col p-3 rounded-2xl border ${containerStyle} transition gap-2">
+                            <div class="flex flex-col p-3 rounded-2xl ${containerStyle} transition gap-2">
                                 <div class="flex items-center justify-between gap-3">
                                     <div class="flex items-start gap-2.5">
                                         <span class="w-6 h-6 rounded-lg ${badgeStyle} flex items-center justify-center font-mono font-bold text-xs shrink-0 select-none">
@@ -970,7 +970,7 @@
                                 </div>
                                 ${choiceImg ? `
                                     <div class="pl-8">
-                                        <img src="${choiceImg}" class="max-h-16 rounded-lg border-white/10 object-contain shadow-sm bg-transparent border-t border-white/10">
+                                        <img src="${choiceImg}" class="max-h-16 rounded-lg border-slate-200 object-contain shadow-sm bg-transparent border-t border-slate-200">
                                     </div>
                                 ` : ''}
                             </div>
@@ -978,10 +978,10 @@
                     }).join('');
 
                     return `
-                        <div class="p-6 bg-transparent border-t border-white/10 border-white/10 rounded-3xl space-y-4 shadow-sm">
+                        <div class="p-6 bg-white border border-slate-100 rounded-3xl space-y-4 shadow-sm">
                             <div class="flex justify-between items-start gap-4">
                                 <div class="flex items-start gap-2.5">
-                                    <span class="bg-transparent/10 border-white/10 text-slate-500 px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold shrink-0 select-none">
+                                    <span class="bg-indigo-50 border border-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold shrink-0 select-none">
                                         ข้อที่ ${idx + 1}
                                     </span>
                                     <h4 class="font-extrabold text-sm text-slate-800 leading-relaxed">${escapeHtml(q.question)}</h4>
@@ -991,7 +991,7 @@
 
                             ${q.question_img ? `
                                 <div class="pl-0 md:pl-10">
-                                    <img src="${q.question_img}" class="max-h-40 rounded-xl border-white/10 object-contain shadow-sm bg-transparent border-t border-white/10">
+                                    <img src="${q.question_img}" class="max-h-40 rounded-xl border-slate-200 object-contain shadow-sm bg-transparent border-t border-slate-200">
                                 </div>
                             ` : ''}
 
