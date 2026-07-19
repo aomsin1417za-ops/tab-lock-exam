@@ -52,20 +52,51 @@ if (isPg) {
         ssl: { rejectUnauthorized: false }
     });
 
+    // 🔄 PostgreSQL คืน column names เป็นตัวพิมพ์เล็กทั้งหมด (roomid แทน roomId)
+    // ฟังก์ชันนี้แปลงกลับเป็น camelCase ให้ตรงกับ Frontend
+    const colMap = {
+        roomid: 'roomId', roomname: 'roomName', teacherusername: 'teacherUsername',
+        templateid: 'templateId', templatename: 'templateName',
+        studentid: 'studentId', studentname: 'studentName',
+        maxscore: 'maxScore', answers_json: 'answers_json',
+        is_published: 'is_published', exam_title: 'exam_title',
+        show_score: 'show_score', show_leaderboard: 'show_leaderboard',
+        question_img: 'question_img',
+        a_img: 'a_img', b_img: 'b_img', c_img: 'c_img', d_img: 'd_img',
+        e_img: 'e_img', f_img: 'f_img', g_img: 'g_img', h_img: 'h_img',
+        i_img: 'i_img', j_img: 'j_img',
+        created_at: 'created_at', border_style: 'border_style',
+        sub_title: 'sub_title', footer_text: 'footer_text',
+        signature_img: 'signature_img', signature_name: 'signature_name',
+        logintime: 'loginTime', logindate: 'loginDate',
+        teachername: 'teacherName',
+        roomcount: 'roomCount', questioncount: 'questionCount',
+        resultcount: 'resultCount', questionbytes: 'questionBytes',
+        resultbytes: 'resultBytes'
+    };
+    function transformRow(row) {
+        if (!row || typeof row !== 'object') return row;
+        const out = {};
+        for (const [k, v] of Object.entries(row)) {
+            out[colMap[k] || k] = v;
+        }
+        return out;
+    }
+
     db = {
         isPg: true,
         get(sql, params, callback) {
             if (typeof params === 'function') { callback = params; params = []; }
             const pgSql = convertToPg(sql);
             pool.query(pgSql, params || [])
-                .then(res => callback && callback(null, res.rows[0]))
+                .then(res => callback && callback(null, transformRow(res.rows[0])))
                 .catch(err => callback && callback(err));
         },
         all(sql, params, callback) {
             if (typeof params === 'function') { callback = params; params = []; }
             const pgSql = convertToPg(sql);
             pool.query(pgSql, params || [])
-                .then(res => callback && callback(null, res.rows))
+                .then(res => callback && callback(null, (res.rows || []).map(transformRow)))
                 .catch(err => callback && callback(err));
         },
         run(sql, params, callback) {
