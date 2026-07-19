@@ -456,6 +456,23 @@ app.get('/api/teacher/rooms', (req, res) => {
     });
 });
 
+// 🟢 API สำหรับดึงเฉพาะห้องสอบที่กำลังเผยแพร่อยู่ (is_published = 1) ของอาจารย์
+app.get('/api/teacher/active-published-rooms', (req, res) => {
+    const username = req.query.username;
+    if (!username || username === 'undefined') return res.status(400).json({ message: "กรุณาระบุ username ของอาจารย์" });
+
+    db.all(`
+        SELECT tr.roomId, tr.roomName, tr.exam_title, tr.exam_code, tr.duration, tr.announcement, tr.is_published,
+        (SELECT COUNT(*) FROM questions q WHERE q.roomId = tr.roomId) as questionCount
+        FROM teacher_rooms tr
+        WHERE tr.teacherUsername = ? AND tr.is_published = 1
+        ORDER BY tr.id ASC
+    `, [username], (err, rows) => {
+        if (err) return res.status(500).json({ message: err.message });
+        res.json(rows || []);
+    });
+});
+
 // 🔍 API สำหรับนักศึกษาค้นหาห้องสอบจากรหัสข้อสอบ (examCode) และอาจารย์ผู้สอน (teacherUsername)
 app.get('/api/student/get-room-by-code', (req, res) => {
     const { teacherUsername, examCode } = req.query;
