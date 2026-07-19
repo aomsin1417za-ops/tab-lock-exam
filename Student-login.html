@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <script>
@@ -206,6 +206,7 @@
         let examTimerInterval = null;
         let announcementInterval = null;
         let warningInterval = null;
+        let publishCheckInterval = null;
         let activeWarningIds = [];
         let isExamFinished = false;
 
@@ -313,6 +314,7 @@
                 startExamTimer(settings.duration);
                 startAnnouncementStream(settings.announcement);
                 startWarningStream();
+                startPublishStatusCheck();
                 renderExamQuestions();
             } catch(e) {
                 console.error(e);
@@ -394,6 +396,7 @@
             if (examTimerInterval) clearInterval(examTimerInterval);
             if (announcementInterval) clearInterval(announcementInterval);
             if (warningInterval) clearInterval(warningInterval);
+            if (publishCheckInterval) clearInterval(publishCheckInterval);
             let answersPayload = {};
             let unansweredCount = 0;
             examQuestions.forEach(q => {
@@ -445,6 +448,38 @@
                 if (timeLeftSeconds <= 0) { clearInterval(examTimerInterval); updateClock(); alert("⏱️ หมดเวลาทำข้อสอบ! ระบบส่งคำตอบทันที"); submitExam(true); }
                 else { updateClock(); }
             }, 1000);
+        }
+
+        // 🛑 ตรวจสอบสถานะเผยแพร่ข้อสอบแบบ Real-Time (ทุก 5 วินาที)
+        function startPublishStatusCheck() {
+            if (!currentRoomId) return;
+            publishCheckInterval = setInterval(async () => {
+                if (isExamFinished) { clearInterval(publishCheckInterval); return; }
+                try {
+                    const res = await fetch(`/api/teacher/get-publish-status?roomId=${encodeURIComponent(currentRoomId)}`);
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (data.is_published !== 1) {
+                        clearInterval(publishCheckInterval);
+                        isExamFinished = true;
+                        // บังคับส่งคำตอบอัตโนมัติก่อนปิด
+                        let answersPayload = {};
+                        examQuestions.forEach(q => {
+                            const checked = document.querySelector(`input[name="q_${q.id}"]:checked`);
+                            if (checked) answersPayload[q.id] = checked.value;
+                        });
+                        try {
+                            await fetch('/api/submit-exam', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ roomId: currentRoomId, studentId: currentStudentId, name: currentStudentName, class: currentStudentClass, answers: answersPayload })
+                            });
+                        } catch(e) { console.error('Auto-submit on unpublish failed:', e); }
+                        alert('🛑 อาจารย์ได้ปิดการสอบแล้ว!\nระบบได้บันทึกคำตอบของคุณเรียบร้อยแล้ว');
+                        window.location.href = 'Student-login.html';
+                    }
+                } catch(e) { /* network error, skip this check */ }
+            }, 5000);
         }
 
         function startAnnouncementStream(initialAnnouncement) {

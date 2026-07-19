@@ -398,14 +398,66 @@ app.post('/api/teacher/login', (req, res) => {
     });
 });
 
-// 🏠 API สำหรับดึงห้องสอบ 10 ห้องของอาจารย์คนนั้นๆ
+// 🏠 API สำหรับดึงห้องสอบ 10 ห้องของอาจารย์คนนั้นๆ (สร้างให้อัตโนมัติหากยังไม่มี)
 app.get('/api/teacher/rooms', (req, res) => {
     const username = req.query.username;
-    if (!username) return res.status(400).json({ message: "กรุณาระบุ username ของอาจารย์" });
+    if (!username || username === 'undefined') return res.status(400).json({ message: "กรุณาระบุ username ของอาจารย์" });
 
     db.all('SELECT roomId, roomName FROM teacher_rooms WHERE teacherUsername = ? ORDER BY id ASC', [username], (err, rows) => {
         if (err) return res.status(500).json({ message: err.message });
-        res.json(rows);
+        if (!rows || rows.length === 0) {
+            const stmt = db.prepare('INSERT OR IGNORE INTO teacher_rooms (teacherUsername, roomId, roomName) VALUES (?, ?, ?)');
+            for (let i = 1; i <= 10; i++) {
+                stmt.run(username, `${username}_r${i}`, `ห้องสอบที่ ${i}`);
+            }
+            stmt.finalize();
+
+            db.all('SELECT roomId, roomName FROM teacher_rooms WHERE teacherUsername = ? ORDER BY id ASC', [username], (err2, newRows) => {
+                if (err2) return res.status(500).json({ message: err2.message });
+                res.json(newRows);
+            });
+        } else {
+            res.json(rows);
+        }
+    });
+});
+
+// 🔍 API สำหรับนักศึกษาค้นหาห้องสอบจากรหัสข้อสอบ (examCode) และอาจารย์ผู้สอน (teacherUsername)
+app.get('/api/student/get-room-by-code', (req, res) => {
+    const { teacherUsername, examCode } = req.query;
+    if (!teacherUsername || !examCode) {
+        return res.status(400).json({ message: "กรุณาระบุอาจารย์ผู้สอนและรหัสข้อสอบ" });
+    }
+
+    const cleanCode = String(examCode).trim().toLowerCase();
+
+    db.all(`
+        SELECT roomId, roomName, exam_title, is_published 
+        FROM teacher_rooms 
+        WHERE teacherUsername = ?
+    `, [teacherUsername], (err, rooms) => {
+        if (err) return res.status(500).json({ message: err.message });
+        if (!rooms || rooms.length === 0) {
+            return res.status(404).json({ message: "ไม่พบห้องสอบสำหรับอาจารย์ท่านนี้" });
+        }
+
+        // ค้นหาห้องที่มี exam_title หรือ roomId หรือ roomName ตรงกับ examCode
+        const match = rooms.find(r => {
+            const titleMatch = r.exam_title && String(r.exam_title).trim().toLowerCase() === cleanCode;
+            const roomIdMatch = r.roomId && String(r.roomId).trim().toLowerCase() === cleanCode;
+            const roomNameMatch = r.roomName && String(r.roomName).trim().toLowerCase() === cleanCode;
+            return titleMatch || roomIdMatch || roomNameMatch;
+        });
+
+        if (!match) {
+            return res.status(404).json({ message: "❌ ไม่พบรหัสข้อสอบนี้สำหรับอาจารย์ที่เลือก กรุณาตรวจสอบรหัสข้อสอบอีกครั้งครับ" });
+        }
+
+        if (match.is_published !== 1) {
+            return res.status(403).json({ message: "⏳ ข้อสอบชุดนี้ยังไม่ได้เปิดให้สอบ (สถานะแบบร่าง) กรุณาแจ้งอาจารย์ผู้สอนกดยืนยันเผยแพร่ข้อสอบก่อนครับ" });
+        }
+
+        res.json({ success: true, roomId: match.roomId, examTitle: match.exam_title || match.roomName });
     });
 });
 
