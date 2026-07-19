@@ -17,17 +17,106 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(__dirname));
 
-// 🗄️ เชื่อมต่อฐานข้อมูล SQLite (สร้างโฟลเดอร์ .data เพื่อเก็บข้อมูลถาวรบน Glitch)
-const dbDir = path.join(__dirname, '.data');
-if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir);
-}
-const dbPath = path.join(dbDir, 'exam_system.db');
+const { Pool } = require('pg');
 
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) console.error('❌ เชื่อมต่อ SQLite ล้มเหลว:', err.message);
-    else console.log('🟢 เชื่อมต่อฐานข้อมูล SQLite สำเร็จ (ไฟล์: .data/exam_system.db)');
-});
+const isPg = !!process.env.DATABASE_URL;
+let db;
+
+function convertToPg(sql) {
+    if (typeof sql !== 'string') return sql;
+    let converted = sql;
+    
+    converted = converted.replace(/INTEGER PRIMARY KEY AUTOINCREMENT/gi, 'SERIAL PRIMARY KEY');
+    converted = converted.replace(/roomId TEXT PRIMARY KEY/gi, 'roomId VARCHAR(255) PRIMARY KEY');
+    
+    if (/INSERT OR IGNORE INTO/i.test(converted)) {
+        converted = converted.replace(/INSERT OR IGNORE INTO/gi, 'INSERT INTO');
+        if (/teachers/i.test(converted) && !/ON CONFLICT/i.test(converted)) {
+            converted += ' ON CONFLICT (username) DO NOTHING';
+        } else if (/teacher_rooms/i.test(converted) && !/ON CONFLICT/i.test(converted)) {
+            converted += ' ON CONFLICT (roomId) DO NOTHING';
+        } else {
+            converted += ' ON CONFLICT DO NOTHING';
+        }
+    }
+
+    let paramIndex = 1;
+    converted = converted.replace(/\?/g, () => `$${paramIndex++}`);
+    return converted;
+}
+
+if (isPg) {
+    console.log('🐘 กำลังเชื่อมต่อฐานข้อมูล Neon PostgreSQL...');
+    const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+    });
+
+    db = {
+        isPg: true,
+        get(sql, params, callback) {
+            if (typeof params === 'function') { callback = params; params = []; }
+            const pgSql = convertToPg(sql);
+            pool.query(pgSql, params || [])
+                .then(res => callback && callback(null, res.rows[0]))
+                .catch(err => callback && callback(err));
+        },
+        all(sql, params, callback) {
+            if (typeof params === 'function') { callback = params; params = []; }
+            const pgSql = convertToPg(sql);
+            pool.query(pgSql, params || [])
+                .then(res => callback && callback(null, res.rows))
+                .catch(err => callback && callback(err));
+        },
+        run(sql, params, callback) {
+            if (typeof params === 'function') { callback = params; params = []; }
+            let pgSql = convertToPg(sql);
+            const isInsert = /^\s*INSERT\s+/i.test(pgSql);
+            if (isInsert && !/RETURNING/i.test(pgSql)) {
+                pgSql += ' RETURNING id';
+            }
+            pool.query(pgSql, params || [])
+                .then(res => {
+                    const ctx = {
+                        lastID: res.rows && res.rows[0] && res.rows[0].id ? res.rows[0].id : null,
+                        changes: res.rowCount
+                    };
+                    if (callback) callback.call(ctx, null);
+                })
+                .catch(err => {
+                    if (callback) callback.call({ lastID: null, changes: 0 }, err);
+                });
+        },
+        prepare(sql) {
+            return {
+                run(...args) {
+                    const cb = typeof args[args.length - 1] === 'function' ? args.pop() : null;
+                    db.run(sql, args, cb);
+                },
+                finalize() {}
+            };
+        },
+        serialize(fn) {
+            if (fn) fn();
+        }
+    };
+
+    pool.query('SELECT NOW()')
+        .then(() => console.log('🟢 เชื่อมต่อฐานข้อมูล Neon PostgreSQL สำเร็จ! (Cloud DB Active)'))
+        .catch(err => console.error('❌ เชื่อมต่อ Neon PostgreSQL ล้มเหลว:', err.message));
+
+} else {
+    const dbDir = path.join(__dirname, '.data');
+    if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir);
+    }
+    const dbPath = path.join(dbDir, 'exam_system.db');
+
+    db = new sqlite3.Database(dbPath, (err) => {
+        if (err) console.error('❌ เชื่อมต่อ SQLite ล้มเหลว:', err.message);
+        else console.log('🟢 เชื่อมต่อฐานข้อมูล SQLite สำเร็จ (ไฟล์: .data/exam_system.db)');
+    });
+}
 
 // 🛠️ สร้างตารางข้อมูลทั้งหมด และทำการ Migration ตารางเดิมอย่างปลอดภัย
 db.serialize(() => {
