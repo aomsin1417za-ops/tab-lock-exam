@@ -59,7 +59,7 @@ if (isPg) {
         templateid: 'templateId', templatename: 'templateName',
         studentid: 'studentId', studentname: 'studentName',
         maxscore: 'maxScore', answers_json: 'answers_json',
-        is_published: 'is_published', exam_title: 'exam_title',
+        is_published: 'is_published', exam_title: 'exam_title', exam_code: 'exam_code', examcode: 'examCode',
         show_score: 'show_score', show_leaderboard: 'show_leaderboard',
         question_img: 'question_img',
         a_img: 'a_img', b_img: 'b_img', c_img: 'c_img', d_img: 'd_img',
@@ -321,6 +321,9 @@ db.serialize(() => {
     db.run("ALTER TABLE teacher_rooms ADD COLUMN exam_title TEXT DEFAULT ''", (err) => {
         if (!err) console.log("✔ Added column 'exam_title' to teacher_rooms table");
     });
+    db.run("ALTER TABLE teacher_rooms ADD COLUMN exam_code TEXT DEFAULT ''", (err) => {
+        if (!err) console.log("✔ Added column 'exam_code' to teacher_rooms table");
+    });
 
     // อัปเกรดตารางข้อสอบ (questions) เพิ่มรูปภาพโจทย์และรูปช้อยส์
     db.run("ALTER TABLE questions ADD COLUMN question_img TEXT", (err) => {
@@ -463,7 +466,7 @@ app.get('/api/student/get-room-by-code', (req, res) => {
     const cleanCode = String(examCode).trim().toLowerCase();
 
     db.all(`
-        SELECT roomId, roomName, exam_title, is_published 
+        SELECT roomId, roomName, exam_title, exam_code, is_published 
         FROM teacher_rooms 
         WHERE teacherUsername = ?
     `, [teacherUsername], (err, rooms) => {
@@ -472,12 +475,14 @@ app.get('/api/student/get-room-by-code', (req, res) => {
             return res.status(404).json({ message: "ไม่พบห้องสอบสำหรับอาจารย์ท่านนี้" });
         }
 
-        // ค้นหาห้องที่มี exam_title หรือ roomId หรือ roomName ตรงกับ examCode
+        // ค้นหาห้องที่มี exam_code หรือ exam_title หรือ roomId หรือ roomName ตรงกับ examCode
         const match = rooms.find(r => {
+            const exCode = r.exam_code || r.examCode;
+            const codeMatch = exCode && String(exCode).trim().toLowerCase() === cleanCode;
             const titleMatch = r.exam_title && String(r.exam_title).trim().toLowerCase() === cleanCode;
             const roomIdMatch = r.roomId && String(r.roomId).trim().toLowerCase() === cleanCode;
             const roomNameMatch = r.roomName && String(r.roomName).trim().toLowerCase() === cleanCode;
-            return titleMatch || roomIdMatch || roomNameMatch;
+            return codeMatch || titleMatch || roomIdMatch || roomNameMatch;
         });
 
         if (!match) {
@@ -903,7 +908,7 @@ app.get('/api/room-settings', (req, res) => {
     const roomId = req.query.roomId;
     if (!roomId) return res.status(400).json({ message: "กรุณาระบุ roomId" });
 
-    db.get('SELECT randomize, duration, announcement, show_score, show_leaderboard, exam_title FROM teacher_rooms WHERE roomId = ?', [roomId], (err, row) => {
+    db.get('SELECT randomize, duration, announcement, show_score, show_leaderboard, exam_title, exam_code, roomName FROM teacher_rooms WHERE roomId = ?', [roomId], (err, row) => {
         if (err) return res.status(500).json({ message: err.message });
         res.json({
             randomize: row ? row.randomize : 1,
@@ -911,24 +916,38 @@ app.get('/api/room-settings', (req, res) => {
             announcement: row ? row.announcement : '',
             showScore: row ? (row.show_score !== undefined ? row.show_score : 1) : 1,
             showLeaderboard: row ? (row.show_leaderboard !== undefined ? row.show_leaderboard : 1) : 1,
-            examTitle: row ? row.exam_title : ''
+            examTitle: row ? (row.exam_title || '') : '',
+            examCode: row ? (row.exam_code || row.examCode || '') : '',
+            roomName: row ? (row.roomName || '') : ''
         });
     });
 });
 
 // อัปเดตการตั้งค่าห้องสอบ
 app.post('/api/teacher/update-room-settings', (req, res) => {
-    const { roomId, randomize, duration, announcement, showScore, showLeaderboard } = req.body;
+    const { roomId, randomize, duration, announcement, showScore, showLeaderboard, examCode, examTitle, roomName } = req.body;
     if (!roomId) return res.status(400).json({ message: "กรุณาระบุ roomId" });
 
     db.run(
-        'UPDATE teacher_rooms SET randomize = ?, duration = ?, announcement = ?, show_score = ?, show_leaderboard = ? WHERE roomId = ?',
+        `UPDATE teacher_rooms SET 
+            randomize = ?, 
+            duration = ?, 
+            announcement = ?, 
+            show_score = ?, 
+            show_leaderboard = ?, 
+            exam_code = COALESCE(?, exam_code), 
+            exam_title = COALESCE(?, exam_title), 
+            roomName = COALESCE(?, roomName) 
+        WHERE roomId = ?`,
         [
             randomize !== undefined ? randomize : 1, 
             duration !== undefined ? duration : 0, 
             announcement || '', 
             showScore !== undefined ? showScore : 1, 
             showLeaderboard !== undefined ? showLeaderboard : 1, 
+            examCode !== undefined ? examCode : '',
+            examTitle !== undefined ? examTitle : '',
+            roomName !== undefined ? roomName : '',
             roomId
         ],
         function(err) {
