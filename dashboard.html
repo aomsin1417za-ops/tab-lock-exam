@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -290,29 +290,31 @@
         <!-- ===== QUICK STATS ===== -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <!-- Gemini AI Card -->
-            <div onclick="openGeminiModal()" class="glass-card p-5 flex items-center gap-4 stat-tile cursor-pointer border border-transparent hover:border-violet-300 hover:shadow-md hover:shadow-violet-100 transition duration-300 group">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 via-violet-500 to-indigo-600 flex items-center justify-center text-2xl flex-shrink-0 shadow-sm shadow-violet-500/20 group-hover:scale-105 transition-transform duration-300">✨</div>
-                <div>
-                    <div class="text-[13px] font-black text-slate-800 leading-snug">สร้างข้อสอบด้วย Gemini AI</div>
-                    <div class="text-[10px] text-slate-500 font-bold mt-0.5">แปลงข้อสอบผ่าน AI Gemini Gem 🚀</div>
+            <div onclick="openGeminiModal()" class="glass-card p-5 flex items-center gap-4 cursor-pointer border border-slate-200/80 bg-white/90 hover:bg-white hover:border-purple-300 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 rounded-2xl group active:scale-[0.99]">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-xl shrink-0 shadow-md shadow-purple-500/20 group-hover:scale-110 transition-transform duration-300">✨</div>
+                <div class="min-w-0">
+                    <div class="text-base font-extrabold text-slate-800 leading-snug group-hover:text-purple-700 transition-colors">Gemini AI Generator</div>
+                    <div class="text-xs text-slate-500 font-medium mt-0.5 truncate">สร้างและแปลงข้อสอบด้วย AI Gem 🚀</div>
                 </div>
             </div>
+
             <!-- Real-time Card -->
-            <div class="glass-card p-5 flex items-center gap-4 stat-tile">
-                <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-2xl flex-shrink-0">📊</div>
-                <div>
-                    <div class="text-2xl font-extrabold text-slate-800">Real-Time</div>
-                    <div class="text-xs text-slate-400 font-medium mt-0.5">ดึงข้อมูลสดทุกครั้ง</div>
+            <a href="admin-results.html" class="glass-card p-5 flex items-center gap-4 cursor-pointer border border-slate-200/80 bg-white/90 hover:bg-white hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 rounded-2xl group active:scale-[0.99]">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-xl shrink-0 shadow-md shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">📊</div>
+                <div class="min-w-0">
+                    <div class="text-base font-extrabold text-slate-800 leading-snug group-hover:text-teal-700 transition-colors">Real-Time Data</div>
+                    <div class="text-xs text-slate-500 font-medium mt-0.5 truncate">ประมวลผลและดึงข้อมูลสดทันที</div>
                 </div>
-            </div>
+            </a>
+
             <!-- AI Guard Card -->
-            <div class="glass-card p-5 flex items-center gap-4 stat-tile">
-                <div class="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-2xl flex-shrink-0">🛡️</div>
-                <div>
-                    <div class="text-2xl font-extrabold text-slate-800">AI Guard</div>
-                    <div class="text-xs text-slate-400 font-medium mt-0.5">ตรวจจับสลับหน้าจออัตโนมัติ</div>
+            <a href="admin-monitoring.html" class="glass-card p-5 flex items-center gap-4 cursor-pointer border border-slate-200/80 bg-white/90 hover:bg-white hover:border-rose-300 hover:shadow-lg hover:shadow-rose-500/10 transition-all duration-300 rounded-2xl group active:scale-[0.99]">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center text-xl shrink-0 shadow-md shadow-rose-500/20 group-hover:scale-110 transition-transform duration-300">🛡️</div>
+                <div class="min-w-0">
+                    <div class="text-base font-extrabold text-slate-800 leading-snug group-hover:text-rose-700 transition-colors">AI Anti-Cheat Guard</div>
+                    <div class="text-xs text-slate-500 font-medium mt-0.5 truncate">ตรวจจับสลับหน้าจออัตโนมัติ</div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <!-- ===== 4 ACTION CARDS ===== -->

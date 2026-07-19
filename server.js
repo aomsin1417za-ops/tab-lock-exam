@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
@@ -1311,8 +1312,10 @@ function copyRoomQuestionsToTemplate(roomId, templateId) {
                 a, b, c, d, e, f, g, h, i, j,
                 a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img,
                 answer
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, (prepErr) => {
+            if (prepErr) console.error("Error preparing template_questions stmt:", prepErr.message);
+        });
         questions.forEach(q => {
             stmt.run(
                 templateId, q.question || '', q.question_img || '',
@@ -1385,7 +1388,7 @@ app.post('/api/library/update-template-questions', (req, res) => {
                     a, b, c, d, e, f, g, h, i, j,
                     a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img,
                     answer
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
 
             questions.forEach(q => {
