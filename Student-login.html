@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
     <script>
@@ -13,6 +13,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        html { font-size: 125% !important; }
+
         body { font-family: 'Kanit', 'Inter', sans-serif; background: linear-gradient(to right, #f8fafc 0%, #eff6ff 50%, #faf5ff 100%); background-attachment: fixed; color: #334155; -webkit-user-select:none; user-select:none; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04); }
         .glass-light { background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(226, 232, 240, 0.5); }
@@ -52,7 +54,8 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-800 tracking-tight">Tab-<span style="background: linear-gradient(to right,#06b6d4,#6366f1,#8b5cf6); -webkit-background-clip:text; background-clip:text; color:transparent;">Lock</span></h1>
-                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">SECURED STUDENT EXAM TERMINAL</p>
+                    <h2 class="text-xl font-bold text-slate-800 mt-2">เข้าสู่ระบบนักศึกษา</h2>
+                    <p class="text-xs text-slate-400 font-medium mt-1">กรุณากรอกข้อมูลส่วนตัวและรหัสเพื่อทำข้อสอบ</p>
                 </div>
             </div>
 
@@ -89,13 +92,8 @@
                     </div>
                 </div>
                 <div class="space-y-1.5">
-                    <label class="block text-[10px] font-bold text-slate-550 uppercase tracking-wider">เลือกห้องสอบ</label>
-                    <div class="relative">
-                        <select id="room-selector" onchange="updateRoomIdVar()" class="input-dark w-full px-3 py-2.5 rounded-xl text-sm appearance-none cursor-pointer">
-                            <option value="">กรุณาเลือกอาจารย์ก่อน...</option>
-                        </select>
-                        <span class="absolute inset-y-0 right-3 flex items-center pointer-events-none text-slate-500 text-xs">▼</span>
-                    </div>
+                    <label class="block text-[10px] font-bold text-slate-550 uppercase tracking-wider">กรอกรหัสข้อสอบ (Exam Code)</label>
+                    <input type="text" id="exam-code-input" class="input-dark w-full px-3 py-2.5 rounded-xl text-sm transition-all" placeholder="รหัสข้อสอบ เช่น MATH101">
                 </div>
                 <button onclick="startExam()" class="btn-primary w-full text-white py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2 mt-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -240,23 +238,7 @@
         }
 
         async function onTeacherChange() {
-            const teacherUsername = document.getElementById('teacher-selector').value;
-            const select = document.getElementById('room-selector');
-            if (!teacherUsername) { select.innerHTML = '<option value="">กรุณาเลือกอาจารย์ก่อน...</option>'; currentRoomId = ""; return; }
-            try {
-                const res = await fetch(`/api/teacher/rooms?username=${teacherUsername}`);
-                const rooms = await res.json();
-                if (rooms.length === 0) { select.innerHTML = '<option value="">ไม่พบห้องสอบ</option>'; currentRoomId = ""; return; }
-                select.innerHTML = rooms.map(r => `<option value="${r.roomId}">${r.roomName}</option>`).join('');
-                currentRoomId = select.value;
-            } catch(e) {
-                select.innerHTML = '<option value="">โหลดห้องสอบไม่ได้</option>';
-                currentRoomId = "";
-            }
-        }
-
-        function updateRoomIdVar() {
-            currentRoomId = document.getElementById('room-selector').value;
+            // ระบบรหัสข้อสอบแบบกรอกเอง ไม่จำเป็นต้องโหลดรายชื่อห้องล่วงหน้า
         }
 
         async function startExam() {
@@ -264,13 +246,24 @@
             const lastname = document.getElementById('student-lastname').value.trim();
             currentStudentId = document.getElementById('student-id').value.trim();
             currentStudentClass = document.getElementById('student-class').value.trim();
-            currentRoomId = document.getElementById('room-selector').value;
-            if (!firstname || !lastname || !currentStudentId || !currentStudentClass || !currentRoomId) {
-                alert("กรุณากรอกข้อมูลผู้สอบและเลือกห้องสอบให้ครบทุกช่องครับ");
+            const teacherUsername = document.getElementById('teacher-selector').value;
+            const examCode = document.getElementById('exam-code-input').value.trim();
+
+            if (!firstname || !lastname || !currentStudentId || !currentStudentClass || !teacherUsername || !examCode) {
+                alert("กรุณากรอกข้อมูลผู้สอบ เลือกอาจารย์ผู้สอน และกรอกรหัสข้อสอบให้ครบถ้วนครับ");
                 return;
             }
             currentStudentName = `${firstname} ${lastname}`;
             try {
+                // ค้นหาห้องสอบ (roomId) จากรหัสข้อสอบและอาจารย์ผู้สอน
+                const codeRes = await fetch(`/api/student/get-room-by-code?teacherUsername=${teacherUsername}&examCode=${encodeURIComponent(examCode)}`);
+                const codeData = await codeRes.json();
+                if (!codeRes.ok) {
+                    alert(codeData.message || "❌ ไม่พบรหัสข้อสอบนี้สำหรับอาจารย์ที่ระบุ");
+                    return;
+                }
+                currentRoomId = codeData.roomId;
+
                 const settingsRes = await fetch(`/api/room-settings?roomId=${currentRoomId}`);
                 const settings = await settingsRes.json();
                 showScoreSetting = settings.showScore;

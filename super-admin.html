@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
@@ -7,16 +7,144 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Kanit', 'Inter', sans-serif; }
+        html { font-size: 125% !important; }
+
+        body {
+            font-family: 'Kanit', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #faf5ff 100%) !important;
+            background-attachment: fixed !important;
+            color: #334155 !important;
+        }
         .bg-grid {
             background-image: linear-gradient(to right, rgba(99, 102, 241, 0.03) 1px, transparent 1px),
-                              linear-gradient(to bottom, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+                              linear-gradient(to bottom, rgba(99, 102, 241, 0.03) 1px, transparent 1px) !important;
             background-size: 30px 30px;
         }
-        .tab-btn.active { background: linear-gradient(135deg, #f43f5e, #be123c); color: white; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.2); }
+        header {
+            background: rgba(255, 255, 255, 0.85) !important;
+            border-color: rgba(226, 232, 240, 0.8) !important;
+            backdrop-filter: blur(12px) !important;
+        }
+        header h1 {
+            color: #1e293b !important;
+        }
+        header p {
+            color: #4f46e5 !important;
+        }
+        header span {
+            color: #1e293b !important;
+        }
+        /* Cards */
+        .grid > div {
+            background: #ffffff !important;
+            border-color: rgba(226, 232, 240, 0.8) !important;
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03) !important;
+        }
+        .grid > div div {
+            color: #475569 !important;
+        }
+        .grid > div div.text-slate-800, .grid > div div.text-lg {
+            color: #1e293b !important;
+        }
+        .grid > div span.p-3 {
+            background: #f1f5f9 !important;
+            border-color: #e2e8f0 !important;
+        }
+        /* Tab panels */
+        #panel-teachers, #panel-storage {
+            background: #ffffff !important;
+            border-color: rgba(226, 232, 240, 0.8) !important;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04) !important;
+        }
+        #panel-teachers h2, #panel-storage h2 {
+            color: #1e293b !important;
+        }
+        /* Storage bar */
+        .storage-bar-bg { height: 7px; border-radius: 9999px; background: #e2e8f0; overflow: hidden; }
+        .storage-bar-fill { height: 100%; border-radius: 9999px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+        .storage-card { background: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 16px; padding: 16px 20px; transition: all 0.25s; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .storage-card:hover { border-color: rgba(99, 102, 241, 0.3); box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05); }
+        .stat-chip-dark { display: inline-flex; align-items: center; gap: 3px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; padding: 2px 9px; font-size: 10px; font-weight: 600; color: #475569; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in-up { animation: fadeInUp 0.3s ease forwards; opacity: 0; }
+        /* Buttons */
+        .tab-btn {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #64748b !important;
+        }
+        .tab-btn:hover {
+            background: #f8fafc !important;
+            color: #1e293b !important;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed) !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3) !important;
+            border-color: transparent !important;
+        }
+        /* Inputs */
+        input[type="text"] {
+            background: #ffffff !important;
+            border-color: #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+        input[type="text"]::placeholder {
+            color: #94a3b8 !important;
+        }
+        input[type="text"]:focus {
+            border-color: #4f46e5 !important;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
+        }
+        /* Tables */
+        table thead tr {
+            border-color: #f1f5f9 !important;
+            background: #f8fafc;
+        }
+        table th {
+            color: #475569 !important;
+        }
+        table tbody tr {
+            border-color: #f1f5f9 !important;
+        }
+        table tbody tr:hover {
+            background: #f8fafc !important;
+        }
+        table td {
+            color: #334155 !important;
+        }
+        table td.text-slate-800, table td.text-slate-700 {
+            color: #1e293b !important;
+        }
+        table td.text-emerald-700 {
+            color: #059669 !important;
+        }
+        table td.text-indigo-700 {
+            color: #4f46e5 !important;
+        }
+        /* Footer */
+        footer {
+            border-color: #e2e8f0 !important;
+            color: #94a3b8 !important;
+        }
+        
+        header .bg-rose-50 {
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+            color: #475569 !important;
+        }
+        header a.bg-rose-50 {
+            background: #fef2f2 !important;
+            border-color: #fee2e2 !important;
+            color: #ef4444 !important;
+        }
+        header a.bg-rose-50:hover {
+            background: #ef4444 !important;
+            color: #ffffff !important;
+        }
     </style>
 </head>
-<body class="bg-rose-50 min-h-screen text-slate-800 bg-grid" style="background: linear-gradient(to right, #fff5f5 0%, #fff1f2 50%, #fef2f2 100%); background-attachment: fixed;">
+<body class="min-h-screen bg-grid">
 
     <!-- Top Header Bar -->
     <header class="bg-white/80 backdrop-blur-md border-b border-rose-100 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
@@ -78,12 +206,12 @@
         <!-- Tab Navigation -->
         <div class="flex gap-2">
             <button onclick="switchTab('teachers')" id="tab-teachers"
-                class="tab-btn active px-5 py-2.5 rounded-xl text-xs font-bold transition duration-300 border border-slate-800 bg-slate-900/40 text-slate-550 hover:text-slate-200 hover:bg-slate-850/60">
+                class="tab-btn active px-5 py-2.5 rounded-xl text-xs font-bold transition duration-300 border">
                 📋 จัดการบัญชีอาจารย์
             </button>
-            <button onclick="switchTab('students')" id="tab-students"
-                class="tab-btn px-5 py-2.5 rounded-xl text-xs font-bold transition duration-300 border border-slate-800 bg-slate-900/40 text-slate-550 hover:text-slate-200 hover:bg-slate-850/60">
-                👨‍🎓 ประวัตินักศึกษาเข้าสอบ
+            <button onclick="switchTab('storage')" id="tab-storage"
+                class="tab-btn px-5 py-2.5 rounded-xl text-xs font-bold transition duration-300 border">
+                🗄️ พื้นที่จัดเก็บข้อมูล
             </button>
         </div>
 
@@ -115,37 +243,46 @@
             </div>
         </div>
 
-        <!-- Tab 2: Students History -->
-        <div id="panel-students" class="hidden bg-white/80 backdrop-blur-sm border border-rose-150 rounded-3xl p-6 space-y-4 shadow-md">
+        <!-- Tab 2: Storage Overview -->
+        <div id="panel-storage" class="hidden space-y-4">
+            <!-- Storage Summary -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="storage-card flex flex-col gap-1">
+                    <div class="text-[10px] font-bold uppercase tracking-wider" style="color:#fda4af">อาจารย์ทั้งหมด</div>
+                    <div class="text-2xl font-black" style="color:#ffe4e6" id="st-teachers">—</div>
+                    <div class="text-[10px]" style="color:#fca5a5">บัญชีที่ลงทะเบียน</div>
+                </div>
+                <div class="storage-card flex flex-col gap-1">
+                    <div class="text-[10px] font-bold uppercase tracking-wider" style="color:#fda4af">ข้อสอบในระบบ</div>
+                    <div class="text-2xl font-black text-cyan-400" id="st-questions">—</div>
+                    <div class="text-[10px]" style="color:#fca5a5">ข้อทั้งหมด</div>
+                </div>
+                <div class="storage-card flex flex-col gap-1">
+                    <div class="text-[10px] font-bold uppercase tracking-wider" style="color:#fda4af">ผลการสอบ</div>
+                    <div class="text-2xl font-black text-violet-400" id="st-results">—</div>
+                    <div class="text-[10px]" style="color:#fca5a5">รายการผลสอบ</div>
+                </div>
+                <div class="storage-card flex flex-col gap-1">
+                    <div class="text-[10px] font-bold uppercase tracking-wider" style="color:#fda4af">พื้นที่ใช้ไป</div>
+                    <div class="text-2xl font-black text-emerald-400" id="st-total">—</div>
+                    <div class="text-[10px]" style="color:#fca5a5">ข้อมูลรวม</div>
+                </div>
+            </div>
+
+            <!-- Storage Header -->
             <div class="flex items-center justify-between">
-                <h2 class="text-sm font-extrabold text-slate-850 flex items-center gap-2">👨‍🎓 ประวัตินักศึกษาเข้าสอบทั้งหมด</h2>
-                <button onclick="loadStudentLogins()" class="px-4 py-2 bg-slate-950 hover:bg-slate-900 border border-slate-800/80 rounded-xl text-[10px] font-bold text-white transition">🔄 รีเฟรช</button>
+                <h2 class="text-sm font-extrabold flex items-center gap-2" style="color:#ffe4e6">🗄️ การใช้พื้นที่จัดเก็บแยกตามอาจารย์</h2>
+                <button onclick="loadStorageStats()" class="px-4 py-2 bg-slate-950 hover:bg-slate-900 border border-slate-800/80 rounded-xl text-[10px] font-bold text-white transition">🔄 รีเฟรช</button>
             </div>
 
-            <!-- Search Filter -->
-            <div class="flex gap-3">
-                <input type="text" id="student-search" oninput="filterStudents()" placeholder="🔍 ค้นหารหัสนักศึกษา หรือชื่อ..."
-                    class="flex-grow px-4 py-2.5 bg-slate-50 border border-rose-200/85 rounded-xl text-xs text-slate-800 placeholder-slate-450 focus:outline-none focus:border-cyan-500 transition">
+            <!-- Loading -->
+            <div id="storage-loading" class="storage-card flex flex-col items-center justify-center gap-3 py-10">
+                <div class="w-8 h-8 border-4 border-rose-700/30 border-t-rose-500 rounded-full animate-spin"></div>
+                <p class="text-xs font-semibold" style="color:#fda4af">กำลังโหลดข้อมูล...</p>
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead>
-                        <tr class="border-b border-rose-100 text-[10px] font-bold text-slate-650 uppercase tracking-wider">
-                            <th class="pb-3 pr-4">#</th>
-                            <th class="pb-3 pr-4">รหัสนักศึกษา</th>
-                            <th class="pb-3 pr-4">ชื่อ-นามสกุล</th>
-                            <th class="pb-3 pr-4">ชั้นเรียน</th>
-                            <th class="pb-3 pr-4">ห้องสอบ</th>
-                            <th class="pb-3 pr-4">เวลา</th>
-                            <th class="pb-3 pr-4">วันที่</th>
-                        </tr>
-                    </thead>
-                    <tbody id="students-table-body">
-                        <tr><td colspan="7" class="py-8 text-center text-xs text-slate-600">กำลังโหลด...</td></tr>
-                    </tbody>
-                </table>
-            </div>
+            <!-- Storage List -->
+            <div id="storage-list" class="space-y-3 hidden"></div>
         </div>
 
     </main>
@@ -163,13 +300,101 @@
         }
         document.getElementById('admin-name-display').textContent = adminName || 'Admin';
 
-        let allStudentLogins = [];
-
         window.addEventListener('DOMContentLoaded', () => {
             loadStats();
             loadTeachers();
-            loadStudentLogins();
         });
+
+        // Tab Switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            ['teachers','storage'].forEach(p => {
+                const el = document.getElementById('panel-' + p);
+                if (el) el.classList.add('hidden');
+            });
+            document.getElementById('tab-' + tab).classList.add('active');
+            document.getElementById('panel-' + tab).classList.remove('hidden');
+            if (tab === 'storage') loadStorageStats();
+        }
+
+        // Storage Stats
+        let storageLoaded = false;
+        async function loadStorageStats() {
+            storageLoaded = false;
+            document.getElementById('storage-loading').classList.remove('hidden');
+            document.getElementById('storage-list').classList.add('hidden');
+            try {
+                const res = await fetch('/api/admin/storage-stats');
+                const data = await res.json();
+                if (!Array.isArray(data) || data.length === 0) {
+                    document.getElementById('storage-loading').innerHTML = '<p class="text-xs py-8 text-center text-slate-500">ยังไม่มีข้อมูลอาจารย์</p>';
+                    return;
+                }
+                data.sort((a, b) => b.totalBytes - a.totalBytes);
+                const maxBytes = data[0].totalBytes || 1;
+                const totalQ = data.reduce((s,t)=>s+(t.questionCount||0),0);
+                const totalR = data.reduce((s,t)=>s+(t.resultCount||0),0);
+                const totalB = data.reduce((s,t)=>s+(t.totalBytes||0),0);
+                document.getElementById('st-teachers').textContent = data.length;
+                document.getElementById('st-questions').textContent = totalQ.toLocaleString();
+                document.getElementById('st-results').textContent = totalR.toLocaleString();
+                document.getElementById('st-total').textContent = fmtBytes(totalB);
+
+                const list = document.getElementById('storage-list');
+                list.innerHTML = '';
+                const ranks = ['🥇','🥈','🥉'];
+                data.forEach((t, i) => {
+                    const pct = maxBytes > 0 ? Math.max(2, Math.round((t.totalBytes / maxBytes) * 100)) : 2;
+                    const barColor = pct >= 75 ? 'from-rose-500 to-red-600' : pct >= 40 ? 'from-amber-400 to-orange-500' : 'from-cyan-400 to-violet-500';
+                    const sizeColor = pct >= 75 ? '#f87171' : pct >= 40 ? '#fbbf24' : '#34d399';
+                    const card = document.createElement('div');
+                    card.className = 'storage-card fade-in-up';
+                    card.style.animationDelay = (i * 0.07) + 's';
+                    card.innerHTML = `
+                        <div style="display:flex;align-items:flex-start;gap:14px">
+                            <div style="font-size:22px;line-height:1;flex-shrink:0;margin-top:2px">${ranks[i] || '<span style="font-size:12px;font-weight:800;color:#fda4af">' + (i+1) + '</span>'}</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px">
+                                    <span style="font-weight:800;color:#1e293b;font-size:13px">${escapeHtml(t.name || t.username)}</span>
+                                    <span style="font-size:10px;color:#64748b">@${escapeHtml(t.username)}</span>
+                                    ${t.status==='approved' ? '<span style="font-size:9px;font-weight:700;color:#059669;background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);padding:1px 8px;border-radius:20px">✓ อนุมัติแล้ว</span>' : '<span style="font-size:9px;font-weight:700;color:#d97706;background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.2);padding:1px 8px;border-radius:20px">⏳ รอการอนุมัติ</span>'}
+                                </div>
+                                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+                                    <span class="stat-chip-dark">🏫 ${t.roomCount||0} ห้องสอบ</span>
+                                    <span class="stat-chip-dark">📝 ${(t.questionCount||0).toLocaleString()} ข้อสอบ</span>
+                                    <span class="stat-chip-dark">📊 ${(t.resultCount||0).toLocaleString()} ผลสอบ</span>
+                                    <span class="stat-chip-dark">📚 ${t.templateCount||0} เทมเพลต</span>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+                                    <span style="font-size:10px;color:#64748b;font-weight:600">พื้นที่ใช้ไป</span>
+                                    <span style="font-size:12px;font-weight:800;color:${sizeColor === '#f87171' ? '#dc2626' : sizeColor === '#fbbf24' ? '#d97706' : '#059669'}">${fmtBytes(t.totalBytes||0)}</span>
+                                </div>
+                                <div class="storage-bar-bg">
+                                    <div class="storage-bar-fill bg-gradient-to-r ${barColor}" style="width:0%" data-w="${pct}%"></div>
+                                </div>
+                                <div style="font-size:9px;color:#94a3b8;margin-top:3px">${pct}% เทียบกับอาจารย์ที่ใช้มากที่สุด</div>
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+                document.getElementById('storage-loading').classList.add('hidden');
+                list.classList.remove('hidden');
+                setTimeout(() => {
+                    document.querySelectorAll('.storage-bar-fill').forEach(el => { el.style.width = el.dataset.w; });
+                }, 80);
+                storageLoaded = true;
+            } catch(e) {
+                document.getElementById('storage-loading').innerHTML = `<p class="text-xs py-8 text-center text-rose-500">โหลดไม่ได้: ${e.message}</p>`;
+            }
+        }
+
+        function fmtBytes(b) {
+            if (b === 0) return '0 B';
+            if (b < 1024) return b + ' B';
+            if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+            return (b/1048576).toFixed(2) + ' MB';
+        }
 
         // โหลดสถิติ
         async function loadStats() {
@@ -221,13 +446,13 @@
                     }
 
                     return `
-                        <tr class="border-b border-rose-100 hover:bg-rose-50/40 transition">
-                            <td class="py-3 pr-4 text-xs text-slate-600 font-mono">${i + 1}</td>
+                        <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                            <td class="py-3 pr-4 text-xs text-slate-500 font-mono">${i + 1}</td>
                             <td class="py-3 pr-4 text-xs font-mono font-bold text-slate-800">${escapeHtml(t.username)}</td>
-                            <td class="py-3 pr-4 text-xs font-mono text-emerald-700 font-semibold">${escapeHtml(t.password)}</td>
-                            <td class="py-3 pr-4 text-xs font-mono text-indigo-700 font-semibold">${escapeHtml(t.phone || '-')}</td>
+                            <td class="py-3 pr-4 text-xs font-mono text-emerald-600 font-semibold">${escapeHtml(t.password)}</td>
+                            <td class="py-3 pr-4 text-xs font-mono text-indigo-600 font-semibold">${escapeHtml(t.phone || '-')}</td>
                             <td class="py-3 pr-4 text-xs font-semibold text-slate-700">${escapeHtml(t.name)}</td>
-                            <td class="py-3 pr-4 text-[10px] text-slate-600 font-semibold">${t.created_at || '-'}</td>
+                            <td class="py-3 pr-4 text-[10px] text-slate-500 font-semibold">${t.created_at || '-'}</td>
                             <td class="py-3 pr-4">${statusBadge}</td>
                             <td class="py-3 text-center space-x-1">${actions}</td>
                         </tr>
@@ -240,48 +465,6 @@
             }
         }
 
-        // โหลดประวัตินักศึกษา
-        async function loadStudentLogins() {
-            try {
-                const res = await fetch('/api/superadmin/student-logins');
-                allStudentLogins = await res.json();
-                renderStudentTable(allStudentLogins);
-            } catch(e) {
-                console.error(e);
-                document.getElementById('students-table-body').innerHTML = '<tr><td colspan="7" class="py-8 text-center text-xs text-red-400">โหลดข้อมูลล้มเหลว</td></tr>';
-            }
-        }
-
-        function renderStudentTable(data) {
-            const tbody = document.getElementById('students-table-body');
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-xs text-slate-600">ยังไม่มีประวัตินักศึกษาเข้าสอบ</td></tr>';
-                return;
-            }
-            tbody.innerHTML = data.map((s, i) => `
-                <tr class="border-b border-rose-100 hover:bg-rose-50/40 transition">
-                    <td class="py-3 pr-4 text-xs text-slate-650 font-mono">${i + 1}</td>
-                    <td class="py-3 pr-4 text-xs font-mono font-bold text-slate-800">${escapeHtml(s.studentId)}</td>
-                    <td class="py-3 pr-4 text-xs font-semibold text-slate-700">${escapeHtml(s.name)}</td>
-                    <td class="py-3 pr-4 text-[10px] text-slate-600 font-bold">${escapeHtml(s.class || '-')}</td>
-                    <td class="py-3 pr-4 text-[10px] font-mono font-bold text-indigo-700">${escapeHtml(s.roomId)}</td>
-                    <td class="py-3 pr-4 text-[10px] text-slate-600 font-semibold">${s.loginTime || '-'}</td>
-                    <td class="py-3 pr-4 text-[10px] text-slate-600">${s.loginDate || '-'}</td>
-                </tr>
-            `).join('');
-        }
-
-        function filterStudents() {
-            const query = document.getElementById('student-search').value.trim().toLowerCase();
-            if (!query) { renderStudentTable(allStudentLogins); return; }
-            const filtered = allStudentLogins.filter(s => 
-                (s.studentId || '').toLowerCase().includes(query) || 
-                (s.name || '').toLowerCase().includes(query) ||
-                (s.class || '').toLowerCase().includes(query) ||
-                (s.roomId || '').toLowerCase().includes(query)
-            );
-            renderStudentTable(filtered);
-        }
 
         // Actions
         async function approveTeacher(username) {
@@ -326,15 +509,7 @@
             } catch(e) { alert("เกิดข้อผิดพลาด"); }
         }
 
-        // Tab Switching
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('panel-teachers').classList.add('hidden');
-            document.getElementById('panel-students').classList.add('hidden');
 
-            document.getElementById(`tab-${tab}`).classList.add('active');
-            document.getElementById(`panel-${tab}`).classList.remove('hidden');
-        }
 
         function escapeHtml(text) {
             if (!text) return '';

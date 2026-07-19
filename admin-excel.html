@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>รายงานปัญหาจากนักศึกษา - Tab-Lock</title>
+    <title>นำเข้าข้อสอบ Excel - Tab-Lock</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         html { font-size: 125% !important; }
@@ -103,9 +104,16 @@
             border-radius: 20px;
             box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
         }
+        @keyframes onlinePulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+        }
+        .online-dot { animation: onlinePulse 2s ease-in-out infinite; }
+        @keyframes sidebarDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .sidebar-online-dot { animation: sidebarDot 2s ease-in-out infinite; }
         select.dark-select, input.dark-input {
             background: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(226, 232, 240, 1);
             color: #1e293b; border-radius: 10px;
             padding: 10px 14px; font-size: 13px;
             font-family: 'Kanit', sans-serif;
@@ -115,7 +123,7 @@
         select.dark-select option { background: #ffffff; color: #1e293b; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.3); border-radius: 4px; }
     
         /* Collapsible Sidebar */
         #sidebar.collapsed { width: 72px !important; }
@@ -151,7 +159,6 @@
     <!-- Animated Background Blobs -->
     <div class="fixed w-[500px] h-[500px] bg-cyan-500/5 blur-[120px] rounded-full -top-20 -left-20 pointer-events-none"></div>
     <div class="fixed w-[550px] h-[550px] bg-pink-500/4 blur-[130px] rounded-full -bottom-20 -right-20 pointer-events-none"></div>
-    <div class="fixed inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.02)_0%,transparent_70%)] pointer-events-none"></div>
 
     <!-- 📊 Left Sidebar Navigation (SaaS Style) -->
     <aside id="sidebar">
@@ -171,7 +178,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
                     <span>แดชบอร์ดหลัก</span>
                 </a>
-                <a href="admin-portal.html" class="nav-link">
+                <a href="admin-portal.html" class="nav-link active">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
                     <span>จัดการข้อสอบ</span>
                 </a>
@@ -187,16 +194,16 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" /></svg>
                     <span>ตรวจสอบพฤติกรรมน่าสงสัย</span>
                 </a>
-                <a href="admin-analysis.html" class="nav-link active">
+                <a href="admin-analysis.html" class="nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg>
                     <span>รายงานปัญหาจากนักศึกษา</span>
                 </a>
             </nav>
         </div>
-        <div class="sidebar-inner p-5 border-t border-slate-200 space-y-3">
+        <div class="sidebar-inner p-5 border-t border-white/5 space-y-3">
             <div class="flex items-center gap-2.5">
                 <div class="relative">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-slate-800">อ</div>
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white">อ</div>
                     <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white sidebar-online-dot"></span>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -220,20 +227,15 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 w-full">
                 <div class="flex items-center gap-3">
                     <a href="dashboard.html" class="md:hidden text-xs text-slate-500 hover:text-slate-800 font-bold">&larr; กลับ</a>
-                    <h1 class="text-base font-extrabold text-slate-800">🚨 รายงานปัญหาและข้อเสนอแนะจากนักศึกษา</h1>
+                    <h1 class="text-base font-extrabold text-slate-800">📂 นำเข้าข้อสอบจาก Excel</h1>
                 </div>
 
-                <!-- Room Selector Dropdown -->
+                <!-- 🏠 Room Selector -->
                 <div class="flex items-center gap-3 w-full sm:w-auto shrink-0 justify-end">
-                    <span class="text-xs font-bold text-slate-500">เลือกห้องสอบ:</span>
-                    <select id="room-selector" onchange="fetchReports()" 
-                        class="dark-select max-w-[180px]">
-                        <!-- รายการห้องของอาจารย์ -->
+                    <span class="text-xs font-bold text-slate-400">ห้องสอบที่ต้องการบันทึก:</span>
+                    <select id="room-selector" onchange="onRoomChange()" class="dark-select max-w-[180px]">
+                        <!-- รายการห้องจะโหลดมาตรงนี้ -->
                     </select>
-                    <button onclick="fetchReports()" 
-                        class="bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-600 hover:to-indigo-600 text-slate-800 px-3.5 py-2.5 rounded-xl font-bold text-xs transition active:scale-95 shadow-md whitespace-nowrap">
-                        🔄 รีเฟรช
-                    </button>
                 </div>
             </div>
         </header>
@@ -241,96 +243,121 @@
         <!-- Main Workspace -->
         <main class="p-6 md:p-8 flex-grow max-w-[1400px] w-full mx-auto space-y-6 overflow-y-auto">
             
-            <!-- Analysis Summary Banner -->
-            <div class="glass-card p-6 shadow-2xl flex items-start gap-4">
-                <span class="text-3xl p-3.5 bg-rose-500/10 border border-rose-500/20 text-rose-450 rounded-2xl shrink-0">📢</span>
+            <div class="glass-card p-8 space-y-6 shadow-2xl">
                 <div class="space-y-1">
-                    <h3 class="text-slate-800 font-extrabold text-base">ศูนย์แจ้งรายงานปัญหาหลังการทำข้อสอบ</h3>
-                    <p class="text-slate-500 text-xs leading-relaxed">
-                        กล่องข้อความเหล่านี้ส่งตรงมาจากผู้เข้าสอบหลังจากส่งข้อสอบเสร็จสิ้น (ผ่านหน้าต่างสรุปผลคะแนน) เพื่อให้อาจารย์ได้รับทราบข้อผิดพลาด เช่น ช้อยส์เฉลยไม่ตรง ตัวสะกดผิดพลาด หรือข้อคำถามสับสน และดำเนินการแก้ไขได้ทันท่วงที
-                    </p>
+                    <h2 class="text-lg font-extrabold bg-gradient-to-r from-cyan-600 to-indigo-600 bg-clip-text text-transparent flex items-center gap-2">
+                        📂 นำเข้าข้อสอบผ่านไฟล์ Microsoft Excel (.xlsx)
+                    </h2>
+                    <p class="text-xs text-slate-500">กรุณาจัดโครงสร้างตารางข้อมูลข้อสอบให้ตรงตามคู่มือตารางด้านล่าง เพื่อความแม่นยำในการนำเข้าคำถาม</p>
                 </div>
-            </div>
-
-            <!-- Stats Tiles -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                <div class="bg-slate-900/40 border border-slate-205 p-5 rounded-2xl flex items-center gap-4 shadow-lg shadow-black/10">
-                    <span class="text-2xl p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-450">🚨</span>
-                    <div>
-                        <div class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">เรื่องร้องเรียนทั้งหมด</div>
-                        <div class="text-sm font-extrabold text-rose-300 mt-0.5" id="stats-total">0 รายงาน</div>
-                    </div>
-                </div>
-                <div class="bg-slate-900/40 border border-slate-205 p-5 rounded-2xl flex items-center gap-4 shadow-lg shadow-black/10">
-                    <span class="text-2xl p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-450">⏳</span>
-                    <div>
-                        <div class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">รอดำเนินการคัดกรอง</div>
-                        <div class="text-sm font-extrabold text-amber-300 mt-0.5" id="stats-pending">0 รายงาน</div>
-                    </div>
-                </div>
-                <div class="bg-slate-900/40 border border-slate-205 p-5 rounded-2xl flex items-center gap-4 shadow-lg shadow-black/10">
-                    <span class="text-2xl p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-450">🟢</span>
-                    <div>
-                        <div class="text-[10px] font-bold text-slate-300 uppercase tracking-wider">สถานะกล่องรับเรื่อง</div>
-                        <div class="text-sm font-extrabold text-emerald-300 mt-0.5">เชื่อมต่อระบบแล้ว</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Analysis List Container -->
-            <div class="glass-card p-6 shadow-2xl space-y-6">
-                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                    📋 ประวัติรายการร้องเรียนปัญหาจากนักศึกษา
-                </h4>
                 
-                <!-- Reports List Container -->
-                <div id="reports-container" class="space-y-6 divide-y divide-white/5 max-h-[600px] overflow-y-auto pr-2">
-                    <div class="text-center py-16 text-slate-450 font-semibold select-none">
-                        📭 ยังไม่มีการรายงานข้อผิดพลาดใดๆ จากนักศึกษาในขณะนี้
+                <!-- Guidelines Table -->
+                <div class="space-y-3">
+                    <p class="text-xs text-slate-650 font-bold flex items-center gap-1">
+                        💡 ข้อกำหนดโครงสร้างข้อมูลตาราง (เริ่มบรรทัดที่ 1 ของตาราง Excel):
+                    </p>
+                    <div class="overflow-x-auto border border-slate-200 rounded-2xl">
+                        <table class="w-full text-left text-xs font-mono">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
+                                <tr>
+                                    <th class="p-3">question</th>
+                                    <th class="p-3">a</th>
+                                    <th class="p-3">b</th>
+                                    <th class="p-3">c</th>
+                                    <th class="p-3">d</th>
+                                    <th class="p-3 text-slate-400">e ... j (ตัวเลือกเสริม)</th>
+                                    <th class="p-3 text-rose-600">answer</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 bg-white text-slate-700">
+                                <tr>
+                                    <td class="p-3">พิมพ์คำถามตรงนี้...</td>
+                                    <td class="p-3">ช้อยส์ ข้อ ก</td>
+                                    <td class="p-3">ช้อยส์ ข้อ ข</td>
+                                    <td class="p-3">ช้อยส์ ข้อ ค</td>
+                                    <td class="p-3">ช้อยส์ ข้อ ง</td>
+                                    <td class="p-3 text-slate-400">ใส่ตัวเลือกเพิ่ม (กว้างสุด j)</td>
+                                    <td class="p-3 text-rose-600 font-bold">a, b, c หรือ d ... j</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
+                </div>
+
+                <!-- Drag & Drop Zone -->
+                <div id="drop-zone" class="border-2 border-dashed border-slate-300 hover:border-cyan-500 bg-slate-50/50 hover:bg-cyan-50/30 p-16 rounded-2xl transition duration-300 text-center cursor-pointer group shadow-sm">
+                    <input type="file" id="file-input" accept=".xlsx, .xls" class="hidden">
+                    <div class="space-y-3">
+                        <span class="text-5xl block group-hover:scale-110 transition duration-300">📊</span>
+                        <p class="text-slate-700 font-semibold text-sm">ลากไฟล์ Excel (.xlsx) มาวางตรงนี้ หรือคลิกเพื่อเลือกไฟล์</p>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-widest">รองรับช้อยส์สูงสุด 10 ช้อยส์ (a-j)</p>
+                        <p class="text-[11px] text-amber-600 font-medium mt-1">⚠️ แนะนำการอัพโหลดไฟล์ Excel ขนาดไม่เกิน 50MB ต่อการอัพโหลด 1 ครั้ง</p>
+                        <div class="pt-2">
+                            <button type="button" onclick="event.stopPropagation(); downloadExcelTemplate();" 
+                                class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 rounded-xl text-[10px] font-bold text-cyan-600 transition">
+                                📄 ดาวน์โหลดไฟล์ Excel ตัวอย่างสำหรับกรอกข้อสอบ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview File Info -->
+                <div id="preview-area" class="hidden space-y-4 pt-2">
+                    <div class="flex justify-between items-center bg-cyan-50/70 border border-cyan-200 p-5 rounded-2xl text-xs">
+                        <span class="text-cyan-700 font-semibold flex items-center gap-1.5">📄 แฟ้มข้อมูล: <strong id="file-name" class="text-slate-800 font-bold"></strong></span>
+                        <span class="bg-cyan-600 text-white font-extrabold px-3 py-1 rounded-full text-[10px]" id="row-count">0 ข้อ</span>
+                    </div>
+                    <button id="upload-btn" class="w-full bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-600 hover:to-indigo-600 text-white font-bold py-4 px-4 rounded-2xl transition shadow-lg shadow-cyan-500/20 active:scale-[0.99]">
+                        🚀 เริ่มนำเข้าข้อสอบเข้าสู่ห้องสอบเลย
+                    </button>
                 </div>
             </div>
 
         </main>
 
         <!-- Footer -->
-        <footer class="border-t border-slate-200 py-5 text-center text-slate-500 text-[10px]">
-            <p>&copy; 2026 ระบบรับแจ้งปัญหาการสอบ Tab-Lock. สงวนลิขสิทธิ์ทั้งหมด.</p>
+        <footer class="border-t border-slate-100 py-4 px-8 text-center text-slate-500 text-[10px]">
+            <p>&copy; 2026 ระบบการจัดการคลังข้อสอบ Tab-Lock Online Exam Platform. สงวนลิขสิทธิ์ทั้งหมด.</p>
         </footer>
     </div>
 
     <script>
         const username = localStorage.getItem('teacher_username') || 'admin';
         const teacherName = localStorage.getItem('teacher_name') || 'ไม่ระบุชื่ออาจารย์';
-        
+
         document.getElementById('sidebar-teacher-name').textContent = `อาจารย์: ${teacherName}`;
 
-        let currentRoomId = '';
+        let currentRoomId = "";
+        let rooms = [];
+        let excelData = null;
 
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const previewArea = document.getElementById('preview-area');
+        const fileNameSpan = document.getElementById('file-name');
+        const rowCountSpan = document.getElementById('row-count');
+        const uploadBtn = document.getElementById('upload-btn');
+
+        // โหลดห้องสอบอาจารย์
         window.addEventListener('DOMContentLoaded', async () => {
             await loadTeacherRooms();
-            await fetchReports();
         });
 
-        // ดึงข้อมูลห้องสอบของอาจารย์
         async function loadTeacherRooms() {
             try {
                 const res = await fetch(`/api/teacher/rooms?username=${username}`);
-                const rooms = await res.json();
-                
+                rooms = await res.json();
                 const select = document.getElementById('room-selector');
+                if (rooms.length === 0) {
+                    select.innerHTML = '<option value="">ไม่มีห้องสอบ</option>';
+                    return;
+                }
+                select.innerHTML = rooms.map(r => `<option value="${r.roomId}">${r.roomName}</option>`).join('');
                 
-                // แทรกตัวเลือกดูรายงานปัญหารวมทุกห้อง (ALL)
-                let selectHtml = `<option value="ALL">ดูรายงานสะสมทุกห้องเรียน (ALL)</option>`;
-                selectHtml += rooms.map(r => `<option value="${r.roomId}">${r.roomName}</option>`).join('');
-                select.innerHTML = selectHtml;
-                
-                const savedActiveRoom = localStorage.getItem('active_room_id');
-                if (savedActiveRoom && (savedActiveRoom === 'ALL' || rooms.some(r => r.roomId === savedActiveRoom))) {
-                    select.value = savedActiveRoom;
-                } else {
-                    select.value = 'ALL';
-                    localStorage.setItem('active_room_id', 'ALL');
+                // ใช้ห้องเดิมที่เลือกใน localStorage หากมีอยู่
+                const savedRoom = localStorage.getItem('active_room_id');
+                if (savedRoom && rooms.some(r => r.roomId === savedRoom)) {
+                    select.value = savedRoom;
                 }
                 currentRoomId = select.value;
             } catch(e) {
@@ -338,95 +365,109 @@
             }
         }
 
-        // ดึงข้อมูลรายการปัญหาที่แจ้งเตือน
-        async function fetchReports() {
-            const selectRoom = document.getElementById('room-selector').value;
-            if (!selectRoom) return;
-            currentRoomId = selectRoom;
+        function onRoomChange() {
+            currentRoomId = document.getElementById('room-selector').value;
             localStorage.setItem('active_room_id', currentRoomId);
-
-            try {
-                const response = await fetch(`/api/student-reports?roomId=${currentRoomId}&username=${username}`);
-                const data = await response.json();
-                const container = document.getElementById('reports-container');
-
-                document.getElementById('stats-total').textContent = `${data.length} รายงาน`;
-                document.getElementById('stats-pending').textContent = `${data.length} เรื่อง`;
-
-                if (data.length === 0) {
-                    container.innerHTML = `
-                        <div class="text-center py-16 text-slate-450 font-semibold select-none">
-                            📭 ยังไม่มีการรายงานข้อผิดพลาดใดๆ จากนักศึกษาในขณะนี้
-                        </div>`;
-                    return;
-                }
-
-                container.innerHTML = data.map((item, index) => {
-                    const cleanDate = item.date ? item.date.replace("วัน", "") : "-";
-                    return `
-                        <div class="py-5 first:pt-0 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-slate-200">
-                            <div class="space-y-2 flex-grow">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="bg-rose-500/10 border border-rose-500/20 text-rose-650 px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold select-none">
-                                        รายงานที่ ${data.length - index}
-                                    </span>
-                                    <span class="bg-cyan-500/10 border border-cyan-500/20 text-cyan-600 px-2.5 py-0.5 rounded-lg text-xs font-mono font-bold select-none">
-                                        ห้องสอบ: ${escapeHtml(item.roomId)}
-                                    </span>
-                                </div>
-                                <div class="text-xs text-slate-500 font-medium">
-                                    โดย: <strong class="text-slate-800 font-bold">${escapeHtml(item.studentName)}</strong> 
-                                    | รหัส: <strong class="text-slate-800 font-mono font-bold">${escapeHtml(item.studentId)}</strong>
-                                    | ชั้นเรียน: <strong class="text-cyan-600 font-bold">${escapeHtml(item.class || '-')}</strong>
-                                </div>
-                                <div class="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-xs text-rose-800 leading-relaxed shadow-sm">
-                                    📢 "${escapeHtml(item.issue)}"
-                                </div>
-                                <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-2">
-                                    🕒 วันเวลาที่แจ้ง: ${item.time} | ${cleanDate}
-                                </div>
-                            </div>
-                            <div class="shrink-0 pt-2 md:pt-0">
-                                <button onclick="deleteReport(${item.id}, '${escapeHtml(item.studentId)}')"
-                                    class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-sm active:scale-[0.98]">
-                                    🗑️ ลบออก
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-            } catch (err) {
-                console.error(err);
-                container.innerHTML = '<div class="text-center py-16 text-rose-500 font-bold">❌ เกิดข้อผิดพลาดในการดึงข้อมูลรายงาน</div>';
-            }
+            previewArea.classList.add('hidden');
+            excelData = null;
         }
 
-        // ลบข้อความการแจ้งเตือน
-        async function deleteReport(id, studentId) {
-            if (!confirm(`⚠️ ยืนยันการลบการแจ้งเรื่องปัญหานี้ออกจากระบบใช่หรือไม่?\n(กรุณาแก้ไขปัญหาในคลังข้อสอบก่อนกดตกลง)`)) return;
+        // Drag & Drop
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
+        
+        dropZone.addEventListener('dragover', (e) => { 
+            e.preventDefault(); 
+            dropZone.classList.add('border-cyan-500','bg-cyan-500/10'); 
+        });
+        dropZone.addEventListener('dragleave', () => { 
+            dropZone.classList.remove('border-cyan-500','bg-cyan-500/10'); 
+        });
+        dropZone.addEventListener('drop', (e) => { 
+            e.preventDefault(); 
+            handleFile(e.dataTransfer.files[0]); 
+        });
+
+        function handleFile(file) {
+            if (!file || (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls'))) {
+                alert('❌ ใช้ไฟล์ Excel (.xlsx) เท่านั้นครับ'); 
+                return;
+            }
+            fileNameSpan.textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                    const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                    if (json.length === 0) { 
+                        alert('❌ ไม่พบข้อมูลข้อสอบภายในไฟล์ Excel'); 
+                        return; 
+                    }
+                    excelData = json.map(row => {
+                        const newRow = {};
+                        for (let key in row) {
+                            if (row.hasOwnProperty(key)) {
+                                const cleanKey = key.trim().toLowerCase();
+                                const val = row[key];
+                                newRow[cleanKey] = (val !== null && val !== undefined) ? String(val).trim() : '';
+                            }
+                        }
+                        return newRow;
+                    });
+                    rowCountSpan.textContent = `${json.length} ข้อ`;
+                    previewArea.classList.remove('hidden');
+                } catch (err) {
+                    alert("ไม่สามารถอ่านข้อมูลในไฟล์ได้ กรุณาตรวจสอบหัวตาราง");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        uploadBtn.addEventListener('click', async () => {
+            if (!excelData || !currentRoomId) return;
 
             try {
-                const response = await fetch('/api/delete-student-report', {
-                    method: 'DELETE',
+                const res = await fetch('/api/upload-questions-excel', {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id })
+                    body: JSON.stringify({ roomId: currentRoomId, questions: excelData })
                 });
+                const data = await res.json();
                 
-                if (response.ok) {
-                    fetchReports();
+                if (res.ok && data.success) {
+                    alert(`✅ นำเข้าข้อสอบเข้าห้อง ${currentRoomId} สำเร็จจำนวน ${excelData.length} ข้อเรียบร้อยแล้ว!\nระบบจะพาท่านไปยังหน้าจัดการข้อสอบหลักเพื่อตรวจสอบครับ`);
+                    previewArea.classList.add('hidden');
+                    excelData = null;
+                    window.location.href = 'admin-questions.html?tab=preview';
                 } else {
-                    alert("ลบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
+                    alert(`❌ ล้มเหลว: ${data.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล'}`);
                 }
+            } catch (err) { 
+                alert('❌ ล้มเหลว กรุณาตรวจสอบว่า Node Server เปิดอยู่หรือไม่'); 
+            }
+        });
+
+        // ดาวน์โหลดแม่แบบ Excel
+        function downloadExcelTemplate() {
+            try {
+                const headers = [
+                    ["Question", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "Answer", "Question_img", "A_img", "B_img", "C_img", "D_img", "E_img", "F_img", "G_img", "H_img", "I_img", "J_img"]
+                ];
+                headers.push([
+                    "1 + 1 มีค่าเท่ากับเท่าใด?", "2", "3", "4", "5", "", "", "", "", "", "", "a", "", "", "", "", "", "", "", "", "", "", ""
+                ]);
+                headers.push([
+                    "โปรแกรมเบราว์เซอร์ข้อใดได้รับความนิยมสูงสุดในปัจจุบัน?", "Google Chrome", "Safari", "Firefox", "Internet Explorer", "", "", "", "", "", "", "a", "", "", "", "", "", "", "", "", "", "", ""
+                ]);
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet(headers);
+                XLSX.utils.book_append_sheet(wb, ws, "แบบฟอร์มคลังข้อสอบ");
+                XLSX.writeFile(wb, `exam_template_${currentRoomId || 'general'}.xlsx`);
             } catch (err) {
                 console.error(err);
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+                alert("ไม่สามารถดาวน์โหลดไฟล์ตัวอย่างได้");
             }
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
     
     // Collapsible Sidebar

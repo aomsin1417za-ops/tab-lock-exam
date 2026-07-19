@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="th">
 <head>
   <script>
@@ -14,6 +14,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
+        html { font-size: 125% !important; }
+
     *, *::before, *::after { box-sizing: border-box; }
     body {
       margin: 0;
@@ -170,7 +172,7 @@
             <img src="logo.png" alt="Tab-Lock Logo" class="w-full h-full object-cover rounded-xl" />
           </div>
           <div class="text-xs font-bold tracking-[0.3em] text-cyan-600 uppercase mb-1">TAB-LOCK</div>
-          <h1 class="text-2xl font-bold text-slate-800 mb-1">ระบบเข้าสู่ระบบอาจารย์ผู้สอน</h1>
+          <h1 class="text-2xl font-bold text-slate-800 mb-1">เข้าสู่ระบบอาจารย์ผู้สอน</h1>
           <p class="text-slate-500 text-sm">กรุณาใส่ข้อมูลเพื่อเข้าสู่ระบบ</p>
         </div>
 
@@ -225,7 +227,7 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3h7a3 3 0 013 3v1"/>
           </svg>
-          เข้าสู่ระบบ
+          เข้าสู่ระบบอาจารย์ผู้สอน
         </button>
 
         <!-- Divider -->
@@ -297,12 +299,12 @@
         } else {
           showError(data.message || 'เข้าสู่ระบบล้มเหลว');
           btn.disabled = false;
-          btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg> เข้าสู่ระบบ`;
+          btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3h7a3 3 0 013 3v1"/></svg> เข้าสู่ระบบอาจารย์ผู้สอน`;
         }
       } catch(e) {
         showError('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
         btn.disabled = false;
-        btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg> เข้าสู่ระบบ`;
+        btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3h7a3 3 0 013 3v1"/></svg> เข้าสู่ระบบอาจารย์ผู้สอน`;
       }
     }
 

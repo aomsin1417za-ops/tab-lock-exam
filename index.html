@@ -1,622 +1,894 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tab-Lock - แพลตฟอร์มจัดการสอบออนไลน์ป้องกันการทุจริตแบบเรียลไทม์</title>
-  <meta name="description" content="Tab-Lock แพลตฟอร์มจัดการการสอบออนไลน์ที่ป้องกันการสลับหน้าต่างเบราว์เซอร์ เฝ้าระวังทุจริตแบบเรียลไทม์ พร้อมระบบสรุปประเมินผลอัจฉริยะ" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tab-Lock -- แพลตฟอร์มจัดการสอบออนไลน์ป้องกันการทุจริตแบบเรียลไทม์</title>
+  <!-- Google Fonts: Kanit (weights 300 to 900) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- CDN Scripts for in-browser React & Framer Motion execution -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      font-family: 'Kanit', 'Outfit', sans-serif;
-      background: linear-gradient(to right, #f8fafc 0%, #eff6ff 50%, #faf5ff 100%);
-      background-attachment: fixed;
-      color: #334155;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    
-    /* Global grid lines pattern */
-    .grid-overlay {
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(99,102,241,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(99,102,241,0.02) 1px, transparent 1px);
-      background-size: 50px 50px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* Animated background gradient blobs */
-    .blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(130px);
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.6;
-    }
-    .blob-1 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
-      top: -150px; left: -100px;
-      animation: floatBlob 10s ease-in-out infinite;
-    }
-    .blob-2 {
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(168, 85, 247, 0.06) 0%, transparent 70%);
-      top: 30%; right: -200px;
-      animation: floatBlob 12s ease-in-out infinite reverse;
-    }
-    .blob-3 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.04) 0%, transparent 70%);
-      bottom: -100px; left: 15%;
-      animation: floatBlob 8s ease-in-out infinite 2s;
-    }
-    @keyframes floatBlob {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(30px, -50px) scale(1.1); }
-      66% { transform: translate(-20px, 20px) scale(0.95); }
-    }
-
-    /* Glowing effect styles */
-    .shimmer-text {
-      background: linear-gradient(90deg, #2563eb 0%, #4f46e5 35%, #6366f1 50%, #4f46e5 65%, #2563eb 100%);
-      background-size: 200% auto;
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shine 4s linear infinite;
-    }
-    @keyframes shine {
-      0% { background-position: 0% center; }
-      100% { background-position: 200% center; }
-    }
-    
-    .glow-border {
-      position: relative;
-    }
-    .glow-border::after {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(168, 85, 247, 0.15), transparent);
-      border-radius: inherit;
-      z-index: -1;
-      opacity: 0.8;
-      transition: opacity 0.3s;
-    }
-    .glow-border:hover::after {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(168, 85, 247, 0.4), rgba(99, 102, 241, 0.4));
-    }
-
-    /* Glassmorphism styling */
-    .glass-card {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-      border: 1px solid rgba(226, 232, 240, 0.8);
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .glass-card:hover {
-      transform: translateY(-8px);
-      border-color: rgba(59, 130, 246, 0.25);
-      box-shadow: 0 20px 40px rgba(59, 130, 246, 0.08);
-    }
-
-    .hero-img-container {
-      position: relative;
-    }
-    .hero-img-container::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 24px;
-      box-shadow: 0 0 50px rgba(59, 130, 246, 0.08);
-      z-index: -1;
-      animation: pulseGlow 4s infinite ease-in-out;
-    }
-    @keyframes pulseGlow {
-      0%, 100% { transform: scale(0.98); opacity: 0.5; }
-      50% { transform: scale(1.02); opacity: 0.8; }
-    }
-
-    .dot-ping-blue {
-      display: inline-block;
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: #3b82f6;
-      animation: pingGlow 1.8s cubic-bezier(0,0,0.2,1) infinite;
-    }
-    @keyframes pingGlow {
-      75%, 100% { transform: scale(2.2); opacity: 0; }
-    }
-
-    /* Interactive Timeline Style */
-    .timeline-step {
-      position: relative;
-    }
-    .timeline-step::before {
-      content: '';
-      position: absolute;
-      left: 23px; top: 40px; bottom: -30px;
-      width: 2px;
-      background: rgba(59, 130, 246, 0.15);
-    }
-    .timeline-step:last-child::before { display: none; }
-    .step-active .timeline-step-icon {
-      background: linear-gradient(135deg, #3b82f6, #6366f1);
-      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);
-    }
-
-    /* Custom scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #f8fafc; }
-    ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.2); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.4); }
-  </style>
-</head>
-<body class="relative">
-
-  <div class="grid-overlay"></div>
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-
-  <!-- ===== 1. NAVIGATION BAR ===== -->
-  <nav class="sticky top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 backdrop-blur-md">
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-      <!-- Logo -->
-      <a href="#" class="flex items-center gap-3">
-        <img src="logo.png" alt="Tab-Lock Logo" class="h-10 w-10 object-cover rounded-xl shadow-md border border-slate-100" />
-        <span class="text-xl font-black tracking-tight text-slate-800">TAB-<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600">LOCK</span></span>
-      </a>
-
-      <!-- Menu Items -->
-      <div class="hidden items-center gap-8 md:flex">
-        <a href="#" class="text-sm font-medium text-slate-650 hover:text-cyan-600 transition">หน้าแรก</a>
-        <a href="#features" class="text-sm font-medium text-slate-650 hover:text-cyan-600 transition">ฟีเจอร์เด่น</a>
-        <a href="#workflow" class="text-sm font-medium text-slate-650 hover:text-cyan-600 transition">วิธีการใช้งาน</a>
-        <a href="#stats" class="text-sm font-medium text-slate-650 hover:text-cyan-600 transition">ความน่าเชื่อถือ</a>
-      </div>
-
-      <!-- Action Button -->
-      <div class="flex items-center gap-3">
-        <a href="admin-login.html" class="hidden rounded-full bg-rose-50 border border-rose-200 px-5 py-2 text-xs font-bold text-rose-600 hover:bg-rose-100 transition sm:block">
-          ผู้ดูแลระบบ (Admin)
-        </a>
-        <a href="#portal" class="hidden rounded-full bg-slate-100 border border-slate-205 px-5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200/80 transition sm:block">
-          เข้าสู่ระบบ
-        </a>
-        <a href="#portal" class="rounded-full bg-gradient-to-r from-cyan-500 to-indigo-500 px-5 py-2.5 text-xs font-bold text-white hover:from-cyan-650 hover:to-indigo-650 transition shadow-lg shadow-cyan-500/15">
-          เริ่มต้นใช้งาน
-        </a>
-      </div>
-    </div>
-  </nav>
-
-  <div class="relative z-10 mx-auto max-w-7xl px-6">
-    <!-- ===== 2. HERO SECTION ===== -->
-    <header class="grid grid-cols-1 items-center gap-12 py-16 lg:grid-cols-12 lg:py-24">
-      <!-- Text details -->
-      <div class="space-y-8 lg:col-span-7">
-        <div class="inline-flex items-center gap-2.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 px-4 py-1.5 text-xs font-bold text-cyan-600">
-          <span class="relative flex h-2.5 w-2.5">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
-          </span>
-          SECURED EXAM ENVIRONMENT v3.0
-        </div>
-        <h1 class="text-4xl font-extrabold tracking-tight text-slate-800 sm:text-5xl md:text-6xl leading-tight">
-          แพลตฟอร์มจัดการการสอบ<br />
-          เพื่อตรวจสอบ<span class="shimmer-text">พฤติกรรมน่าสงสัย</span>ของผู้สอบ
-        </h1>
-        <p class="max-w-xl text-base text-slate-655 leading-relaxed">
-          ยกระดับความโปร่งใสและคุณภาพการทดสอบออนไลน์ด้วย Tab-Lock ระบบควบคุมและตรวจจับประวัติการออกจากหน้าต่างสอบแบบเรียลไทม์ พร้อมรายงานผลสถิตินักเรียนและข้อสอบอัตโนมัติ
-        </p>
-        <div class="flex flex-wrap gap-4">
-          <a href="#portal" class="rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 px-7 py-4 text-sm font-bold text-white shadow-lg shadow-cyan-500/15 hover:from-cyan-600 hover:to-indigo-600 transition-all duration-200 hover:-translate-y-0.5">
-            เข้าใช้งานระบบสอบ
-          </a>
-          <a href="#features" class="rounded-xl bg-slate-100 border border-slate-205 hover:bg-slate-200/80 px-7 py-4 text-sm font-bold text-slate-700 transition-all duration-200 hover:-translate-y-0.5">
-            เรียนรู้เพิ่มเติม
-          </a>
-        </div>
-        <!-- Integrations/Badge info -->
-        <div class="flex items-center gap-4 pt-4 border-t border-slate-200">
-          <div class="text-xs text-slate-500 tracking-wider uppercase font-semibold">รองรับระบบหลักครบวงจร:</div>
-          <div class="flex gap-3 text-slate-500 text-xs font-bold">
-            <span class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-205 text-slate-600">Excel Export</span>
-            <span class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-205 text-slate-600">AI Assistant</span>
-            <span class="bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-205 text-slate-600">Real-Time Monitor</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- App mockup visualization -->
-      <div class="lg:col-span-5">
-        <div class="hero-img-container rounded-3xl bg-slate-50 border border-slate-200 p-4 shadow-2xl relative">
-          <!-- Mockup Browser Header -->
-          <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4 select-none">
-            <div class="flex items-center gap-1.5">
-              <span class="w-3 h-3 rounded-full bg-rose-400"></span>
-              <span class="w-3 h-3 rounded-full bg-amber-400"></span>
-              <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
-            </div>
-            <div class="bg-slate-100 border border-slate-200 rounded-lg px-4 py-1 text-[9px] text-slate-400 font-mono flex items-center gap-1.5">
-              <span class="text-emerald-500">🔒 SECURE</span> tab-lock.online/monitor
-            </div>
-            <div class="w-8"></div>
-          </div>
-          
-          <!-- Mockup Dashboard Content -->
-          <div class="space-y-4 font-sans text-left pb-4">
-            <!-- Header -->
-            <div class="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-200/60 shadow-sm">
-              <div>
-                <span class="text-[8px] font-bold text-indigo-600 uppercase tracking-widest block">กำลังควบคุมการสอบ</span>
-                <h4 class="text-xs font-bold text-slate-800">วิชา Programming 101 - Sec 2</h4>
-              </div>
-              <span class="flex items-center gap-1 bg-emerald-50 border border-emerald-250 text-emerald-700 text-[9px] font-extrabold px-2.5 py-0.5 rounded-full animate-pulse">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> LIVE
-              </span>
-            </div>
-            
-            <!-- Quick Stats -->
-            <div class="grid grid-cols-3 gap-2">
-              <div class="bg-white p-2.5 rounded-xl border border-slate-200/60 text-center">
-                <span class="text-[8px] text-slate-400 font-bold block uppercase">นักศึกษา</span>
-                <span class="text-xs font-extrabold text-slate-800">42 คน</span>
-              </div>
-              <div class="bg-white p-2.5 rounded-xl border border-slate-200/60 text-center">
-                <span class="text-[8px] text-slate-400 font-bold block uppercase">ส่งข้อสอบ</span>
-                <span class="text-xs font-extrabold text-emerald-600">38 คน</span>
-              </div>
-              <div class="bg-rose-50 p-2.5 rounded-xl border border-rose-100 text-center">
-                <span class="text-[8px] text-rose-500 font-bold block uppercase">สลับหน้าจอ</span>
-                <span class="text-xs font-extrabold text-rose-600">3 คน</span>
-              </div>
-            </div>
-
-            <!-- Monitoring Feed Mockup -->
-            <div class="bg-white p-3 rounded-2xl border border-slate-200/60 shadow-sm space-y-2">
-              <span class="text-[8px] font-bold text-slate-400 uppercase tracking-wider block">เหตุการณ์ผิดปกติล่าสุด</span>
-              
-              <!-- Feed Item 1 -->
-              <div class="flex justify-between items-center p-2 rounded-xl bg-rose-50 border border-rose-100/50">
-                <div class="flex items-center gap-2">
-                  <span class="w-5 h-5 rounded-full bg-rose-100 flex items-center justify-center text-xs">🔴</span>
-                  <div>
-                    <h5 class="text-[10px] font-bold text-slate-800 leading-none">นายสมชาย รักดี</h5>
-                    <p class="text-[8px] text-rose-600 font-bold mt-1">ออกนอกหน้าต่างสอบเกิน 5 วินาที</p>
-                  </div>
-                </div>
-                <span class="text-[8px] text-rose-700 font-extrabold bg-rose-100 border border-rose-200 px-1.5 py-0.5 rounded-md">เตือนครั้งที่ 3</span>
-              </div>
-              
-              <!-- Feed Item 2 -->
-              <div class="flex justify-between items-center p-2 rounded-xl bg-amber-50 border border-amber-100/50">
-                <div class="flex items-center gap-2">
-                  <span class="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center text-xs">🟡</span>
-                  <div>
-                    <h5 class="text-[10px] font-bold text-slate-800 leading-none">นางสาวสมศรี เรียนดี</h5>
-                    <p class="text-[8px] text-amber-600 font-bold mt-1">สลับหน้าจอกลับมาทำข้อสอบ</p>
-                  </div>
-                </div>
-                <span class="text-[8px] text-amber-700 font-extrabold bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded-md">12:45 น.</span>
-              </div>
-
-              <!-- Feed Item 3 -->
-              <div class="flex justify-between items-center p-2 rounded-xl bg-slate-50 border border-slate-100/80">
-                <div class="flex items-center gap-2">
-                  <span class="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-xs">🟢</span>
-                  <div>
-                    <h5 class="text-[10px] font-bold text-slate-800 leading-none">นายปกรณ์ ใฝ่รู้</h5>
-                    <p class="text-[8px] text-slate-500 mt-1">ทำข้อสอบต่ออย่างราบรื่น</p>
-                  </div>
-                </div>
-                <span class="text-[8px] text-slate-500 bg-slate-200 border border-slate-300 px-1.5 py-0.5 rounded-md">12:44 น.</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Floating Status Badge -->
-          <div class="absolute -bottom-5 -left-5 bg-white rounded-2xl p-4 flex items-center gap-3 border border-slate-200 shadow-xl z-20">
-            <div class="h-9 w-9 rounded-full bg-emerald-50 border border-emerald-250 flex items-center justify-center text-emerald-500 text-xs shadow-sm">
-              ✔️
-            </div>
-            <div>
-              <div class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">ระบบความปลอดภัย</div>
-              <div class="text-xs font-extrabold text-slate-800">ปกป้องการสอบ 100%</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- ===== 3. DYNAMIC STATS SECTION ===== -->
-    <section id="stats" class="py-12 border-y border-slate-205 my-12 bg-slate-100/50 rounded-2xl">
-      <div class="grid grid-cols-1 gap-8 sm:grid-cols-3 text-center">
-        <div class="space-y-2">
-          <div class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-indigo-600">99.9%</div>
-          <div class="text-xs text-slate-500 tracking-widest font-bold uppercase">ป้องกันการเปิดเบราว์เซอร์อื่นสอบ</div>
-        </div>
-        <div class="space-y-2 border-y border-slate-205 py-6 sm:border-y-0 sm:border-x sm:border-slate-205 sm:py-0">
-          <div class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">&lt; 1 วินาที</div>
-          <div class="text-xs text-slate-500 tracking-widest font-bold uppercase">แจ้งเตือนสลับหน้าจอเรียลไทม์</div>
-        </div>
-        <div class="space-y-2">
-          <div class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-cyan-600">100% Automated</div>
-          <div class="text-xs text-slate-500 tracking-widest font-bold uppercase">สรุปผลสอบ Z-Score & T-Score ทันที</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 4. FEATURES GRID ===== -->
-    <section id="features" class="py-16 space-y-12">
-      <div class="text-center max-w-2xl mx-auto space-y-4">
-        <span class="text-xs font-bold tracking-[0.3em] uppercase text-cyan-600">คุณลักษณะเด่น</span>
-        <h2 class="text-3xl font-extrabold text-slate-800 sm:text-4xl">ฟีเจอร์คุมสอบอัจฉริยะแบบครบวงจร</h2>
-        <p class="text-sm text-slate-500">พัฒนาขึ้นด้วยเทคโนโลยีสแกนหน้าต่างและประมวลผลสถิติแบบครบวงจร เพื่อตอบสนองความต้องการของผู้เข้าสอบและผู้สอนอย่างมีประสิทธิภาพ</p>
-      </div>
-
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <!-- Feature 1 -->
-        <div class="glass-card p-6 rounded-3xl space-y-4 flex flex-col justify-between">
-          <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-2xl">🔒</div>
-          <div class="space-y-2">
-            <h3 class="text-base font-bold text-slate-800">ระบบล็อกแท็บ (Tab Lock)</h3>
-            <p class="text-xs text-slate-550 leading-relaxed">ตรวจจับและแจ้งเตือนทันทีเมื่อนักศึกษาสลับหน้าต่างเบราว์เซอร์หรือกดย่อหน้าจอระบบสอบ</p>
-          </div>
-        </div>
-
-        <!-- Feature 2 -->
-        <div class="glass-card p-6 rounded-3xl space-y-4 flex flex-col justify-between">
-          <div class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-2xl">📺</div>
-          <div class="space-y-2">
-            <h3 class="text-base font-bold text-slate-800">เฝ้าระวังเรียลไทม์ (Live Monitor)</h3>
-            <p class="text-xs text-slate-550 leading-relaxed">อาจารย์สามารถสังเกตจำนวนการสลับหน้าจอของนักศึกษาทุกคนในห้องสอบได้พร้อมกันแบบวินาทีต่อวินาที</p>
-          </div>
-        </div>
-
-        <!-- Feature 3 -->
-        <div class="glass-card p-6 rounded-3xl space-y-4 flex flex-col justify-between">
-          <div class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-2xl">📊</div>
-          <div class="space-y-2">
-            <h3 class="text-base font-bold text-slate-800">ประมวลผลผลลัพธ์เชิงลึก</h3>
-            <p class="text-xs text-slate-550 leading-relaxed">คำนวณ Z-Score, T-Score, คะแนนเฉลี่ย (Mean) ส่วนเบี่ยงเบนมาตรฐาน (SD) และวิเคราะห์ข้อสอบให้เสร็จสรรพ</p>
-          </div>
-        </div>
-
-        <!-- Feature 4 -->
-        <div class="glass-card p-6 rounded-3xl space-y-4 flex flex-col justify-between">
-          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl">🤖</div>
-          <div class="space-y-2">
-            <h3 class="text-base font-bold text-slate-800">AI เจนเนอเรเตอร์คำถาม</h3>
-            <p class="text-xs text-slate-550 leading-relaxed">มีระบบ AI ช่วยออกคำถามแบบปรนัยและอัตนัยอย่างชาญฉลาดโดยอิงตามหัวข้อวิชาที่เลือก</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 5. WORKFLOW SECTION (HOW IT WORKS) ===== -->
-    <section id="workflow" class="py-16 space-y-12">
-      <div class="text-center max-w-2xl mx-auto space-y-4">
-        <span class="text-xs font-bold tracking-[0.3em] uppercase text-indigo-650">ขั้นตอนการทำงาน</span>
-        <h2 class="text-3xl font-extrabold text-slate-800 sm:text-4xl">ใช้งานง่ายใน 4 ขั้นตอน</h2>
-        <p class="text-sm text-slate-555">ออกแบบอินเตอร์เฟซให้ทำงานโดยตรงบนเบราว์เซอร์ ไม่ต้องติดตั้งซอฟต์แวร์เสริมอื่นใดเพิ่มเติม</p>
-      </div>
-
-      <!-- Tab Switch Controls -->
-      <div class="flex justify-center">
-        <div class="bg-slate-100 border border-slate-205 p-1.5 rounded-2xl flex gap-1">
-          <button onclick="switchWorkflowTab('student')" id="workflow-tab-student" class="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-indigo-500 transition shadow-sm">
-            สำหรับผู้สอบ (นักศึกษา)
-          </button>
-          <button onclick="switchWorkflowTab('teacher')" id="workflow-tab-teacher" class="px-6 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition">
-            สำหรับผู้คุมสอบ (อาจารย์)
-          </button>
-        </div>
-      </div>
-
-      <!-- Timeline Containers -->
-      <div class="max-w-3xl mx-auto">
-        <!-- Student Workflow -->
-        <div id="workflow-content-student" class="space-y-8">
-          <div class="timeline-step flex gap-6 step-active">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-500 border border-slate-205 flex items-center justify-center text-sm font-bold text-white">1</div>
-            <div class="space-y-1">
-              <h3 class="text-base font-bold text-slate-800">ลงชื่อเข้าสอบ (Student Login)</h3>
-              <p class="text-xs text-slate-550 leading-relaxed">กรอกรหัสประจำตัวนักศึกษา และรหัสห้องสอบที่อาจารย์ผู้สอนมอบให้เพื่อยืนยันสิทธิ์เข้ารับการสอบ</p>
-            </div>
-          </div>
-          <div class="timeline-step flex gap-6">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-white border border-slate-205 flex items-center justify-center text-sm font-bold text-slate-500">2</div>
-            <div class="space-y-1">
-              <h3 class="text-base font-bold text-slate-800">ยืนยันและยอมรับข้อตกลงป้องกันทุจริต</h3>
-              <p class="text-xs text-slate-555 leading-relaxed">หน้าจอแสดงคำแนะนำและระเบียบการสอบ นักศึกษายอมรับเพื่อเข้าสู่โหมดการทำข้อสอบที่มีการป้องกันหน้าต่าง</p>
-            </div>
-          </div>
-          <div class="timeline-step flex gap-6">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-white border border-slate-205 flex items-center justify-center text-sm font-bold text-slate-500">3</div>
-            <div class="space-y-1">
-              <h3 class="text-base font-bold text-slate-800">ทำข้อสอบภายใต้การควบคุม (Tab-Lock Monitoring)</h3>
-              <p class="text-xs text-slate-555 leading-relaxed">ในระหว่างการทำข้อสอบ หากกดย่อหน้าต่าง สลับแท็บ หรือเปิดโปรแกรมอื่น ระบบจะจับเวลาและบันทึกประวัติการออกจากแท็บคุมสอบทันที</p>
-            </div>
-          </div>
-          <div class="timeline-step flex gap-6">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-white border border-slate-205 flex items-center justify-center text-sm font-bold text-slate-500">4</div>
-            <div class="space-y-1">
-              <h3 class="text-base font-bold text-slate-800">ส่งกระดาษคำตอบและดูผลการประเมิน</h3>
-              <p class="text-xs text-slate-555 leading-relaxed">เมื่อกดส่งกระดาษคำตอบ หน้ากระดาษสรุปผลสัมฤทธิ์และผลการประเมินการทุจริตจะถูกนำเสนอให้นักศึกษาและส่งข้อมูลเข้าเซิร์ฟเวอร์หลัก</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Teacher Workflow (Hidden by default) -->
-        <div id="workflow-content-teacher" class="space-y-8 hidden">
-          <div class="timeline-step flex gap-6 step-active">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-500 border border-slate-205 flex items-center justify-center text-sm font-bold text-white">1</div>
-            <div class="space-y-1">
-              <h3 class="text-base font-bold text-slate-800">สร้างห้องสอบและข้อสอบ (Create Exam)</h3>
-              <p class="text-xs text-slate-555 leading-relaxed">อาจารย์เปิดห้องคุมสอบ ตั้งชื่อการสอบ ใส่รายการข้อสอบด้วยตนเอง หรืออัพโหลดผ่านไฟล์ Excel หรือเรียกใช้ AI คำสั่งเขียนข้อสอบอัตโนมัติ</p>
-            </div>
-          </div>
-          <div class="timeline-step flex gap-6">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-white border border-slate-205 flex items-center justify-center text-sm font-bold text-slate-500">2</div>
-            <div class="space-y-1">
-              <h3 class="text-base font-bold text-slate-800">แจกจ่ายโค้ดเข้าสอบ (Generate Room Code)</h3>
-              <p class="text-xs text-slate-555 leading-relaxed">ระบบจะสร้างโค้ดห้องสอบเพื่อให้ผู้เรียนนำไปกรอก และอาจารย์สามารถกำหนดช่วงเริ่มสอบ ปิดข้อสอบ หรือส่งสาส์นเตือนให้นักศึกษาได้จากในหน้าเว็บ</p>
-            </div>
-          </div>
-          <div class="timeline-step flex gap-6">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-white border border-slate-205 flex items-center justify-center text-sm font-bold text-slate-500">3</div>
-            <div class="space-y-1">
-              <h3 class="text-base font-bold text-slate-800">ติดตามความประพฤติแบบสด (Live Monitor Dashboard)</h3>
-              <p class="text-xs text-slate-555 leading-relaxed">สังเกตข้อมูลนักศึกษาที่พฤติกรรมเสี่ยงสูง (สลับแท็บบ่อยเกินกำหนด) ส่งการแจ้งเตือนพฤติกรรมไปยังหน้าจอของผู้สอบได้ทันที</p>
-            </div>
-          </div>
-          <div class="timeline-step flex gap-6">
-            <div class="timeline-step-icon flex-shrink-0 w-12 h-12 rounded-full bg-white border border-slate-205 flex items-center justify-center text-sm font-bold text-slate-500">4</div>
-            <div class="space-y-1">
-              <h3 class="text-base font-bold text-slate-800">รายงานสถิติและคะแนน (Export Report)</h3>
-              <p class="text-xs text-slate-555 leading-relaxed">เมื่อจบกระบวนการสอบ อาจารย์สามารถเข้าดูการจัดจำแนกคะแนน วิเคราะห์ตัวชี้วัดข้อสอบ Z-Score, T-Score, ประมวลกราฟ และออกเอกสาร Excel ได้ในคลิกเดียว</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== 6. PORTAL GATEWAY SECTION ===== -->
-    <section id="portal" class="py-16 space-y-12">
-      <div class="text-center max-w-2xl mx-auto space-y-4">
-        <span class="text-xs font-bold tracking-[0.3em] uppercase text-cyan-600">เข้าใช้งานแผงควบคุม</span>
-        <h2 class="text-3xl font-extrabold text-slate-800 sm:text-4xl">ยินดีต้อนรับสู่ระบบ Tab-Lock</h2>
-        <p class="text-sm text-slate-500">กรุณาเลือกช่องทางการเข้าสู่ระบบตามสิทธิ์ผู้ใช้งานของคุณ</p>
-      </div>
-
-      <!-- Portal Cards Grid -->
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 max-w-4xl mx-auto">
-        <!-- Student Card -->
-        <a href="Student-login.html" class="glass-card glow-border p-8 rounded-3xl flex flex-col items-center justify-between text-center relative overflow-hidden" id="student-card">
-          <div class="absolute -top-10 -right-10 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl"></div>
-          <div class="space-y-6 w-full flex flex-col items-center">
-            <img src="student_avatar.jpg" alt="Student Avatar" class="h-16 w-16 rounded-2xl object-cover border border-cyan-500/20 shadow-md shadow-cyan-500/10" />
-            <div class="space-y-2">
-              <h3 class="text-2xl font-bold text-slate-800">พอร์ทัลนักศึกษา</h3>
-              <p class="text-xs text-slate-555 leading-relaxed">ลงทะเบียนเข้าห้องสอบด้วยรหัสวิชา ทำข้อสอบผ่านโปรแกรมเบราว์เซอร์ที่มีระบบควบคุมการสลับแท็บ</p>
-            </div>
-            <div class="flex flex-wrap gap-2 justify-center">
-              <span class="text-[10px] px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-700 font-bold">🔒 ปลอดภัย</span>
-              <span class="text-[10px] px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-700 font-bold">⚡ ตรวจสอบเรียลไทม์</span>
-            </div>
-          </div>
-          <button class="mt-8 w-full py-4.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 font-bold text-sm text-white hover:from-cyan-600 hover:to-indigo-600 transition flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/15">
-            เข้าสู่ระบบนักศึกษา
-          </button>
-        </a>
-
-        <!-- Teacher Card -->
-        <a href="teacher-login.html" class="glass-card glow-border p-8 rounded-3xl flex flex-col items-center justify-between text-center relative overflow-hidden" id="teacher-card">
-          <div class="absolute -top-10 -right-10 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl"></div>
-          <div class="space-y-6 w-full flex flex-col items-center">
-            <img src="teacher_avatar.jpg" alt="Teacher Avatar" class="h-16 w-16 rounded-2xl object-cover border border-indigo-500/20 shadow-md shadow-indigo-500/10" />
-            <div class="space-y-2">
-              <h3 class="text-2xl font-bold text-slate-800">แผงควบคุมอาจารย์</h3>
-              <p class="text-xs text-slate-555 leading-relaxed">จัดการข้อมูลข้อสอบ วิเคราะห์ความประพฤติผู้สอบเรียลไทม์ และสรุปรายงานความยากง่ายข้อสอบ (Item Analysis)</p>
-            </div>
-            <div class="flex flex-wrap gap-2 justify-center">
-              <span class="text-[10px] px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 font-bold">📋 จัดการห้องสอบ</span>
-              <span class="text-[10px] px-2.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 font-bold">📊 ผลลัพธ์เชิงสถิติ</span>
-            </div>
-          </div>
-          <button class="mt-8 w-full py-4.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 font-bold text-sm text-white hover:from-indigo-600 hover:to-violet-600 transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/15">
-            เข้าสู่ระบบอาจารย์
-          </button>
-        </a>
-      </div>
-      <div class="text-center mt-6">
-        <a href="admin-login.html" class="text-xs font-bold text-rose-600 hover:text-rose-700 hover:underline transition">
-          🔐 สำหรับผู้ดูแลระบบสูงสุด (Super Admin Portal)
-        </a>
-      </div>
-    </section>
-
-    <!-- ===== 7. FOOTER ===== -->
-    <footer class="mt-16 border-t border-slate-205 py-12 space-y-8">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div class="space-y-4">
-          <div class="flex items-center gap-3">
-            <img src="logo.png" alt="Tab-Lock Logo" class="h-8 w-8 object-cover rounded-lg shadow-sm border border-slate-100" />
-            <span class="text-base font-extrabold tracking-tight text-slate-800">TAB-<span class="text-cyan-600">LOCK</span></span>
-          </div>
-          <p class="text-xs text-slate-555 leading-relaxed">แพลตฟอร์มจัดการและควบคุมการสอบออนไลน์ ป้องกันการทุจริต ยกระดับการศึกษาอย่างยุติธรรมในทุกระดับชั้น</p>
-        </div>
-
-        <div class="space-y-4">
-          <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">สำหรับครูและสถาบัน</h4>
-          <ul class="space-y-2 text-xs text-slate-555">
-            <li><a href="teacher-login.html" class="hover:text-cyan-600 transition">เข้าสู่ระบบอาจารย์</a></li>
-            <li><a href="register-teacher.html" class="hover:text-cyan-600 transition">ลงทะเบียนบัญชีผู้สอน</a></li>
-            <li><a href="admin-login.html" class="hover:text-cyan-600 transition">ทางเข้าสำหรับผู้ดูแลระบบ</a></li>
-          </ul>
-        </div>
-
-        <div class="space-y-4">
-          <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">ลิงก์นำทาง</h4>
-          <ul class="space-y-2 text-xs text-slate-555">
-            <li><a href="#" class="hover:text-cyan-600 transition">หน้าแรกแนะนำระบบ</a></li>
-            <li><a href="#features" class="hover:text-cyan-600 transition">ฟีเจอร์เด่น</a></li>
-            <li><a href="#workflow" class="hover:text-cyan-600 transition">ขั้นตอนการทำงาน</a></li>
-          </ul>
-        </div>
-
-        <div class="space-y-4">
-          <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">ความปลอดภัย</h4>
-          <p class="text-xs text-slate-555 leading-relaxed">ระบบจัดเก็บฐานข้อมูลอย่างรัดกุมผ่านระบบ SQLite3 มีการส่งข้อมูลแบบเข้ารหัส HTTPS ปกป้องข้อมูลข้อสอบและประวัตินักเรียนอย่างสูงสุด</p>
-        </div>
-      </div>
-
-      <div class="flex flex-col sm:flex-row items-center justify-between pt-8 border-t border-slate-205 text-[10px] text-slate-500">
-        <div>&copy; 2026 Tab-Lock Online Exam Platform. All rights reserved. สงวนลิขสิทธิ์ทั้งหมด</div>
-        <div class="flex gap-4 mt-4 sm:mt-0">
-          <a href="admin-login.html" class="admin-pill px-3 py-1.5 rounded-full text-slate-500 hover:text-rose-600 transition font-bold flex items-center gap-1.5" id="admin-link">
-            Admin Access
-          </a>
-          <span>SECURED v3.0</span>
-        </div>
-      </div>
-    </footer>
-  </div>
-
-  <!-- Javascript workflows -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+  
   <script>
-    function switchWorkflowTab(type) {
-      const btnStudent = document.getElementById('workflow-tab-student');
-      const btnTeacher = document.getElementById('workflow-tab-teacher');
-      const contentStudent = document.getElementById('workflow-content-student');
-      const contentTeacher = document.getElementById('workflow-content-teacher');
-
-      if (type === 'student') {
-        btnStudent.className = 'px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-indigo-500 transition shadow-sm';
-        btnTeacher.className = 'px-6 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition';
-        
-        contentStudent.classList.remove('hidden');
-        contentTeacher.classList.add('hidden');
-      } else {
-        btnTeacher.className = 'px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-indigo-500 transition shadow-sm';
-        btnStudent.className = 'px-6 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-700 transition';
-
-        contentTeacher.classList.remove('hidden');
-        contentStudent.classList.add('hidden');
+    // Tailwind Config
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Kanit', 'sans-serif'],
+          }
+        }
       }
     }
+  </script>
+
+  <style>
+    /* GLOBAL STYLES */
+    html, body, #root {
+      background-color: #0C0C0C;
+      color: #D7E2EA;
+      font-family: 'Kanit', 'sans-serif';
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    * {
+      box-sizing: inherit;
+    }
+
+    .hero-heading {
+      background: linear-gradient(180deg, #646973 0%, #BBCCD7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Custom Hide Scrollbar for Marquees */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Floating Portal Button styling */
+    .portal-float-btn {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 9999;
+      background: linear-gradient(135deg, #0891b2, #7c3aed);
+      box-shadow: 0 4px 20px rgba(8, 145, 178, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .portal-float-btn:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 8px 30px rgba(8, 145, 178, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React code with Babel compiler -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+    const { motion, useScroll, useTransform, AnimatePresence } = window.Motion || {
+      // Fallback in case Framer Motion UMD fails to load
+      motion: {
+        div: (props) => <div {...props} />,
+        h1: (props) => <h1 {...props} />,
+        h2: (props) => <h2 {...props} />,
+        span: (props) => <span {...props} />,
+        p: (props) => <p {...props} />,
+        nav: (props) => <nav {...props} />,
+      }
+    };
+
+    // --- REUSABLE COMPONENTS ---
+
+    // ContactButton
+    const ContactButton = ({ className = '', onClick, label = "เข้าสู่ระบบ 🔒" }) => {
+      return (
+        <button
+          onClick={onClick}
+          className={`rounded-full transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98] font-medium uppercase tracking-widest text-white px-8 py-3 sm:px-10 sm:py-3.5 md:px-12 md:py-4 text-xs sm:text-sm md:text-base ${className}`}
+          style={{
+            background: 'linear-gradient(123deg, #18011F 7%, #B600A8 37%, #7621B0 72%, #BE4C00 100%)',
+            boxShadow: '0px 4px 4px rgba(181, 1, 167, 0.25), inset 4px 4px 12px #7721B1',
+            outline: '2px solid white',
+            outlineOffset: '-3px',
+          }}
+        >
+          {label}
+        </button>
+      );
+    };
+
+    // LiveProjectButton
+    const LiveProjectButton = ({ className = '', onClick, label = "เข้าสู่ระบบ ➔" }) => {
+      return (
+        <button
+          onClick={onClick}
+          className={`rounded-full border-2 border-[#D7E2EA] text-[#D7E2EA] font-medium uppercase tracking-widest px-8 py-3 sm:px-10 sm:py-3.5 text-sm sm:text-base hover:bg-[#D7E2EA]/10 transition-colors duration-200 active:scale-[0.98] ${className}`}
+        >
+          {label}
+        </button>
+      );
+    };
+
+    // FadeIn Animation Wrapper
+    const FadeIn = ({ children, delay = 0, duration = 0.7, x = 0, y = 30, as = 'div', className = '' }) => {
+      const Component = motion[as] || motion.div;
+      return (
+        <Component
+          initial={{ opacity: 0, x, y }}
+          whileInView={{ opacity: 1, x: 0, y: 0 }}
+          viewport={{ once: true, margin: '50px', amount: 0 }}
+          transition={{
+            delay,
+            duration,
+            ease: [0.25, 0.1, 0.25, 1],
+          }}
+          className={className}
+        >
+          {children}
+        </Component>
+      );
+    };
+
+    // Magnet mouse-following hover effect
+    const Magnet = ({ children, padding = 150, strength = 3, activeTransition = 'transform 0.3s ease-out', inactiveTransition = 'transform 0.6s ease-in-out', className = '' }) => {
+      const [position, setPosition] = useState({ x: 0, y: 0 });
+      const [isActive, setIsActive] = useState(false);
+      const elementRef = useRef(null);
+
+      useEffect(() => {
+        const handleMouseMove = (e) => {
+          if (!elementRef.current) return;
+          const rect = elementRef.current.getBoundingClientRect();
+          const centerX = rect.left + rect.width / 2;
+          const centerY = rect.top + rect.height / 2;
+
+          const distanceX = e.clientX - centerX;
+          const distanceY = e.clientY - centerY;
+
+          const isInside =
+            e.clientX >= rect.left - padding &&
+            e.clientX <= rect.right + padding &&
+            e.clientY >= rect.top - padding &&
+            e.clientY <= rect.bottom + padding;
+
+          if (isInside) {
+            setIsActive(true);
+            setPosition({
+              x: distanceX / strength,
+              y: distanceY / strength,
+            });
+          } else {
+            setIsActive(false);
+            setPosition({ x: 0, y: 0 });
+          }
+        };
+
+        const handleMouseLeave = () => {
+          setIsActive(false);
+          setPosition({ x: 0, y: 0 });
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseleave', handleMouseLeave);
+        return () => {
+          window.removeEventListener('mousemove', handleMouseMove);
+          window.removeEventListener('mouseleave', handleMouseLeave);
+        };
+      }, [padding, strength]);
+
+      return (
+        <div
+          ref={elementRef}
+          className={`relative inline-block ${className}`}
+          style={{
+            transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+            transition: isActive ? activeTransition : inactiveTransition,
+            willChange: 'transform',
+          }}
+        >
+          {children}
+        </div>
+      );
+    };
+
+    // Character character scroll text reveal component
+    const Character = ({ char, index, total, progress }) => {
+      if (!progress) return <span className="inline-block">{char === ' ' ? '\u00A0' : char}</span>;
+      
+      const start = index / total;
+      const end = Math.min(1, (index + 8) / total);
+      const opacity = useTransform(progress, [start, end], [0.2, 1]);
+
+      if (char === ' ') {
+        return <span className="inline-block">&nbsp;</span>;
+      }
+
+      return (
+        <span className="relative inline-block">
+          <span className="opacity-0">{char}</span>
+          <motion.span style={{ opacity }} className="absolute inset-0 select-none">
+            {char}
+          </motion.span>
+        </span>
+      );
+    };
+
+    const AnimatedText = ({ text, className = '', style }) => {
+      const containerRef = useRef(null);
+      let scrollYProgress = null;
+
+      try {
+        const { scrollYProgress: sp } = useScroll({
+          target: containerRef,
+          offset: ['start 0.8', 'end 0.2'],
+        });
+        scrollYProgress = sp;
+      } catch (e) {
+        // Safe fallback in case hooks fail
+      }
+
+      const chars = text.split('');
+      const total = chars.length;
+
+      return (
+        <p ref={containerRef} className={`flex flex-wrap ${className}`} style={style}>
+          {chars.map((char, index) => (
+            <Character
+              key={index}
+              char={char}
+              index={index}
+              total={total}
+              progress={scrollYProgress}
+            />
+          ))}
+        </p>
+      );
+    };
+
+
+    // --- SECTION 1: HERO SECTION ---
+    const HeroSection = ({ onPortalClick }) => {
+      return (
+        <section className="h-screen w-full flex flex-col justify-between relative overflow-hidden bg-[#0C0C0C]" style={{ overflowX: 'clip' }}>
+          {/* Navbar */}
+          <FadeIn delay={0} y={-20} as="nav" className="w-full px-6 md:px-10 pt-6 md:pt-8 flex justify-between items-center z-20">
+            <div className="text-xl font-bold tracking-wider text-[#D7E2EA]">TAB-LOCK</div>
+            <div className="flex gap-4 sm:gap-6 md:gap-10">
+              <a href="#about" className="text-[#D7E2EA] font-medium uppercase tracking-wider text-sm md:text-lg lg:text-[1.4rem] hover:opacity-70 transition-opacity duration-200">About</a>
+              <a href="#features" className="text-[#D7E2EA] font-medium uppercase tracking-wider text-sm md:text-lg lg:text-[1.4rem] hover:opacity-70 transition-opacity duration-200">Features</a>
+              <a href="#projects" className="text-[#D7E2EA] font-medium uppercase tracking-wider text-sm md:text-lg lg:text-[1.4rem] hover:opacity-70 transition-opacity duration-200">Portal</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); onPortalClick(); }} className="text-[#D7E2EA] font-semibold uppercase tracking-wider text-sm md:text-lg lg:text-[1.4rem] hover:opacity-70 transition-opacity duration-200 text-cyan-400">เข้าสู่ระบบ 🔒</a>
+            </div>
+          </FadeIn>
+
+          {/* Portrait Portrait - AI Guardian Mascot */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div className="relative w-full h-full">
+              <FadeIn
+                delay={0.6}
+                y={30}
+                className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 sm:top-auto sm:translate-y-0 sm:bottom-0 pointer-events-auto"
+              >
+                <Magnet
+                  padding={150}
+                  strength={3}
+                  activeTransition="transform 0.3s ease-out"
+                  inactiveTransition="transform 0.6s ease-in-out"
+                >
+                  <img
+                    src="https://shrug-person-78902957.figma.site/_components/v2/d24c01ad3a56fc65e942a1f501eb73db42d7cf9a/Rectangle_40443.81459862.png"
+                    alt="AI Guardian Guardian Mascot"
+                    className="w-[280px] sm:w-[360px] md:w-[440px] lg:w-[520px] h-auto object-contain pointer-events-none select-none opacity-80"
+                  />
+                </Magnet>
+              </FadeIn>
+            </div>
+          </div>
+
+          {/* Main Content Title */}
+          <div className="flex-1 flex flex-col justify-center items-center px-6 md:px-10 relative z-0">
+            <div className="w-full text-center overflow-hidden py-4">
+              <FadeIn delay={0.15} y={40} as="h1" className="w-full">
+                <span className="hero-heading font-black uppercase tracking-tight leading-none whitespace-nowrap block text-[13vw] sm:text-[14vw] md:text-[15vw] lg:text-[16.5vw] mt-6 sm:mt-4 md:-mt-5">
+                  TAB-LOCK EXAM
+                </span>
+              </FadeIn>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="w-full px-6 md:px-10 pb-7 sm:pb-8 md:pb-10 flex justify-between items-end z-20">
+            <FadeIn delay={0.35} y={20} className="text-left">
+              <p
+                className="text-[#D7E2EA] font-light uppercase tracking-wide leading-snug max-w-[160px] sm:max-w-[220px] md:max-w-[260px]"
+                style={{ fontSize: 'clamp(0.75rem, 1.4vw, 1.5rem)' }}
+              >
+                an online exam platform designed to prevent cheating and secure exam environments
+              </p>
+            </FadeIn>
+
+            <FadeIn delay={0.5} y={20}>
+              <ContactButton onClick={onPortalClick} label="เข้าสู่ระบบ 🔒" />
+            </FadeIn>
+          </div>
+        </section>
+      );
+    };
+
+
+    // --- SECTION 2: MARQUEE SECTION ---
+    const row1Images = [
+      'images/student_exam_ui.jpg',
+      'images/student_studying.jpg',
+      'images/student_cartoon.jpg',
+      'images/teacher_cartoon.jpg',
+      'images/teacher_class.jpg',
+      'images/teacher_analytics.jpg',
+    ];
+
+    const row2Images = [
+      'images/admin_cartoon.jpg',
+      'images/admin_security.jpg',
+      'images/admin_database.jpg',
+      'images/exam_security_ui.jpg',
+      'images/classroom_stats_ui.jpg',
+      'images/ai_question_generation_ui.jpg',
+    ];
+
+    const MarqueeSection = () => {
+      const sectionRef = useRef(null);
+      const [scrollOffset, setScrollOffset] = useState(0);
+
+      useEffect(() => {
+        const handleScroll = () => {
+          if (!sectionRef.current) return;
+          const rect = sectionRef.current.getBoundingClientRect();
+          const sectionTop = rect.top + window.scrollY;
+          const offset = (window.scrollY - sectionTop + window.innerHeight) * 0.3;
+          setScrollOffset(offset);
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll();
+
+        return () => {
+          window.removeEventListener('scroll', handleScroll);
+        };
+      }, []);
+
+      const tripledRow1 = [...row1Images, ...row1Images, ...row1Images];
+      const tripledRow2 = [...row2Images, ...row2Images, ...row2Images];
+
+      return (
+        <section
+          ref={sectionRef}
+          className="w-full bg-[#0C0C0C] pt-24 sm:pt-32 md:pt-40 pb-10 overflow-hidden flex flex-col gap-3"
+        >
+          <div className="w-full overflow-hidden">
+            <div
+              className="flex gap-3 w-max"
+              style={{
+                transform: `translateX(${scrollOffset - 2000}px)`,
+                willChange: 'transform',
+                transition: 'transform 0.1s ease-out',
+              }}
+            >
+              {tripledRow1.map((url, idx) => (
+                <img
+                  key={`r1-${idx}`}
+                  src={url}
+                  alt={`Marquee item ${idx}`}
+                  loading="lazy"
+                  className="w-[300px] h-[190px] sm:w-[360px] sm:h-[230px] md:w-[420px] md:h-[270px] rounded-2xl object-cover"
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="w-full overflow-hidden">
+            <div
+              className="flex gap-3 w-max"
+              style={{
+                transform: `translateX(-${scrollOffset + 1000}px)`,
+                willChange: 'transform',
+                transition: 'transform 0.1s ease-out',
+              }}
+            >
+              {tripledRow2.map((url, idx) => (
+                <img
+                  key={`r2-${idx}`}
+                  src={url}
+                  alt={`Marquee item ${idx}`}
+                  loading="lazy"
+                  className="w-[300px] h-[190px] sm:w-[360px] sm:h-[230px] md:w-[420px] md:h-[270px] rounded-2xl object-cover"
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+
+    // --- SECTION 3: ABOUT SECTION ---
+    const AboutSection = ({ onPortalClick }) => {
+      return (
+        <section id="about" className="min-h-screen w-full relative bg-[#0C0C0C] px-5 sm:px-8 md:px-10 py-20 flex flex-col justify-center items-center overflow-hidden">
+          {/* Moon icon */}
+          <FadeIn
+            delay={0.1}
+            x={-80}
+            y={0}
+            duration={0.9}
+            className="absolute top-[4%] left-[1%] sm:left-[2%] md:left-[4%] z-0"
+          >
+            <img
+              src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/moon_icon.11395d36.png"
+              alt="Moon icon"
+              className="w-[120px] sm:w-[160px] md:w-[210px] h-auto object-contain select-none pointer-events-none"
+            />
+          </FadeIn>
+
+          {/* 3D object */}
+          <FadeIn
+            delay={0.25}
+            x={-80}
+            y={0}
+            duration={0.9}
+            className="absolute bottom-[8%] left-[3%] sm:left-[6%] md:left-[10%] z-0"
+          >
+            <img
+              src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/p59_1.4659672e.png"
+              alt="3D object left"
+              className="w-[100px] sm:w-[140px] md:w-[180px] h-auto object-contain select-none pointer-events-none"
+            />
+          </FadeIn>
+
+          {/* Lego icon */}
+          <FadeIn
+            delay={0.15}
+            x={80}
+            y={0}
+            duration={0.9}
+            className="absolute top-[4%] right-[1%] sm:right-[2%] md:right-[4%] z-0"
+          >
+            <img
+              src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/lego_icon-1.703bb594.png"
+              alt="Lego icon"
+              className="w-[120px] sm:w-[160px] md:w-[210px] h-auto object-contain select-none pointer-events-none"
+            />
+          </FadeIn>
+
+          {/* 3D group */}
+          <FadeIn
+            delay={0.3}
+            x={80}
+            y={0}
+            duration={0.9}
+            className="absolute bottom-[8%] right-[3%] sm:right-[6%] md:right-[10%] z-0"
+          >
+            <img
+              src="https://shrug-person-78902957.figma.site/_components/v2/ebb2b8f25d8e24d5f0a5ca8af4c950de81aa2fd7/Group_134-1.2e04f3ce.png"
+              alt="3D object right"
+              className="w-[130px] sm:w-[170px] md:w-[220px] h-auto object-contain select-none pointer-events-none"
+            />
+          </FadeIn>
+
+          <div className="relative z-10 flex flex-col items-center max-w-4xl w-full">
+            <FadeIn delay={0} y={40} className="w-full text-center">
+              <h2
+                className="hero-heading font-black uppercase leading-none tracking-tight text-center"
+                style={{ fontSize: 'clamp(3rem, 12vw, 160px)' }}
+              >
+                About Us
+              </h2>
+            </FadeIn>
+
+            <div className="h-10 sm:h-14 md:h-16" />
+
+            <AnimatedText
+              text="ด้วยเทคโนโลยีป้องกันการทุจริตขั้นสูง Tab-Lock มุ่งเน้นไปที่ระบบตรวจจับการสลับหน้าต่าง (Window Switching), การสร้างข้อสอบที่มีความปลอดภัย และระบบตรวจข้อสอบอัตโนมัติ เรารู้สึกยินดีเป็นอย่างยิ่งที่ได้ช่วยเหลือสถาบันการศึกษาต่าง ๆ ที่ต้องการจัดสอบอย่างปลอดภัยและโปร่งใส มาร่วมกันทำให้การสอบของคุณปลอดภัยไปด้วยกัน!"
+              className="text-[#D7E2EA] font-medium leading-relaxed max-w-[560px] text-center justify-center"
+              style={{ fontSize: 'clamp(1rem, 2vw, 1.35rem)' }}
+            />
+
+            <div className="h-16 sm:h-20 md:h-24" />
+
+            <FadeIn delay={0.1} y={20}>
+              <ContactButton onClick={onPortalClick} label="เข้าสู่ระบบ 🔒" />
+            </FadeIn>
+          </div>
+        </section>
+      );
+    };
+
+
+    // --- SECTION 4: SERVICES SECTION ---
+    const servicesData = [
+      {
+        num: '01',
+        name: 'Anti-Cheating Guard',
+        desc: 'ระบบตรวจจับการสลับหน้าต่างและแท็บแบบเรียลไทม์ พร้อมสัญญาณเตือนอัตโนมัติเมื่อพบพฤติกรรมที่น่าสงสัย',
+      },
+      {
+        num: '02',
+        name: 'AI Question Generator',
+        desc: 'สร้างข้อสอบคุณภาพสูงในทุกหัวข้อได้ทันที โดยใช้ขุมพลังจากระบบ Google Gemini AI ที่รวมอยู่ในตัว',
+      },
+      {
+        num: '03',
+        name: 'Live Monitoring',
+        desc: 'ติดตามห้องสอบที่กำลังใช้งาน สถานะของนักเรียน และตรวจสอบบันทึกการทุจริตแบบเรียลไทม์ผ่านแดชบอร์ดของผู้สอน',
+      },
+      {
+        num: '04',
+        name: 'Analytics & Reports',
+        desc: 'รับผลการประมวลผลอัตโนมัติทั้งค่า Z-score, T-score, การวิเคราะห์รายข้อ (Item Analysis) และสามารถดาวน์โหลดผลลัพธ์ในรูปแบบไฟล์ Excel ได้',
+      },
+      {
+        num: '05',
+        name: 'Exam Template Bank',
+        desc: 'คลังจัดเก็บเทมเพลตที่อยู่ถาวร สามารถปรับแต่งกฎ สุ่มข้อสอบ และนำกลับมาใช้ซ้ำในห้องสอบต่าง ๆ ได้อย่างสะดวกสบาย',
+      },
+    ];
+
+    const ServicesSection = () => {
+      return (
+        <section id="features" className="bg-white rounded-t-[40px] sm:rounded-t-[50px] md:rounded-t-[60px] px-5 sm:px-8 md:px-10 py-20 sm:py-24 md:py-32 relative z-0">
+          <div className="max-w-5xl mx-auto w-full flex flex-col">
+            <FadeIn delay={0} y={40} className="w-full text-center">
+              <h2
+                className="text-[#0C0C0C] font-black uppercase text-center leading-none tracking-tight mb-16 sm:mb-20 md:mb-28"
+                style={{ fontSize: 'clamp(3rem, 12vw, 160px)' }}
+              >
+                Features
+              </h2>
+            </FadeIn>
+
+            <div className="flex flex-col w-full">
+              {servicesData.map((service, index) => (
+                <FadeIn
+                  key={service.num}
+                  delay={index * 0.1}
+                  y={30}
+                  className="border-t border-[rgba(12,12,12,0.15)] last:border-b last:border-[rgba(12,12,12,0.15)]"
+                >
+                  <div className="flex flex-row items-center gap-6 sm:gap-10 md:gap-14 py-8 sm:py-10 md:py-12 w-full text-left">
+                    <div
+                      className="font-black text-[#0C0C0C] select-none leading-none tracking-tight shrink-0 min-w-[70px] sm:min-w-[120px] md:min-w-[170px]"
+                      style={{ fontSize: 'clamp(2.5rem, 10vw, 140px)' }}
+                    >
+                      {service.num}
+                    </div>
+
+                    <div className="flex flex-col gap-2 md:gap-3 flex-1">
+                      <h3
+                        className="font-medium uppercase text-[#0C0C0C]"
+                        style={{ fontSize: 'clamp(1rem, 2.2vw, 2.1rem)' }}
+                      >
+                        {service.name}
+                      </h3>
+                      <p
+                        className="font-light leading-relaxed text-[#0C0C0C] opacity-60 max-w-2xl"
+                        style={{ fontSize: 'clamp(0.85rem, 1.6vw, 1.25rem)' }}
+                      >
+                        {service.desc}
+                      </p>
+                    </div>
+                  </div>
+                </FadeIn>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+
+    // --- SECTION 5: PROJECTS SECTION ---
+    const projectsData = [
+      {
+        num: '01',
+        category: 'Exam Environment',
+        name: 'Student Exam Portal',
+        link: 'Student-login.html',
+        col1Img1: 'images/student_exam_ui.jpg',
+        col1Img2: 'images/student_studying.jpg',
+        col2Img: 'images/student_cartoon.jpg',
+      },
+      {
+        num: '02',
+        category: 'Management & Monitoring',
+        name: 'Teacher Dashboard',
+        link: 'teacher-login.html',
+        col1Img1: 'images/teacher_analytics.jpg',
+        col1Img2: 'images/teacher_class.jpg',
+        col2Img: 'images/teacher_cartoon.jpg',
+      },
+      {
+        num: '03',
+        category: 'Global System Controls',
+        name: 'Super Admin Panel',
+        link: 'admin-login.html',
+        col1Img1: 'images/admin_database.jpg',
+        col1Img2: 'images/admin_security.jpg',
+        col2Img: 'images/admin_cartoon.jpg',
+      },
+    ];
+
+    const StackingCard = ({ project, index, totalCards }) => {
+      const containerRef = useRef(null);
+      const targetScale = 1 - (totalCards - 1 - index) * 0.03;
+      const topOffset = index * 28;
+      let scale = 1;
+
+      try {
+        const { scrollYProgress } = useScroll({
+          target: containerRef,
+          offset: ['start start', 'end start'],
+        });
+        scale = useTransform(scrollYProgress, [0, 1], [1, targetScale]);
+      } catch (e) {
+        // Fallback
+      }
+
+      return (
+        <div
+          ref={containerRef}
+          className="sticky w-full h-[85vh] flex items-start justify-center"
+          style={{
+            top: `calc(6rem + ${topOffset}px)`,
+          }}
+        >
+          <motion.div
+            style={{ scale }}
+            className="w-full bg-[#0C0C0C] border-2 border-[#D7E2EA] rounded-[40px] sm:rounded-[50px] md:rounded-[60px] p-4 sm:p-6 md:p-8 flex flex-col gap-6 sm:gap-8 md:gap-10 shadow-2xl"
+          >
+            {/* Top Row */}
+            <div className="flex justify-between items-center w-full">
+              <div className="flex items-center gap-4 sm:gap-6">
+                <span
+                  className="font-black text-[#D7E2EA] leading-none"
+                  style={{ fontSize: 'clamp(2rem, 6vw, 90px)' }}
+                >
+                  {project.num}
+                </span>
+                <div className="flex flex-col text-left">
+                  <span className="text-xs sm:text-sm uppercase tracking-wider text-[#D7E2EA] opacity-60">
+                    {project.category}
+                  </span>
+                  <span className="text-sm sm:text-lg md:text-xl font-bold text-[#D7E2EA] uppercase tracking-wide">
+                    {project.name}
+                  </span>
+                </div>
+              </div>
+
+              <LiveProjectButton onClick={() => window.location.href = project.link} label="เข้าสู่ระบบ" />
+            </div>
+
+            {/* Bottom Row - Columns Image Grid */}
+            <div className="grid grid-cols-10 gap-3 sm:gap-4 md:gap-5 w-full flex-1 min-h-0 overflow-hidden">
+              <div className="col-span-4 flex flex-col gap-3 sm:gap-4 h-full justify-between">
+                <img
+                  src={project.col1Img1}
+                  alt={`${project.name} image 1`}
+                  className="w-full object-cover rounded-[20px] sm:rounded-[35px] md:rounded-[45px] lg:rounded-[60px] select-none pointer-events-none flex-1 min-h-0"
+                  style={{ height: 'clamp(130px, 16vw, 230px)' }}
+                />
+                <img
+                  src={project.col1Img2}
+                  alt={`${project.name} image 2`}
+                  className="w-full object-cover rounded-[20px] sm:rounded-[35px] md:rounded-[45px] lg:rounded-[60px] select-none pointer-events-none flex-1 min-h-0"
+                  style={{ height: 'clamp(160px, 22vw, 340px)' }}
+                />
+              </div>
+
+              <div className="col-span-6 h-full">
+                <img
+                  src={project.col2Img}
+                  alt={`${project.name} image 3`}
+                  className="w-full h-full object-cover rounded-[20px] sm:rounded-[35px] md:rounded-[45px] lg:rounded-[60px] select-none pointer-events-none"
+                />
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      );
+    };
+
+    const ProjectsSection = () => {
+      const sectionRef = useRef(null);
+      let scrollYProgress = null;
+
+      try {
+        const { scrollYProgress: sp } = useScroll({
+          target: sectionRef,
+          offset: ['start start', 'end end'],
+        });
+        scrollYProgress = sp;
+      } catch (e) {
+        // Fallback
+      }
+
+      const totalCards = projectsData.length;
+
+      return (
+        <section
+          ref={sectionRef}
+          id="projects"
+          className="bg-[#0C0C0C] rounded-t-[40px] sm:rounded-t-[50px] md:rounded-t-[60px] -mt-10 sm:-mt-12 md:-mt-14 pt-20 pb-20 relative z-10 px-5 sm:px-8 md:px-10 flex flex-col items-center"
+        >
+          <div className="max-w-5xl w-full flex flex-col gap-16 md:gap-20">
+            <FadeIn delay={0} y={40} className="w-full text-center">
+              <h2
+                className="hero-heading font-black uppercase text-center leading-none tracking-tight"
+                style={{ fontSize: 'clamp(3rem, 12vw, 160px)' }}
+              >
+                Portals
+              </h2>
+            </FadeIn>
+
+            <div className="flex flex-col gap-24 sm:gap-32 w-full relative">
+              {projectsData.map((project, index) => (
+                <StackingCard
+                  key={project.num}
+                  project={project}
+                  index={index}
+                  totalCards={totalCards}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    };
+
+
+    // --- FLOATING PORTAL OVERLAY MODAL ---
+    const FloatingPortal = ({ isOpen, setIsOpen }) => {
+      return (
+        <React.Fragment>
+          {/* Floating trigger button */}
+          <button
+            onClick={() => setIsOpen(true)}
+            className="portal-float-btn px-5 py-3 rounded-full text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2 select-none"
+          >
+            🔒 ระบบสอบ Tab-Lock
+          </button>
+
+          {/* Modal overlay */}
+          <AnimatePresence>
+            {isOpen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[99999] flex items-center justify-center p-4"
+                onClick={() => setIsOpen(false)}
+              >
+                <motion.div
+                  initial={{ scale: 0.9, y: 20 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.9, y: 20 }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+                  className="bg-white rounded-3xl p-8 md:p-10 max-w-2xl w-full shadow-2xl space-y-6 text-[#0C0C0C]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <h3 className="text-2xl font-black text-slate-800 uppercase tracking-wide">เข้าสู่ระบบสอบออนไลน์</h3>
+                      <p className="text-sm text-slate-500 font-medium">กรุณาเลือกประเภทการใช้งานเพื่อเข้าสู่ระบบสอบ Tab-Lock</p>
+                    </div>
+                    <button
+                      onClick={() => setIsOpen(false)}
+                      className="text-slate-400 hover:text-slate-700 text-2xl font-bold p-1 hover:bg-slate-100 rounded-lg transition"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col gap-4">
+                    <a
+                      href="Student-login.html"
+                      className="flex items-center justify-between p-4 rounded-2xl bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 transition-all font-bold group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <img
+                          src="images/student_cartoon.jpg"
+                          alt="Student 3D"
+                          className="w-16 h-16 rounded-2xl object-cover border border-cyan-150 shadow-sm"
+                        />
+                        <div className="flex flex-col text-left">
+                          <span className="text-base sm:text-lg text-cyan-800 leading-tight">เข้าสู่ระบบนักศึกษา</span>
+                          <span className="text-xs sm:text-sm text-cyan-600 font-light">สำหรับเข้าทำข้อสอบ</span>
+                        </div>
+                      </div>
+                      <span className="text-cyan-400 group-hover:translate-x-1.5 transition-transform text-lg">➔</span>
+                    </a>
+
+                    <a
+                      href="teacher-login.html"
+                      className="flex items-center justify-between p-4 rounded-2xl bg-violet-50 hover:bg-violet-100 border border-violet-200 transition-all font-bold group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <img
+                          src="images/teacher_cartoon.jpg"
+                          alt="Teacher 3D"
+                          className="w-16 h-16 rounded-2xl object-cover border border-violet-150 shadow-sm"
+                        />
+                        <div className="flex flex-col text-left">
+                          <span className="text-base sm:text-lg text-violet-800 leading-tight">เข้าสู่ระบบอาจารย์</span>
+                          <span className="text-xs sm:text-sm text-violet-600 font-light">สำหรับสร้างข้อสอบและดูรายงาน</span>
+                        </div>
+                      </div>
+                      <span className="text-violet-400 group-hover:translate-x-1.5 transition-transform text-lg">➔</span>
+                    </a>
+
+                    <a
+                      href="admin-login.html"
+                      className="flex items-center justify-between p-4 rounded-2xl bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all font-bold group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <img
+                          src="images/admin_cartoon.jpg"
+                          alt="Admin 3D"
+                          className="w-16 h-16 rounded-2xl object-cover border border-rose-150 shadow-sm"
+                        />
+                        <div className="flex flex-col text-left">
+                          <span className="text-base sm:text-lg text-rose-800 leading-tight">ทางเข้าผู้ดูแลระบบ</span>
+                          <span className="text-xs sm:text-sm text-rose-600 font-light">Super Admin Dashboard</span>
+                        </div>
+                      </div>
+                      <span className="text-rose-400 group-hover:translate-x-1.5 transition-transform text-lg">➔</span>
+                    </a>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </React.Fragment>
+      );
+    };
+
+
+    // --- MAIN APP COMPONENT ---
+    const App = () => {
+      const [isPortalOpen, setIsPortalOpen] = useState(false);
+
+      return (
+        <div className="w-full min-h-screen bg-[#0C0C0C] text-[#D7E2EA] overflow-x-clip select-none relative">
+          <HeroSection onPortalClick={() => setIsPortalOpen(true)} />
+          <MarqueeSection />
+          <AboutSection onPortalClick={() => setIsPortalOpen(true)} />
+          <ServicesSection />
+          <ProjectsSection />
+          <FloatingPortal isOpen={isPortalOpen} setIsOpen={setIsPortalOpen} />
+        </div>
+      );
+    };
+
+    // Render App
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
   </script>
 </body>
 </html>
