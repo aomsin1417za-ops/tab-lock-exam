@@ -131,6 +131,25 @@ db.serialize(() => {
         time TEXT
     )`);
 
+    // 11. ตารางคลังข้อสอบสะสม (My Exam Library)
+    db.run(`CREATE TABLE IF NOT EXISTS exam_templates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        teacherUsername TEXT,
+        templateName TEXT,
+        created_at TEXT
+    )`);
+
+    db.run(`CREATE TABLE IF NOT EXISTS template_questions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        templateId INTEGER,
+        question TEXT,
+        a TEXT, b TEXT, c TEXT, d TEXT, e TEXT, f TEXT, g TEXT, h TEXT, i TEXT, j TEXT,
+        answer TEXT,
+        question_img TEXT,
+        a_img TEXT, b_img TEXT, c_img TEXT, d_img TEXT, e_img TEXT, f_img TEXT, g_img TEXT, h_img TEXT, i_img TEXT, j_img TEXT,
+        FOREIGN KEY(templateId) REFERENCES exam_templates(id) ON DELETE CASCADE
+    )`);
+
     // ==========================================
     // ⚙️ ระบบ Auto-Migrations (เพิ่มคอลัมน์ใหม่สำหรับตารางเดิมที่มีอยู่แล้ว)
     // ==========================================
@@ -340,6 +359,7 @@ app.post('/api/teacher/update-exam-title', (req, res) => {
         [examTitle || '', username, roomId], function(err) {
         if (err) return res.status(500).json({ message: err.message });
         console.log(`🏷️ [ห้อง: ${roomId}] ตั้งชื่อการสอบเป็น: "${examTitle}"`);
+        syncRoomToLibrary(roomId);
         res.json({ success: true });
     });
 });
@@ -394,6 +414,7 @@ app.post('/api/upload-questions-excel', (req, res) => {
         });
 
         console.log(`📥 [ห้อง: ${roomId}] อัปโหลดข้อสอบสำเร็จ: ${questions.length} ข้อ (สูงสุด 10 ช้อยส์ + รูปภาพ)`);
+        syncRoomToLibrary(roomId);
         res.json({ success: true, count: questions.length });
     });
 });
@@ -441,6 +462,7 @@ app.post('/api/teacher/add-questions', (req, res) => {
     });
 
     console.log(`📥 [ห้อง: ${roomId}] เพิ่มข้อสอบใหม่สำเร็จ: ${questions.length} ข้อ`);
+    syncRoomToLibrary(roomId);
     res.json({ success: true, count: questions.length });
 });
 
@@ -845,7 +867,9 @@ app.post('/api/teacher/update-single-question', (req, res) => {
             // รีเซ็ตสถานะเผยแพร่ห้องสอบเมื่อมีการแก้ไขข้อสอบ
             db.get('SELECT roomId FROM questions WHERE id = ?', [id], (qErr, qRow) => {
                 if (qRow) {
-                    db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [qRow.roomId]);
+                    db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [qRow.roomId], () => {
+                        syncRoomToLibrary(qRow.roomId);
+                    });
                 }
             });
 
@@ -867,7 +891,9 @@ app.delete('/api/teacher/delete-question', (req, res) => {
             if (err) return res.status(500).json({ message: err.message });
             
             if (roomId) {
-                db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [roomId]);
+                db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [roomId], () => {
+                    syncRoomToLibrary(roomId);
+                });
             }
             res.json({ success: true });
         });
@@ -1236,6 +1262,300 @@ app.post('/api/teacher/publish-exam', (req, res) => {
             res.json({ success: true, is_published: 0, message: "ยกเลิกการเผยแพร่ข้อสอบแล้ว (กลับเข้าสู่สถานะแบบร่าง)" });
         });
     }
+});
+
+// ==========================================
+// 📚 ระบบคลังข้อสอบสะสม (My Exam Library) & 💾 ข้อมูลพื้นที่จัดเก็บ (Storage stats)
+// ==========================================
+
+function syncRoomToLibrary(roomId) {
+    db.get('SELECT teacherUsername, exam_title, roomName FROM teacher_rooms WHERE roomId = ?', [roomId], (err, room) => {
+        if (err || !room) return;
+        const teacherUsername = room.teacherUsername;
+        const templateName = room.exam_title || room.roomName || 'ข้อสอบไม่มีชื่อ';
+
+        db.get('SELECT id FROM exam_templates WHERE teacherUsername = ? AND templateName = ?', [teacherUsername, templateName], (err, tpl) => {
+            if (err) return;
+            const nowStr = new Date().toLocaleDateString('th-TH', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            if (tpl) {
+                const templateId = tpl.id;
+                db.run('DELETE FROM template_questions WHERE templateId = ?', [templateId], (delErr) => {
+                    if (delErr) return;
+                    copyRoomQuestionsToTemplate(roomId, templateId);
+                });
+                db.run('UPDATE exam_templates SET created_at = ? WHERE id = ?', [nowStr, templateId]);
+            } else {
+                db.run('INSERT INTO exam_templates (teacherUsername, templateName, created_at) VALUES (?, ?, ?)',
+                    [teacherUsername, templateName, nowStr],
+                    function(insErr) {
+                        if (insErr) return;
+                        const templateId = this.lastID;
+                        copyRoomQuestionsToTemplate(roomId, templateId);
+                    }
+                );
+            }
+        });
+    });
+}
+
+function copyRoomQuestionsToTemplate(roomId, templateId) {
+    db.all('SELECT * FROM questions WHERE roomId = ?', [roomId], (err, questions) => {
+        if (err || !questions || questions.length === 0) return;
+        const stmt = db.prepare(`
+            INSERT INTO template_questions (
+                templateId, question, question_img,
+                a, b, c, d, e, f, g, h, i, j,
+                a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img,
+                answer
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        questions.forEach(q => {
+            stmt.run(
+                templateId, q.question || '', q.question_img || '',
+                q.a || '', q.b || '', q.c || '', q.d || '', q.e || '', q.f || '', q.g || '', q.h || '', q.i || '', q.j || '',
+                q.a_img || '', q.b_img || '', q.c_img || '', q.d_img || '', q.e_img || '', q.f_img || '', q.g_img || '', q.h_img || '', q.i_img || '', q.j_img || '',
+                q.answer || ''
+            );
+        });
+        stmt.finalize();
+    });
+}
+
+// 1. ดึงรายการชุดข้อสอบสะสมในคลังทั้งหมด
+app.get('/api/library/get-templates', (req, res) => {
+    const { username } = req.query;
+    if (!username) return res.status(400).json({ message: "กรุณาระบุ username" });
+
+    let sql = `
+        SELECT et.*, 
+            (SELECT COUNT(*) FROM template_questions tq WHERE tq.templateId = et.id) as questionCount
+        FROM exam_templates et
+    `;
+    const params = [];
+    if (username !== 'admin') {
+        sql += " WHERE et.teacherUsername = ?";
+        params.push(username);
+    }
+    sql += " ORDER BY et.id DESC";
+
+    db.all(sql, params, (err, rows) => {
+        if (err) return res.status(500).json({ message: err.message });
+        res.json(rows);
+    });
+});
+
+// 2. ดึงข้อสอบรายข้อในเทมเพลตที่เลือก
+app.get('/api/library/get-template-questions', (req, res) => {
+    const { templateId } = req.query;
+    if (!templateId) return res.status(400).json({ message: "กรุณาระบุ templateId" });
+
+    db.all('SELECT * FROM template_questions WHERE templateId = ?', [templateId], (err, rows) => {
+        if (err) return res.status(500).json({ message: err.message });
+        res.json(rows);
+    });
+});
+
+// 3. บันทึกแก้ไขชื่อเทมเพลตและคำถามรายข้อ
+app.post('/api/library/update-template-questions', (req, res) => {
+    const { templateId, templateName, questions } = req.body;
+    if (!templateId || !templateName || !Array.isArray(questions)) {
+        return res.status(400).json({ message: "ข้อมูลไม่ครบถ้วน" });
+    }
+
+    db.serialize(() => {
+        const nowStr = new Date().toLocaleDateString('th-TH', { 
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+
+        db.run('UPDATE exam_templates SET templateName = ?, created_at = ? WHERE id = ?', [templateName, nowStr, templateId], (err) => {
+            if (err) return res.status(500).json({ message: err.message });
+        });
+
+        db.run('DELETE FROM template_questions WHERE templateId = ?', [templateId], (err) => {
+            if (err) return res.status(500).json({ message: err.message });
+
+            const stmt = db.prepare(`
+                INSERT INTO template_questions (
+                    templateId, question, question_img,
+                    a, b, c, d, e, f, g, h, i, j,
+                    a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img,
+                    answer
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `);
+
+            questions.forEach(q => {
+                stmt.run(
+                    templateId, q.question || '', q.question_img || '',
+                    q.a || '', q.b || '', q.c || '', q.d || '', q.e || '', q.f || '', q.g || '', q.h || '', q.i || '', q.j || '',
+                    q.a_img || '', q.b_img || '', q.c_img || '', q.d_img || '', q.e_img || '', q.f_img || '', q.g_img || '', q.h_img || '', q.i_img || '', q.j_img || '',
+                    q.answer || ''
+                );
+            });
+            stmt.finalize();
+            res.json({ success: true });
+        });
+    });
+});
+
+// 4. ลบชุดข้อสอบสะสมออกจากคลัง
+app.post('/api/library/delete-template', (req, res) => {
+    const { templateId } = req.body;
+    if (!templateId) return res.status(400).json({ message: "กรุณาระบุ templateId" });
+
+    db.serialize(() => {
+        db.run('DELETE FROM template_questions WHERE templateId = ?', [templateId]);
+        db.run('DELETE FROM exam_templates WHERE id = ?', [templateId], (err) => {
+            if (err) return res.status(500).json({ message: err.message });
+            res.json({ success: true });
+        });
+    });
+});
+
+// 5. ดึงข้อสอบสะสมจากคลังกลับเข้าสู่ห้องเรียนปัจจุบัน
+app.post('/api/library/load-template', (req, res) => {
+    const { roomId, templateId } = req.body;
+    if (!roomId || !templateId) return res.status(400).json({ message: "ข้อมูลห้องสอบหรือคลังสะสมไม่ถูกต้อง" });
+
+    db.serialize(() => {
+        // ลบข้อสอบเดิมในห้องสอบนี้
+        db.run('DELETE FROM questions WHERE roomId = ?', [roomId], (delErr) => {
+            if (delErr) return res.status(500).json({ message: delErr.message });
+
+            // ดึงข้อสอบจากคลังสะสมมาใส่ห้อง
+            db.all('SELECT * FROM template_questions WHERE templateId = ?', [templateId], (err, tplQuestions) => {
+                if (err) return res.status(500).json({ message: err.message });
+                if (tplQuestions.length === 0) {
+                    return res.json({ success: true, count: 0 });
+                }
+
+                const stmt = db.prepare(`
+                    INSERT INTO questions (
+                        roomId, question, question_img,
+                        a, b, c, d, e, f, g, h, i, j,
+                        a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img,
+                        answer
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `);
+
+                tplQuestions.forEach(q => {
+                    stmt.run(
+                        roomId, q.question || '', q.question_img || '',
+                        q.a || '', q.b || '', q.c || '', q.d || '', q.e || '', q.f || '', q.g || '', q.h || '', q.i || '', q.j || '',
+                        q.a_img || '', q.b_img || '', q.c_img || '', q.d_img || '', q.e_img || '', q.f_img || '', q.g_img || '', q.h_img || '', q.i_img || '', q.j_img || '',
+                        q.answer || ''
+                    );
+                });
+                stmt.finalize();
+
+                // ตั้งค่าเผยแพร่ห้องสอบเป็นแบบร่าง
+                db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [roomId]);
+
+                res.json({ success: true, count: tplQuestions.length });
+            });
+        });
+    });
+});
+
+// 6. ลบข้อสอบทั้งหมดในห้องสอบของอาจารย์
+app.post('/api/teacher/delete-all-questions', (req, res) => {
+    const { roomId } = req.body;
+    if (!roomId) return res.status(400).json({ message: "กรุณาระบุรหัสห้องสอบ" });
+
+    db.serialize(() => {
+        db.run('DELETE FROM questions WHERE roomId = ?', [roomId], (err) => {
+            if (err) return res.status(500).json({ message: err.message });
+
+            // รีเซ็ตสถานะเป็นแบบร่างเมื่อไม่มีข้อสอบแล้ว
+            db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [roomId]);
+
+            // อัปเดตคลังข้อสอบสะสมด้วย (ถ้าต้องการให้ลบออกไปด้วยเมื่อห้องว่าง หรือเก็บไว้)
+            syncRoomToLibrary(roomId);
+
+            res.json({ success: true, message: "ลบข้อสอบทั้งหมดเรียบร้อย" });
+        });
+    });
+});
+
+// 7. สถิติพื้นที่จัดเก็บของอาจารย์รายบุคคล (My Storage)
+app.get('/api/teacher/my-storage', (req, res) => {
+    const { username } = req.query;
+    if (!username) return res.status(400).json({ message: "กรุณาระบุ username" });
+
+    const sql = `
+        SELECT 
+            (SELECT COUNT(*) FROM teacher_rooms tr WHERE tr.teacherUsername = t.username) as roomCount,
+            (SELECT COUNT(*) FROM questions q JOIN teacher_rooms tr ON q.roomId = tr.roomId WHERE tr.teacherUsername = t.username) as questionCount,
+            (SELECT COUNT(*) FROM exam_results er JOIN teacher_rooms tr ON er.roomId = tr.roomId WHERE tr.teacherUsername = t.username) as resultCount,
+            (SELECT COUNT(*) FROM exam_templates et WHERE et.teacherUsername = t.username) as templateCount,
+            (SELECT COALESCE(SUM(
+                LENGTH(COALESCE(q.question,''))+LENGTH(COALESCE(q.question_img,''))+
+                LENGTH(COALESCE(q.a,''))+LENGTH(COALESCE(q.b,''))+LENGTH(COALESCE(q.c,''))+LENGTH(COALESCE(q.d,''))+
+                LENGTH(COALESCE(q.a_img,''))+LENGTH(COALESCE(q.b_img,''))+LENGTH(COALESCE(q.c_img,''))+LENGTH(COALESCE(q.d_img,''))
+            ),0) FROM questions q JOIN teacher_rooms tr ON q.roomId = tr.roomId WHERE tr.teacherUsername = t.username) as questionBytes,
+            (SELECT COALESCE(SUM(
+                LENGTH(COALESCE(er.answers_json,''))+LENGTH(COALESCE(er.studentId,''))+LENGTH(COALESCE(er.name,''))
+            ),0) FROM exam_results er JOIN teacher_rooms tr ON er.roomId = tr.roomId WHERE tr.teacherUsername = t.username) as resultBytes,
+            (SELECT COALESCE(SUM(LENGTH(COALESCE(tq.question,''))+LENGTH(COALESCE(tq.question_img,''))),0)
+             FROM template_questions tq JOIN exam_templates et ON tq.templateId = et.id WHERE et.teacherUsername = t.username) as templateBytes
+        FROM teachers t
+        WHERE t.username = ?
+    `;
+
+    db.get(sql, [username], (err, row) => {
+        if (err) return res.status(500).json({ message: err.message });
+        if (!row) {
+            return res.json({
+                totalBytes: 0,
+                roomCount: 0,
+                questionCount: 0,
+                resultCount: 0,
+                templateCount: 0,
+                questionBytes: 0,
+                resultBytes: 0,
+                templateBytes: 0
+            });
+        }
+        
+        row.totalBytes = (row.questionBytes || 0) + (row.resultBytes || 0) + (row.templateBytes || 0);
+        res.json(row);
+    });
+});
+
+// 8. สถิติพื้นที่จัดเก็บของทุกคนในระบบ (Super Admin Dashboard View)
+app.get('/api/admin/storage-stats', (req, res) => {
+    const sql = `
+        SELECT t.name, t.username, t.status, t.created_at,
+            (SELECT COUNT(*) FROM teacher_rooms tr WHERE tr.teacherUsername = t.username) as roomCount,
+            (SELECT COUNT(*) FROM questions q JOIN teacher_rooms tr ON q.roomId = tr.roomId WHERE tr.teacherUsername = t.username) as questionCount,
+            (SELECT COUNT(*) FROM exam_results er JOIN teacher_rooms tr ON er.roomId = tr.roomId WHERE tr.teacherUsername = t.username) as resultCount,
+            (SELECT COUNT(*) FROM exam_templates et WHERE et.teacherUsername = t.username) as templateCount,
+            (SELECT COALESCE(SUM(
+                LENGTH(COALESCE(q.question,''))+LENGTH(COALESCE(q.question_img,''))+
+                LENGTH(COALESCE(q.a,''))+LENGTH(COALESCE(q.b,''))+LENGTH(COALESCE(q.c,''))+LENGTH(COALESCE(q.d,''))+
+                LENGTH(COALESCE(q.a_img,''))+LENGTH(COALESCE(q.b_img,''))+LENGTH(COALESCE(q.c_img,''))+LENGTH(COALESCE(q.d_img,''))
+            ),0) FROM questions q JOIN teacher_rooms tr ON q.roomId = tr.roomId WHERE tr.teacherUsername = t.username) as questionBytes,
+            (SELECT COALESCE(SUM(
+                LENGTH(COALESCE(er.answers_json,''))+LENGTH(COALESCE(er.studentId,''))+LENGTH(COALESCE(er.name,''))
+            ),0) FROM exam_results er JOIN teacher_rooms tr ON er.roomId = tr.roomId WHERE tr.teacherUsername = t.username) as resultBytes,
+            (SELECT COALESCE(SUM(LENGTH(COALESCE(tq.question,''))+LENGTH(COALESCE(tq.question_img,''))),0)
+             FROM template_questions tq JOIN exam_templates et ON tq.templateId = et.id WHERE et.teacherUsername = t.username) as templateBytes
+        FROM teachers t
+        WHERE t.role != 'admin'
+    `;
+
+    db.all(sql, [], (err, rows) => {
+        if (err) return res.status(500).json({ message: err.message });
+        const result = rows.map(r => {
+            r.totalBytes = (r.questionBytes || 0) + (r.resultBytes || 0) + (r.templateBytes || 0);
+            return r;
+        });
+        res.json(result);
+    });
 });
 
 app.listen(PORT, () => {
