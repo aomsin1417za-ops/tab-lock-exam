@@ -47,8 +47,12 @@ function convertToPg(sql) {
 
 if (isPg) {
     console.log('🐘 กำลังเชื่อมต่อฐานข้อมูล Neon PostgreSQL...');
+    let connStr = process.env.DATABASE_URL;
+    if (connStr) {
+        connStr = connStr.replace(/sslmode=(require|prefer|verify-ca)/gi, 'sslmode=verify-full');
+    }
     const pool = new Pool({
-        connectionString: process.env.DATABASE_URL,
+        connectionString: connStr,
         ssl: { rejectUnauthorized: false }
     });
 
