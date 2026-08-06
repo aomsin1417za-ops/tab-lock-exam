@@ -13,7 +13,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        html { font-size: 125% !important; }
+        html { font-size: 100%; }
+        @media (min-width: 640px) { html { font-size: 110%; } }
+        @media (min-width: 1024px) { html { font-size: 120%; } }
 
         body { font-family: 'Kanit', 'Inter', sans-serif; background: linear-gradient(to right, #f8fafc 0%, #eff6ff 50%, #faf5ff 100%); background-attachment: fixed; color: #334155; -webkit-user-select:none; user-select:none; }
         .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04); }
@@ -63,7 +65,7 @@
 
             <!-- Exam Tab Content -->
             <div id="exam-tab-content" class="space-y-4">
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div class="space-y-1.5">
                         <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">ชื่อจริง</label>
                         <input type="text" id="student-firstname" class="input-dark w-full px-3 py-2.5 rounded-xl text-sm placeholder-slate-400 focus:ring-0 transition-all" placeholder="ชื่อจริง">
