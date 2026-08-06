@@ -437,7 +437,15 @@ app.get('/api/teacher/rooms', (req, res) => {
     const username = req.query.username;
     if (!username || username === 'undefined') return res.status(400).json({ message: "กรุณาระบุ username ของอาจารย์" });
 
-    db.all('SELECT roomId, roomName FROM teacher_rooms WHERE teacherUsername = ? ORDER BY id ASC', [username], (err, rows) => {
+    const sqlQuery = `
+        SELECT tr.roomId, tr.roomName, tr.exam_title, tr.exam_code, tr.is_published,
+        (SELECT COUNT(*) FROM questions q WHERE q.roomId = tr.roomId) as questionCount
+        FROM teacher_rooms tr
+        WHERE tr.teacherUsername = ?
+        ORDER BY tr.id ASC
+    `;
+
+    db.all(sqlQuery, [username], (err, rows) => {
         if (err) return res.status(500).json({ message: err.message });
         if (!rows || rows.length === 0) {
             const stmt = db.prepare('INSERT OR IGNORE INTO teacher_rooms (teacherUsername, roomId, roomName) VALUES (?, ?, ?)');
@@ -446,7 +454,7 @@ app.get('/api/teacher/rooms', (req, res) => {
             }
             stmt.finalize();
 
-            db.all('SELECT roomId, roomName FROM teacher_rooms WHERE teacherUsername = ? ORDER BY id ASC', [username], (err2, newRows) => {
+            db.all(sqlQuery, [username], (err2, newRows) => {
                 if (err2) return res.status(500).json({ message: err2.message });
                 res.json(newRows);
             });
@@ -989,25 +997,9 @@ app.delete('/api/delete-student-result', (req, res) => {
 // 🚨 ระบบแจ้งรายงานปัญหาจากนักศึกษา (Student Issue Reports APIs)
 // ==========================================
 
-// ส่งรายงานปัญหาจากนักศึกษา
+// ส่งรายงานปัญหาจากนักศึกษา (ปิดการใช้งานแล้ว)
 app.post('/api/report-issue', (req, res) => {
-    const { roomId, studentId, studentName, class: studentClass, issue } = req.body;
-    if (!roomId || !studentId || !studentName || !issue) {
-        return res.status(400).json({ message: "ข้อมูลรายงานไม่ครบถ้วน" });
-    }
-
-    const thaiDateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const date = new Date().toLocaleDateString('th-TH', thaiDateOptions);
-    const time = new Date().toLocaleTimeString('th-TH');
-
-    db.run(
-        'INSERT INTO student_reports (roomId, studentId, studentName, class, issue, time, date) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [roomId, studentId, studentName, studentClass || '', issue, time, date],
-        function(err) {
-            if (err) return res.status(500).json({ message: err.message });
-            res.json({ success: true });
-        }
-    );
+    return res.status(403).json({ success: false, message: "ระบบรายงานปัญหาจากนักศึกษาปิดการใช้งานแล้ว" });
 });
 
 // ดึงรายงานปัญหาทั้งหมด
@@ -1244,6 +1236,69 @@ app.post('/api/log-student-login', (req, res) => {
             res.json({ success: true });
         }
     );
+});
+
+// 👨‍🎓 API สำหรับดึงจำนวนนักศึกษาที่กำลังเข้าสอบแบบเรียลไทม์ (Active Students)
+app.get('/api/teacher/active-students', (req, res) => {
+    const { username, roomId } = req.query;
+    if (!username || username === 'undefined') return res.status(400).json({ message: "กรุณาระบุ username" });
+
+    // ดึงห้องทั้งหมดของอาจารย์ท่านนี้
+    db.all('SELECT roomId, roomName FROM teacher_rooms WHERE teacherUsername = ?', [username], (err, rooms) => {
+        if (err) return res.status(500).json({ message: err.message });
+        const roomIds = (rooms || []).map(r => r.roomId);
+        if (roomIds.length === 0) {
+            return res.json({ grandTotalActive: 0, grandTotalLoggedIn: 0, grandTotalSubmitted: 0, rooms: {} });
+        }
+
+        const placeholders = roomIds.map(() => '?').join(',');
+        const sql = `
+            SELECT sl.roomId, sl.studentId,
+            (SELECT COUNT(*) FROM exam_results er WHERE er.roomId = sl.roomId AND er.studentId = sl.studentId) as isSubmitted
+            FROM student_logins sl
+            WHERE sl.roomId IN (${placeholders})
+        `;
+
+        db.all(sql, roomIds, (err2, rows) => {
+            if (err2) return res.status(500).json({ message: err2.message });
+
+            const roomMap = {};
+            const roomSubmittedSet = {};
+            const roomLoggedInSet = {};
+
+            (rows || []).forEach(row => {
+                if (!roomLoggedInSet[row.roomId]) roomLoggedInSet[row.roomId] = new Set();
+                if (!roomSubmittedSet[row.roomId]) roomSubmittedSet[row.roomId] = new Set();
+
+                roomLoggedInSet[row.roomId].add(row.studentId);
+                if (row.isSubmitted > 0) {
+                    roomSubmittedSet[row.roomId].add(row.studentId);
+                }
+            });
+
+            let grandTotalActive = 0;
+            let grandTotalLoggedIn = 0;
+            let grandTotalSubmitted = 0;
+
+            roomIds.forEach(rId => {
+                const loggedIn = roomLoggedInSet[rId] ? roomLoggedInSet[rId].size : 0;
+                const submitted = roomSubmittedSet[rId] ? roomSubmittedSet[rId].size : 0;
+                const active = Math.max(0, loggedIn - submitted);
+
+                roomMap[rId] = { loggedIn, submitted, active };
+                grandTotalActive += active;
+                grandTotalLoggedIn += loggedIn;
+                grandTotalSubmitted += submitted;
+            });
+
+            res.json({
+                grandTotalActive,
+                grandTotalLoggedIn,
+                grandTotalSubmitted,
+                rooms: roomMap
+            });
+        });
+    });
 });
 
 // สรุปสถิติสำหรับ Super Admin Dashboard

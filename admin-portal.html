@@ -189,10 +189,6 @@
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" /></svg>
                     <span>ตรวจสอบพฤติกรรมน่าสงสัย</span>
                 </a>
-                <a href="admin-analysis.html" class="nav-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg>
-                    <span>รายงานปัญหาจากนักศึกษา</span>
-                </a>
             </nav>
         </div>
 
@@ -221,8 +217,8 @@
         <!-- Header -->
         <header id="top-header">
             <div class="flex justify-between items-center w-full">
-                <h1 class="text-base font-extrabold text-slate-800">⚙️ การจัดการข้อสอบ (Exam Management Portal)</h1>
-                <a href="dashboard.html" class="text-xs text-slate-500 hover:text-slate-800 font-bold">&larr; กลับแดชบอร์ด</a>
+                <h1 class="text-xl md:text-2xl font-black text-slate-900">⚙️ การจัดการข้อสอบ (Exam Management Portal)</h1>
+                <a href="dashboard.html" class="text-xs md:text-sm text-slate-500 hover:text-slate-800 font-bold">&larr; กลับแดชบอร์ด</a>
             </div>
         </header>
 
@@ -230,8 +226,8 @@
         <main class="p-6 md:p-12 flex-grow max-w-[1400px] w-full mx-auto flex flex-col justify-center space-y-8 overflow-y-auto">
             
             <div class="text-center space-y-2 max-w-2xl mx-auto">
-                <h2 class="text-2xl font-extrabold bg-gradient-to-r from-cyan-600 to-indigo-600 bg-clip-text text-transparent">เลือกรูปแบบการสร้างชุดข้อสอบ</h2>
-                <p class="text-xs text-slate-500 font-medium">กรุณาเลือกวิธีการนำเข้าข้อมูลข้อสอบที่คุณต้องการเพื่อดำเนินการต่อ</p>
+                <h2 class="text-2xl md:text-3xl font-black bg-gradient-to-r from-cyan-600 to-indigo-600 bg-clip-text text-transparent">เลือกรูปแบบการสร้างชุดข้อสอบ</h2>
+                <p class="text-sm text-slate-500 font-medium">กรุณาเลือกวิธีการนำเข้าข้อมูลข้อสอบที่คุณต้องการเพื่อดำเนินการต่อ</p>
             </div>
 
             <!-- Portal Selection Options -->
@@ -240,17 +236,17 @@
                 <!-- Option 1: Manual Live Write -->
                 <a href="admin-questions.html" class="glass-card p-8 flex flex-col items-center justify-between text-center group cursor-pointer hover:border-pink-500/30">
                     <div class="space-y-5">
-                        <div class="w-18 h-18 w-[72px] h-[72px] rounded-3xl bg-pink-50 flex items-center justify-center text-4xl group-hover:scale-110 transition duration-300 shadow-md shadow-pink-500/10">
+                        <div class="w-[72px] h-[72px] rounded-3xl bg-pink-50 flex items-center justify-center text-4xl group-hover:scale-110 transition duration-300 shadow-md shadow-pink-500/10">
                             ✍️
                         </div>
                         <div class="space-y-2">
-                            <h3 class="text-base font-black text-slate-800 group-hover:text-pink-600 transition">สร้างข้อสอบด้วยตนเอง</h3>
-                            <p class="text-[10px] text-slate-500 leading-relaxed max-w-xs mx-auto">
+                            <h3 class="text-lg md:text-xl font-black text-slate-800 group-hover:text-pink-600 transition">สร้างข้อสอบด้วยตนเอง</h3>
+                            <p class="text-xs md:text-sm text-slate-600 leading-relaxed font-medium max-w-xs mx-auto">
                                 พิมพ์คำถาม กำหนดตัวเลือกคำตอบสูงสุด 10 ช้อยส์ เลือกเฉลย และสามารถอัปโหลดรูปภาพประกอบโจทย์/คำตอบแต่ละข้อได้ตามที่คุณต้องการ
                             </p>
                         </div>
                     </div>
-                    <div class="mt-6 w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-extrabold py-3 px-6 rounded-2xl text-xs shadow-md shadow-pink-500/20 group-hover:shadow-pink-500/35 transition">
+                    <div class="mt-6 w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black py-3.5 px-6 rounded-2xl text-sm shadow-md shadow-pink-500/20 group-hover:shadow-pink-500/35 transition">
                         ✍️ เริ่มเขียนข้อสอบสด
                     </div>
                 </a>
@@ -262,13 +258,13 @@
                             📊
                         </div>
                         <div class="space-y-2">
-                            <h3 class="text-base font-black text-slate-800 group-hover:text-cyan-600 transition">นำเข้าข้อสอบผ่าน Excel</h3>
-                            <p class="text-[10px] text-slate-500 leading-relaxed max-w-xs mx-auto">
+                            <h3 class="text-lg md:text-xl font-black text-slate-800 group-hover:text-cyan-600 transition">นำเข้าข้อสอบผ่าน Excel</h3>
+                            <p class="text-xs md:text-sm text-slate-600 leading-relaxed font-medium max-w-xs mx-auto">
                                 ดาวน์โหลดไฟล์เทมเพลตมาตรฐานตาราง กรอกรายละเอียดโจทย์ ตัวเลือก เฉลยข้อสอบจำนวนมาก และลากอัปโหลดเพื่อนำเข้าสำเร็จในวินาทีเดียว
                             </p>
                         </div>
                     </div>
-                    <div class="mt-6 w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-extrabold py-3 px-6 rounded-2xl text-xs shadow-md shadow-cyan-500/20 group-hover:shadow-cyan-500/35 transition">
+                    <div class="mt-6 w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-black py-3.5 px-6 rounded-2xl text-sm shadow-md shadow-cyan-500/20 group-hover:shadow-cyan-500/35 transition">
                         📊 นำเข้าข้อสอบ Excel
                     </div>
                 </a>
@@ -278,16 +274,16 @@
                     <div class="space-y-5">
                         <div class="w-[72px] h-[72px] rounded-3xl bg-violet-50 flex items-center justify-center text-4xl group-hover:scale-110 transition duration-300 shadow-md shadow-violet-500/10 relative">
                             🤖
-                            <span class="absolute -top-1 -right-1 bg-gradient-to-r from-violet-500 to-purple-500 text-white text-[7px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wide shadow-sm">AI</span>
+                            <span class="absolute -top-1 -right-1 bg-gradient-to-r from-violet-500 to-purple-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide shadow-sm">AI</span>
                         </div>
                         <div class="space-y-2">
-                            <h3 class="text-base font-black text-slate-800 group-hover:text-violet-600 transition">แปลงด้วย Gemini AI</h3>
-                            <p class="text-[10px] text-slate-500 leading-relaxed max-w-xs mx-auto">
+                            <h3 class="text-lg md:text-xl font-black text-slate-800 group-hover:text-violet-600 transition">แปลงด้วย Gemini AI</h3>
+                            <p class="text-xs md:text-sm text-slate-600 leading-relaxed font-medium max-w-xs mx-auto">
                                 ส่งไฟล์ข้อสอบในรูปแบบใดก็ได้ให้ Gemini AI ช่วยแปลงเป็นรูปแบบมาตรฐาน Excel ที่ระบบของเรารองรับ พร้อม Prompt สำเร็จรูปในคลิกเดียว
                             </p>
                         </div>
                     </div>
-                    <div class="mt-6 w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-extrabold py-3 px-6 rounded-2xl text-xs shadow-md shadow-violet-500/20 group-hover:shadow-violet-500/35 transition">
+                    <div class="mt-6 w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-black py-3.5 px-6 rounded-2xl text-sm shadow-md shadow-violet-500/20 group-hover:shadow-violet-500/35 transition">
                         🤖 เปิด Gemini AI แปลงข้อสอบ
                     </div>
                 </div>
