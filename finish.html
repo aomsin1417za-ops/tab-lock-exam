@@ -1,13 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tab-Lock — ส่งกระดาษคำตอบเรียบร้อยแล้ว</title>
+    <title>Tab-Lock — Online Proctoring System (ส่งกระดาษคำตอบเรียบร้อยแล้ว)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        html { font-size: 125% !important; }
+        html { font-size: 100%; }
+        @media (min-width: 640px) { html { font-size: 110%; } }
+        @media (min-width: 1024px) { html { font-size: 120%; } }
 
         body {
             font-family: 'Kanit', 'Inter', sans-serif;
@@ -110,11 +112,6 @@
                 class="block w-full text-center py-3.5 bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-600 hover:to-indigo-600 text-white rounded-2xl font-bold text-xs transition duration-300 shadow-md hover:shadow-lg active:scale-[0.98]">
                 กลับสู่หน้าจอเข้าสู่ระบบหลัก
             </a>
-            
-            <button onclick="openReportModal()" 
-                class="block w-full text-center py-3 border border-rose-500/20 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-2xl font-bold text-xs transition duration-300 shadow-sm active:scale-[0.98]">
-                รายงานปัญหาข้อสอบ / พบข้อผิดพลาด (Report)
-            </button>
         </div>
 
     </div>
@@ -201,46 +198,6 @@
                 teaseEl.textContent = hiddenQuotes[randomQuoteIndex];
             }
         });
-
-        async function openReportModal() {
-            const params = getUrlParams();
-            if (!params.roomId) {
-                alert("คุณไม่มีข้อมูลห้องสอบ ไม่สามารถรายงานปัญหาได้ครับ");
-                return;
-            }
-
-            const issue = prompt("⚠️ กรุณาระบุปัญหาที่พบในข้อสอบ (เช่น ตัวสะกดผิด, ช้อยส์ผิดพลาด, โจทย์สับสน):");
-            if (issue === null) return; // กดยกเลิก
-            
-            const trimmed = issue.trim();
-            if (!trimmed) {
-                alert("กรุณากรอกรายละเอียดปัญหาด้วยครับ");
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/report-issue', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        roomId: params.roomId,
-                        studentId: params.studentId || 'ไม่ระบุ',
-                        studentName: params.studentName || 'ไม่ระบุชื่อ',
-                        class: params.class || 'ไม่ระบุ',
-                        issue: trimmed
-                    })
-                });
-
-                if (response.ok) {
-                    alert("🚨 ส่งรายงานปัญหาไปยังอาจารย์เรียบร้อยแล้วครับ ขอบคุณที่แจ้งข้อมูล!");
-                } else {
-                    alert("❌ ส่งรายงานไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อหลังบ้าน");
-            }
-        }
 
         async function loadLeaderboard(roomId) {
             if (!roomId) return;

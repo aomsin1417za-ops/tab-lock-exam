@@ -1,14 +1,28 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แผงควบคุมหลัก - Tab-Lock Online Exam Platform</title>
+    <title>แผงควบคุมหลัก - Tab-Lock Online Proctoring System</title>
     <meta name="description" content="แผงควบคุมหลักระบบสอบออนไลน์ Tab-Lock สำหรับอาจารย์ผู้ดูแลห้องสอบ">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        html { font-size: 125% !important; }
+        html { font-size: 100%; }
+        @media (min-width: 640px) { html { font-size: 110%; } }
+        @media (min-width: 1024px) { html { font-size: 120%; } }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                position: fixed;
+                top: 0; bottom: 0; left: -280px;
+                z-index: 9999;
+                width: 260px !important;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+                transition: left 0.3s ease-in-out;
+            }
+            #sidebar.mobile-open { left: 0 !important; }
+        }
 
         * { box-sizing: border-box; }
         body {
@@ -63,14 +77,14 @@
         .nav-link {
             display: flex; align-items: center; gap: 10px;
             padding: 10px 14px; border-radius: 12px;
-            font-size: 13px; font-weight: 500;
+            font-size: 13px; font-weight: 700;
             color: #64748b; text-decoration: none;
             transition: all 0.2s ease;
         }
         .nav-link:hover { color: #1e293b; background: rgba(15,23,42,0.04); }
         .nav-link.active {
             background: linear-gradient(135deg, #06b6d4, #8b5cf6);
-            color: #ffffff; font-weight: 600;
+            color: #ffffff; font-weight: 700;
             box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
         }
         .nav-link svg { width: 18px; height: 18px; flex-shrink: 0; }
@@ -160,7 +174,6 @@
         }
         #gemini-modal.open { display: flex; }
 
-        @media (max-width: 768px) { #sidebar { display: none; } }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(6,182,212,0.25); border-radius: 4px; }
@@ -185,7 +198,7 @@
             </div>
             <div class="logo-text leading-tight">
                 <div class="font-extrabold text-base tracking-tight text-slate-800">Tab-<span class="logo-gradient">Lock</span></div>
-                <div class="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Exam Platform</div>
+                <div class="text-[8px] sm:text-[9px] text-slate-500 uppercase tracking-widest font-bold">Online Proctoring System</div>
             </div>
         </div>
 
@@ -194,6 +207,11 @@
             <a href="dashboard.html" class="nav-link active">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
                 <span>แดชบอร์ดหลัก</span>
+            </a>
+            <a href="admin-active-exams.html" class="nav-link">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" /></svg>
+                <span>กำลังดำเนินการสอบ</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-auto"></span>
             </a>
             <a href="admin-portal.html" class="nav-link">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
@@ -210,10 +228,6 @@
             <a href="admin-monitoring.html" class="nav-link">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" /></svg>
                 <span>ตรวจสอบพฤติกรรมน่าสงสัย</span>
-            </a>
-            <a href="admin-analysis.html" class="nav-link">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg>
-                <span>รายงานปัญหาจากนักศึกษา</span>
             </a>
         </nav>
     </div>
@@ -242,9 +256,14 @@
 <div id="main-area">
     <!-- Header -->
     <header id="top-header">
-        <div>
-            <p class="text-sm font-semibold text-slate-800" id="welcome-text">ยินดีต้อนรับกลับมา 👋</p>
-            <p class="text-xs text-slate-500 mt-0.5">Tab-Lock Online Exam Platform &middot; Teacher Dashboard</p>
+        <div class="flex items-center gap-3">
+            <button id="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('mobile-open')" class="md:hidden p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:bg-slate-200 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <div>
+                <h1 class="text-xl md:text-2xl font-black text-slate-800" id="welcome-text">ยินดีต้อนรับกลับมา 👋</h1>
+                <p class="text-sm font-medium text-slate-500 mt-1">Tab-Lock Online Proctoring System &middot; Teacher Dashboard</p>
+            </div>
         </div>
         <div class="flex items-center gap-3">
             <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3.5 py-2 rounded-full">
@@ -270,16 +289,16 @@
                     <div class="flex-1 min-w-0 space-y-3">
                         <div class="inline-flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-full">
                             <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                            <span class="text-[10px] font-extrabold text-amber-700 uppercase tracking-widest">Enterprise AI Platform</span>
+                            <span class="text-xs font-extrabold text-amber-700 uppercase tracking-wider">Enterprise AI Platform</span>
                         </div>
-                        <h1 class="text-xl md:text-2xl font-extrabold text-slate-800 leading-tight">
+                        <h1 class="text-2xl md:text-3xl font-black text-slate-800 leading-tight">
                             ระบบประมวลผลสอบอัจฉริยะยุคใหม่<br>
                             <span class="text-indigo-600">และวิเคราะห์ผลลัพธ์ห้องเรียน</span>
                         </h1>
-                        <p class="text-slate-600 text-sm max-w-lg">ศูนย์รวมข้อสอบออนไลน์ ตรวจจับพฤติกรรมทุจริต วิเคราะห์คุณภาพข้อสอบ และสรุปผลการเรียนรู้แบบอัตโนมัติ</p>
+                        <p class="text-slate-600 text-sm md:text-base max-w-lg font-medium">ศูนย์รวมข้อสอบออนไลน์ ตรวจจับพฤติกรรมทุจริต วิเคราะห์คุณภาพข้อสอบ และสรุปผลการเรียนรู้แบบอัตโนมัติ</p>
                     </div>
                     <div class="shrink-0 self-end">
-                        <a href="admin-portal.html" class="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black px-8 py-3.5 rounded-2xl text-xs transition-all duration-200 shadow-lg shadow-pink-500/25 active:scale-[0.98]">
+                        <a href="admin-portal.html" class="inline-flex items-center gap-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black px-8 py-3.5 rounded-2xl text-sm transition-all duration-200 shadow-lg shadow-pink-500/25 active:scale-[0.98]">
                             ➕ สร้างและจัดการข้อสอบใหม่
                         </a>
                     </div>
@@ -290,34 +309,36 @@
         <!-- ===== QUICK STATS ===== -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <!-- Gemini AI Card -->
-            <div onclick="openGeminiModal()" class="glass-card p-5 flex items-center gap-4 stat-tile cursor-pointer border border-transparent hover:border-violet-300 hover:shadow-md hover:shadow-violet-100 transition duration-300 group">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 via-violet-500 to-indigo-600 flex items-center justify-center text-2xl flex-shrink-0 shadow-sm shadow-violet-500/20 group-hover:scale-105 transition-transform duration-300">✨</div>
-                <div>
-                    <div class="text-[13px] font-black text-slate-800 leading-snug">สร้างข้อสอบด้วย Gemini AI</div>
-                    <div class="text-[10px] text-slate-500 font-bold mt-0.5">แปลงข้อสอบผ่าน AI Gemini Gem 🚀</div>
+            <div onclick="openGeminiModal()" class="glass-card p-5 flex items-center gap-4 cursor-pointer border border-slate-200/80 bg-white/90 hover:bg-white hover:border-purple-300 hover:shadow-lg hover:shadow-purple-500/10 transition-all duration-300 rounded-2xl group active:scale-[0.99]">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-xl shrink-0 shadow-md shadow-purple-500/20 group-hover:scale-110 transition-transform duration-300">✨</div>
+                <div class="min-w-0">
+                    <div class="text-base md:text-lg font-extrabold text-slate-800 leading-snug group-hover:text-purple-700 transition-colors">Gemini AI Generator</div>
+                    <div class="text-xs md:text-sm text-slate-500 font-medium mt-0.5 truncate">สร้างและแปลงข้อสอบด้วย AI Gem 🚀</div>
                 </div>
             </div>
+
             <!-- Real-time Card -->
-            <div class="glass-card p-5 flex items-center gap-4 stat-tile">
-                <div class="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-2xl flex-shrink-0">📊</div>
-                <div>
-                    <div class="text-2xl font-extrabold text-slate-800">Real-Time</div>
-                    <div class="text-xs text-slate-400 font-medium mt-0.5">ดึงข้อมูลสดทุกครั้ง</div>
+            <a href="admin-results.html" class="glass-card p-5 flex items-center gap-4 cursor-pointer border border-slate-200/80 bg-white/90 hover:bg-white hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 rounded-2xl group active:scale-[0.99]">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-xl shrink-0 shadow-md shadow-emerald-500/20 group-hover:scale-110 transition-transform duration-300">📊</div>
+                <div class="min-w-0">
+                    <div class="text-base md:text-lg font-extrabold text-slate-800 leading-snug group-hover:text-teal-700 transition-colors">Real-Time Data</div>
+                    <div class="text-xs md:text-sm text-slate-500 font-medium mt-0.5 truncate">ประมวลผลและดึงข้อมูลสดทันที</div>
                 </div>
-            </div>
+            </a>
+
             <!-- AI Guard Card -->
-            <div class="glass-card p-5 flex items-center gap-4 stat-tile">
-                <div class="w-12 h-12 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-2xl flex-shrink-0">🛡️</div>
-                <div>
-                    <div class="text-2xl font-extrabold text-slate-800">AI Guard</div>
-                    <div class="text-xs text-slate-400 font-medium mt-0.5">ตรวจจับสลับหน้าจออัตโนมัติ</div>
+            <a href="admin-monitoring.html" class="glass-card p-5 flex items-center gap-4 cursor-pointer border border-slate-200/80 bg-white/90 hover:bg-white hover:border-rose-300 hover:shadow-lg hover:shadow-rose-500/10 transition-all duration-300 rounded-2xl group active:scale-[0.99]">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center text-xl shrink-0 shadow-md shadow-rose-500/20 group-hover:scale-110 transition-transform duration-300">🛡️</div>
+                <div class="min-w-0">
+                    <div class="text-base md:text-lg font-extrabold text-slate-800 leading-snug group-hover:text-rose-700 transition-colors">AI Anti-Cheat Guard</div>
+                    <div class="text-xs md:text-sm text-slate-500 font-medium mt-0.5 truncate">ตรวจจับสลับหน้าจออัตโนมัติ</div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <!-- ===== 4 ACTION CARDS ===== -->
         <div>
-            <h2 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-5 flex items-center gap-2">
+            <h2 class="text-sm md:text-base font-extrabold text-slate-700 uppercase tracking-wider mb-5 flex items-center gap-2">
                 <span class="w-4 h-px bg-indigo-400/50 rounded inline-block"></span>
                 เมนูหลัก
                 <span class="w-4 h-px bg-indigo-400/50 rounded inline-block"></span>
@@ -327,78 +348,63 @@
                 <a href="admin-questions.html" class="action-card glass-card p-6 space-y-4 block hover:shadow-lg hover:shadow-indigo-500/10">
                     <div class="flex items-center justify-between">
                         <div class="w-12 h-12 rounded-2xl bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center text-2xl">📚</div>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-extrabold text-slate-800">ระบบจัดการคลังข้อสอบ</h3>
-                        <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">เพิ่ม แก้ไข ลบ และเผยแพร่ข้อสอบ รองรับ Excel, AI Generator และรูปภาพ</p>
+                        <h3 class="text-base md:text-lg font-black text-slate-800">ระบบจัดการคลังข้อสอบ</h3>
+                        <p class="text-sm text-slate-600 mt-1.5 leading-relaxed font-medium">เพิ่ม แก้ไข ลบ และเผยแพร่ข้อสอบ รองรับ Excel, AI Generator และรูปภาพ</p>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <div class="h-1.5 flex-1 bg-indigo-500/30 rounded-full overflow-hidden"><div class="h-full bg-indigo-500 rounded-full" style="width:65%"></div></div>
-                        <span class="text-[10px] text-indigo-400 font-bold">จัดการข้อสอบ</span>
+                        <div class="h-2 flex-1 bg-indigo-500/30 rounded-full overflow-hidden"><div class="h-full bg-indigo-500 rounded-full" style="width:65%"></div></div>
+                        <span class="text-xs text-indigo-600 font-extrabold">จัดการข้อสอบ</span>
                     </div>
                 </a>
                 <!-- Results -->
                 <a href="admin-results.html" class="action-card glass-card p-6 space-y-4 block hover:shadow-lg hover:shadow-emerald-500/10">
                     <div class="flex items-center justify-between">
                         <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-2xl">📈</div>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-extrabold text-slate-800">ตรวจสอบคะแนนสอบ</h3>
-                        <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">ดูผลการสอบ Z-Score, T-Score, Item Analysis และส่งออกรายงาน Excel</p>
+                        <h3 class="text-base md:text-lg font-black text-slate-800">ตรวจสอบคะแนนสอบ</h3>
+                        <p class="text-sm text-slate-600 mt-1.5 leading-relaxed font-medium">ดูผลการสอบ Z-Score, T-Score, Item Analysis และส่งออกรายงาน Excel</p>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <div class="h-1.5 flex-1 bg-emerald-100 rounded-full overflow-hidden"><div class="h-full bg-emerald-500 rounded-full" style="width:82%"></div></div>
-                        <span class="text-[10px] text-emerald-600 font-bold">วิเคราะห์ผล</span>
+                        <div class="h-2 flex-1 bg-emerald-100 rounded-full overflow-hidden"><div class="h-full bg-emerald-500 rounded-full" style="width:82%"></div></div>
+                        <span class="text-xs text-emerald-600 font-extrabold">วิเคราะห์ผล</span>
                     </div>
                 </a>
                 <!-- Monitoring -->
                 <a href="admin-monitoring.html" class="action-card glass-card p-6 space-y-4 block hover:shadow-lg hover:shadow-rose-500/10">
                     <div class="flex items-center justify-between">
                         <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-2xl">🚨</div>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
                     </div>
                     <div>
-                        <h3 class="text-sm font-extrabold text-slate-800">ตรวจสอบพฤติกรรมน่าสงสัย</h3>
-                        <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">ติดตามการสลับหน้าจอ ตรวจจับกลุ่มเสี่ยงสูง และส่งสัญญาณเตือนแบบเรียลไทม์</p>
+                        <h3 class="text-base md:text-lg font-black text-slate-800">ตรวจสอบพฤติกรรมน่าสงสัย</h3>
+                        <p class="text-sm text-slate-600 mt-1.5 leading-relaxed font-medium">ติดตามการสลับหน้าจอ ตรวจจับกลุ่มเสี่ยงสูง และส่งสัญญาณเตือนแบบเรียลไทม์</p>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <div class="h-1.5 flex-1 bg-rose-100 rounded-full overflow-hidden"><div class="h-full bg-rose-500 rounded-full animate-pulse" style="width:100%"></div></div>
-                        <span class="text-[10px] text-rose-600 font-bold">Live Monitor</span>
-                    </div>
-                </a>
-                <!-- Reports -->
-                <a href="admin-analysis.html" class="action-card glass-card p-6 space-y-4 block hover:shadow-lg hover:shadow-amber-500/10">
-                    <div class="flex items-center justify-between">
-                        <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-2xl">📢</div>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-slate-400"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-extrabold text-slate-800">รายงานแจ้งปัญหาจากนักศึกษา</h3>
-                        <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">รับและจัดการรายงานข้อผิดพลาดจากผู้เข้าสอบ เช่น ตัวเลือกไม่ตรง หรือโจทย์ไม่ชัดเจน</p>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <div class="h-1.5 flex-1 bg-amber-100 rounded-full overflow-hidden"><div class="h-full bg-amber-500 rounded-full" style="width:30%"></div></div>
-                        <span class="text-[10px] text-amber-600 font-bold">รายงาน</span>
+                        <div class="h-2 flex-1 bg-rose-100 rounded-full overflow-hidden"><div class="h-full bg-rose-500 rounded-full animate-pulse" style="width:100%"></div></div>
+                        <span class="text-xs text-rose-600 font-extrabold">Live Monitor</span>
                     </div>
                 </a>
             </div>
         </div>
 
         <!-- ===== MY STORAGE WIDGET ===== -->
-        <div class="glass-card p-5 space-y-4" id="my-storage-widget">
+        <div class="glass-card p-6 space-y-4" id="my-storage-widget">
             <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 flex items-center justify-center text-sm">🗄️</div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-violet-500 flex items-center justify-center text-base">🗄️</div>
                     <div>
-                        <div class="text-xs font-extrabold text-slate-700">พื้นที่จัดเก็บข้อมูลของฉัน</div>
-                        <div class="text-[10px] text-slate-400">ข้อมูลการใช้งานในระบบของคุณ</div>
+                        <div class="text-sm md:text-base font-extrabold text-slate-800">พื้นที่จัดเก็บข้อมูลของฉัน</div>
+                        <div class="text-xs text-slate-500 font-medium">ข้อมูลการใช้งานในระบบของคุณ</div>
                     </div>
                 </div>
                 <div class="text-right" id="my-storage-total">
-                    <div class="text-lg font-black text-cyan-600" id="my-storage-size">—</div>
-                    <div class="text-[10px] text-slate-400">ทั้งหมด</div>
+                    <div class="text-xl font-black text-cyan-600" id="my-storage-size">—</div>
+                    <div class="text-xs text-slate-500 font-bold">ทั้งหมด</div>
                 </div>
             </div>
 
@@ -417,7 +423,7 @@
 
     <!-- Footer -->
     <footer class="border-t border-slate-100 py-4 px-8 text-center">
-        <p class="text-[10px] text-slate-500">&copy; 2026 Tab-Lock Online Exam Platform &middot; Enterprise Edition &middot; สงวนลิขสิทธิ์</p>
+        <p class="text-[10px] text-slate-500">&copy; 2026 Tab-Lock Online Proctoring System &middot; Enterprise Edition &middot; สงวนลิขสิทธิ์</p>
     </footer>
 </div>
 

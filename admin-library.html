@@ -1,13 +1,27 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>คลังข้อสอบสะสม - Tab-Lock</title>
+    <title>คลังข้อสอบสะสม - Tab-Lock Online Proctoring System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        html { font-size: 125% !important; }
+        html { font-size: 100%; }
+        @media (min-width: 640px) { html { font-size: 110%; } }
+        @media (min-width: 1024px) { html { font-size: 120%; } }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                position: fixed;
+                top: 0; bottom: 0; left: -280px;
+                z-index: 9999;
+                width: 260px !important;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+                transition: left 0.3s ease-in-out;
+            }
+            #sidebar.mobile-open { left: 0 !important; }
+        }
 
         * { box-sizing: border-box; }
         body {
@@ -70,15 +84,15 @@
         .nav-link {
             display: flex; align-items: center; gap: 10px;
             padding: 10px 14px; border-radius: 12px;
-            font-size: 13px; font-weight: 500;
+            font-size: 13px; font-weight: 700;
             color: #64748b; text-decoration: none;
             transition: all 0.2s ease;
         }
         .nav-link:hover { color: #1e293b; background: rgba(15,23,42,0.04); }
         .nav-link.active {
             background: linear-gradient(135deg, #06b6d4, #8b5cf6);
-            color: #ffffff; font-weight: 600;
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.2);
+            color: #ffffff; font-weight: 700;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
         }
         .nav-link svg { width: 18px; height: 18px; flex-shrink: 0; }
         #main-area {
@@ -164,13 +178,18 @@
                 </div>
                 <div class="leading-tight">
                     <div class="font-extrabold text-base tracking-tight text-slate-800">Tab-<span class="logo-gradient">Lock</span></div>
-                    <div class="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Exam Platform</div>
+                    <div class="text-[8px] sm:text-[9px] text-slate-500 uppercase tracking-widest font-bold">Online Proctoring System</div>
                 </div>
             </div>
             <nav class="space-y-1">
                 <a href="dashboard.html" class="nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
                     <span>แดชบอร์ดหลัก</span>
+                </a>
+                <a href="admin-active-exams.html" class="nav-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" /></svg>
+                    <span>กำลังดำเนินการสอบ</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-auto"></span>
                 </a>
                 <a href="admin-portal.html" class="nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg>
@@ -187,10 +206,6 @@
                 <a href="admin-monitoring.html" class="nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286zm0 13.036h.008v.008H12v-.008z" /></svg>
                     <span>ตรวจสอบพฤติกรรมน่าสงสัย</span>
-                </a>
-                <a href="admin-analysis.html" class="nav-link">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg>
-                    <span>รายงานปัญหาจากนักศึกษา</span>
                 </a>
             </nav>
         </div>
@@ -220,8 +235,8 @@
         <!-- Header -->
         <header id="top-header">
             <div class="flex justify-between items-center w-full">
-                <h1 class="text-base font-extrabold text-slate-800">📚 คลังข้อสอบสะสม (My Exam Library)</h1>
-                <a href="dashboard.html" class="text-xs text-slate-500 hover:text-slate-800 font-bold">&larr; กลับแดชบอร์ด</a>
+                <h1 class="text-xl md:text-2xl font-black text-slate-900">📚 คลังข้อสอบสะสม (My Exam Library)</h1>
+                <a href="dashboard.html" class="text-xs md:text-sm text-slate-500 hover:text-slate-800 font-bold">&larr; กลับแดชบอร์ด</a>
             </div>
         </header>
 
@@ -231,8 +246,8 @@
             <!-- Library Header Control panel -->
             <div class="glass-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/90">
                 <div class="space-y-1">
-                    <h2 class="text-sm font-extrabold text-slate-800">📚 คลังระบบสะสมข้อสอบอัตโนมัติ (My Exam Library)</h2>
-                    <p class="text-[10px] text-slate-500 font-medium">ข้อสอบทุกชุดที่คุณนำเข้าผ่าน Excel หรือสร้างเองสดๆ ในระบบจะบันทึกซิงค์ลงในคลังสะสมนี้โดยอัตโนมัติ เพื่อดึงกลับมาใช้ใหม่หรือแก้ไขได้ตามชอบ</p>
+                    <h2 class="text-lg md:text-xl font-black text-slate-800">📚 คลังระบบสะสมข้อสอบอัตโนมัติ (My Exam Library)</h2>
+                    <p class="text-xs md:text-sm text-slate-600 font-medium leading-relaxed">ข้อสอบทุกชุดที่คุณนำเข้าผ่าน Excel หรือสร้างเองสดๆ ในระบบจะบันทึกซิงค์ลงในคลังสะสมนี้โดยอัตโนมัติ เพื่อดึงกลับมาใช้ใหม่หรือแก้ไขได้ตามชอบ</p>
                 </div>
             </div>
 

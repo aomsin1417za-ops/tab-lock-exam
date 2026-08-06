@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
@@ -16,17 +17,141 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(__dirname));
 
-// 🗄️ เชื่อมต่อฐานข้อมูล SQLite (สร้างโฟลเดอร์ .data เพื่อเก็บข้อมูลถาวรบน Glitch)
-const dbDir = path.join(__dirname, '.data');
-if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir);
-}
-const dbPath = path.join(dbDir, 'exam_system.db');
+const { Pool } = require('pg');
 
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) console.error('❌ เชื่อมต่อ SQLite ล้มเหลว:', err.message);
-    else console.log('🟢 เชื่อมต่อฐานข้อมูล SQLite สำเร็จ (ไฟล์: .data/exam_system.db)');
-});
+const isPg = !!process.env.DATABASE_URL;
+let db;
+
+function convertToPg(sql) {
+    if (typeof sql !== 'string') return sql;
+    let converted = sql;
+    
+    converted = converted.replace(/INTEGER PRIMARY KEY AUTOINCREMENT/gi, 'SERIAL PRIMARY KEY');
+    converted = converted.replace(/roomId TEXT PRIMARY KEY/gi, 'roomId VARCHAR(255) PRIMARY KEY');
+    
+    if (/INSERT OR IGNORE INTO/i.test(converted)) {
+        converted = converted.replace(/INSERT OR IGNORE INTO/gi, 'INSERT INTO');
+        if (/teachers/i.test(converted) && !/ON CONFLICT/i.test(converted)) {
+            converted += ' ON CONFLICT (username) DO NOTHING';
+        } else if (/teacher_rooms/i.test(converted) && !/ON CONFLICT/i.test(converted)) {
+            converted += ' ON CONFLICT (roomId) DO NOTHING';
+        } else {
+            converted += ' ON CONFLICT DO NOTHING';
+        }
+    }
+
+    let paramIndex = 1;
+    converted = converted.replace(/\?/g, () => `$${paramIndex++}`);
+    return converted;
+}
+
+if (isPg) {
+    console.log('🐘 กำลังเชื่อมต่อฐานข้อมูล Neon PostgreSQL...');
+    let connStr = process.env.DATABASE_URL;
+    if (connStr) {
+        connStr = connStr.replace(/sslmode=(require|prefer|verify-ca)/gi, 'sslmode=verify-full');
+    }
+    const pool = new Pool({
+        connectionString: connStr,
+        ssl: { rejectUnauthorized: false }
+    });
+
+    // 🔄 PostgreSQL คืน column names เป็นตัวพิมพ์เล็กทั้งหมด (roomid แทน roomId)
+    // ฟังก์ชันนี้แปลงกลับเป็น camelCase ให้ตรงกับ Frontend
+    const colMap = {
+        roomid: 'roomId', roomname: 'roomName', teacherusername: 'teacherUsername',
+        templateid: 'templateId', templatename: 'templateName',
+        studentid: 'studentId', studentname: 'studentName',
+        maxscore: 'maxScore', answers_json: 'answers_json',
+        is_published: 'is_published', exam_title: 'exam_title', exam_code: 'exam_code', examcode: 'examCode',
+        show_score: 'show_score', show_leaderboard: 'show_leaderboard',
+        question_img: 'question_img',
+        a_img: 'a_img', b_img: 'b_img', c_img: 'c_img', d_img: 'd_img',
+        e_img: 'e_img', f_img: 'f_img', g_img: 'g_img', h_img: 'h_img',
+        i_img: 'i_img', j_img: 'j_img',
+        created_at: 'created_at', border_style: 'border_style',
+        sub_title: 'sub_title', footer_text: 'footer_text',
+        signature_img: 'signature_img', signature_name: 'signature_name',
+        logintime: 'loginTime', logindate: 'loginDate',
+        teachername: 'teacherName',
+        roomcount: 'roomCount', questioncount: 'questionCount',
+        resultcount: 'resultCount', questionbytes: 'questionBytes',
+        resultbytes: 'resultBytes'
+    };
+    function transformRow(row) {
+        if (!row || typeof row !== 'object') return row;
+        const out = {};
+        for (const [k, v] of Object.entries(row)) {
+            out[colMap[k] || k] = v;
+        }
+        return out;
+    }
+
+    db = {
+        isPg: true,
+        get(sql, params, callback) {
+            if (typeof params === 'function') { callback = params; params = []; }
+            const pgSql = convertToPg(sql);
+            pool.query(pgSql, params || [])
+                .then(res => callback && callback(null, transformRow(res.rows[0])))
+                .catch(err => callback && callback(err));
+        },
+        all(sql, params, callback) {
+            if (typeof params === 'function') { callback = params; params = []; }
+            const pgSql = convertToPg(sql);
+            pool.query(pgSql, params || [])
+                .then(res => callback && callback(null, (res.rows || []).map(transformRow)))
+                .catch(err => callback && callback(err));
+        },
+        run(sql, params, callback) {
+            if (typeof params === 'function') { callback = params; params = []; }
+            let pgSql = convertToPg(sql);
+            const isInsert = /^\s*INSERT\s+/i.test(pgSql);
+            if (isInsert && !/RETURNING/i.test(pgSql)) {
+                pgSql += ' RETURNING id';
+            }
+            pool.query(pgSql, params || [])
+                .then(res => {
+                    const ctx = {
+                        lastID: res.rows && res.rows[0] && res.rows[0].id ? res.rows[0].id : null,
+                        changes: res.rowCount
+                    };
+                    if (callback) callback.call(ctx, null);
+                })
+                .catch(err => {
+                    if (callback) callback.call({ lastID: null, changes: 0 }, err);
+                });
+        },
+        prepare(sql) {
+            return {
+                run(...args) {
+                    const cb = typeof args[args.length - 1] === 'function' ? args.pop() : null;
+                    db.run(sql, args, cb);
+                },
+                finalize() {}
+            };
+        },
+        serialize(fn) {
+            if (fn) fn();
+        }
+    };
+
+    pool.query('SELECT NOW()')
+        .then(() => console.log('🟢 เชื่อมต่อฐานข้อมูล Neon PostgreSQL สำเร็จ! (Cloud DB Active)'))
+        .catch(err => console.error('❌ เชื่อมต่อ Neon PostgreSQL ล้มเหลว:', err.message));
+
+} else {
+    const dbDir = path.join(__dirname, '.data');
+    if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir);
+    }
+    const dbPath = path.join(dbDir, 'exam_system.db');
+
+    db = new sqlite3.Database(dbPath, (err) => {
+        if (err) console.error('❌ เชื่อมต่อ SQLite ล้มเหลว:', err.message);
+        else console.log('🟢 เชื่อมต่อฐานข้อมูล SQLite สำเร็จ (ไฟล์: .data/exam_system.db)');
+    });
+}
 
 // 🛠️ สร้างตารางข้อมูลทั้งหมด และทำการ Migration ตารางเดิมอย่างปลอดภัย
 db.serialize(() => {
@@ -200,6 +325,9 @@ db.serialize(() => {
     db.run("ALTER TABLE teacher_rooms ADD COLUMN exam_title TEXT DEFAULT ''", (err) => {
         if (!err) console.log("✔ Added column 'exam_title' to teacher_rooms table");
     });
+    db.run("ALTER TABLE teacher_rooms ADD COLUMN exam_code TEXT DEFAULT ''", (err) => {
+        if (!err) console.log("✔ Added column 'exam_code' to teacher_rooms table");
+    });
 
     // อัปเกรดตารางข้อสอบ (questions) เพิ่มรูปภาพโจทย์และรูปช้อยส์
     db.run("ALTER TABLE questions ADD COLUMN question_img TEXT", (err) => {
@@ -308,14 +436,93 @@ app.post('/api/teacher/login', (req, res) => {
     });
 });
 
-// 🏠 API สำหรับดึงห้องสอบ 10 ห้องของอาจารย์คนนั้นๆ
+// 🏠 API สำหรับดึงห้องสอบ 10 ห้องของอาจารย์คนนั้นๆ (สร้างให้อัตโนมัติหากยังไม่มี)
 app.get('/api/teacher/rooms', (req, res) => {
     const username = req.query.username;
-    if (!username) return res.status(400).json({ message: "กรุณาระบุ username ของอาจารย์" });
+    if (!username || username === 'undefined') return res.status(400).json({ message: "กรุณาระบุ username ของอาจารย์" });
 
-    db.all('SELECT roomId, roomName FROM teacher_rooms WHERE teacherUsername = ? ORDER BY id ASC', [username], (err, rows) => {
+    const sqlQuery = `
+        SELECT tr.roomId, tr.roomName, tr.exam_title, tr.exam_code, tr.is_published,
+        (SELECT COUNT(*) FROM questions q WHERE q.roomId = tr.roomId) as questionCount
+        FROM teacher_rooms tr
+        WHERE tr.teacherUsername = ?
+        ORDER BY tr.id ASC
+    `;
+
+    db.all(sqlQuery, [username], (err, rows) => {
         if (err) return res.status(500).json({ message: err.message });
-        res.json(rows);
+        if (!rows || rows.length === 0) {
+            const stmt = db.prepare('INSERT OR IGNORE INTO teacher_rooms (teacherUsername, roomId, roomName) VALUES (?, ?, ?)');
+            for (let i = 1; i <= 10; i++) {
+                stmt.run(username, `${username}_r${i}`, `ห้องสอบที่ ${i}`);
+            }
+            stmt.finalize();
+
+            db.all(sqlQuery, [username], (err2, newRows) => {
+                if (err2) return res.status(500).json({ message: err2.message });
+                res.json(newRows);
+            });
+        } else {
+            res.json(rows);
+        }
+    });
+});
+
+// 🟢 API สำหรับดึงเฉพาะห้องสอบที่กำลังเผยแพร่อยู่ (is_published = 1) ของอาจารย์
+app.get('/api/teacher/active-published-rooms', (req, res) => {
+    const username = req.query.username;
+    if (!username || username === 'undefined') return res.status(400).json({ message: "กรุณาระบุ username ของอาจารย์" });
+
+    db.all(`
+        SELECT tr.roomId, tr.roomName, tr.exam_title, tr.exam_code, tr.duration, tr.announcement, tr.is_published,
+        (SELECT COUNT(*) FROM questions q WHERE q.roomId = tr.roomId) as questionCount
+        FROM teacher_rooms tr
+        WHERE tr.teacherUsername = ? AND tr.is_published = 1
+        ORDER BY tr.id ASC
+    `, [username], (err, rows) => {
+        if (err) return res.status(500).json({ message: err.message });
+        res.json(rows || []);
+    });
+});
+
+// 🔍 API สำหรับนักศึกษาค้นหาห้องสอบจากรหัสข้อสอบ (examCode) และอาจารย์ผู้สอน (teacherUsername)
+app.get('/api/student/get-room-by-code', (req, res) => {
+    const { teacherUsername, examCode } = req.query;
+    if (!teacherUsername || !examCode) {
+        return res.status(400).json({ message: "กรุณาระบุอาจารย์ผู้สอนและรหัสข้อสอบ" });
+    }
+
+    const cleanCode = String(examCode).trim().toLowerCase();
+
+    db.all(`
+        SELECT roomId, roomName, exam_title, exam_code, is_published 
+        FROM teacher_rooms 
+        WHERE teacherUsername = ?
+    `, [teacherUsername], (err, rooms) => {
+        if (err) return res.status(500).json({ message: err.message });
+        if (!rooms || rooms.length === 0) {
+            return res.status(404).json({ message: "ไม่พบห้องสอบสำหรับอาจารย์ท่านนี้" });
+        }
+
+        // ค้นหาห้องที่มี exam_code หรือ exam_title หรือ roomId หรือ roomName ตรงกับ examCode
+        const match = rooms.find(r => {
+            const exCode = r.exam_code || r.examCode;
+            const codeMatch = exCode && String(exCode).trim().toLowerCase() === cleanCode;
+            const titleMatch = r.exam_title && String(r.exam_title).trim().toLowerCase() === cleanCode;
+            const roomIdMatch = r.roomId && String(r.roomId).trim().toLowerCase() === cleanCode;
+            const roomNameMatch = r.roomName && String(r.roomName).trim().toLowerCase() === cleanCode;
+            return codeMatch || titleMatch || roomIdMatch || roomNameMatch;
+        });
+
+        if (!match) {
+            return res.status(404).json({ message: "❌ ไม่พบรหัสข้อสอบนี้สำหรับอาจารย์ที่เลือก กรุณาตรวจสอบรหัสข้อสอบอีกครั้งครับ" });
+        }
+
+        if (match.is_published !== 1) {
+            return res.status(403).json({ message: "⏳ ข้อสอบชุดนี้ยังไม่ได้เปิดให้สอบ (สถานะแบบร่าง) กรุณาแจ้งอาจารย์ผู้สอนกดยืนยันเผยแพร่ข้อสอบก่อนครับ" });
+        }
+
+        res.json({ success: true, roomId: match.roomId, examTitle: match.exam_title || match.roomName });
     });
 });
 
@@ -375,19 +582,65 @@ app.post('/api/upload-questions-excel', (req, res) => {
         return res.status(400).json({ message: "ข้อมูลห้องสอบหรือข้อสอบไม่ถูกต้อง" });
     }
 
-    db.run('DELETE FROM questions WHERE roomId = ?', [roomId], (err) => {
+    db.run('DELETE FROM questions WHERE roomId = ?', [roomId], async (err) => {
         if (err) return res.status(500).json({ message: err.message });
 
-        const stmt = db.prepare(`
-            INSERT INTO questions (
-                roomId, question, question_img, 
-                a, b, c, d, e, f, g, h, i, j, 
-                a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img, 
-                answer
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-        questions.forEach(rawQ => {
-            // แปลงชื่อคีย์หัวตารางให้เป็นตัวพิมพ์เล็กทั้งหมด และแปลงข้อมูลทุกช่องเป็น String
+        try {
+            for (const rawQ of questions) {
+                const q = {};
+                for (let key in rawQ) {
+                    if (rawQ.hasOwnProperty(key)) {
+                        const cleanKey = key.trim().toLowerCase();
+                        const val = rawQ[key];
+                        q[cleanKey] = (val !== null && val !== undefined) ? String(val).trim() : '';
+                    }
+                }
+
+                await new Promise((resolve, reject) => {
+                    db.run(`
+                        INSERT INTO questions (
+                            roomId, question, question_img, 
+                            a, b, c, d, e, f, g, h, i, j, 
+                            a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img, 
+                            answer
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `, [
+                        roomId, 
+                        q.question || '', 
+                        q.question_img || '',
+                        q.a || '', q.b || '', q.c || '', q.d || '', q.e || '', q.f || '', q.g || '', q.h || '', q.i || '', q.j || '', 
+                        q.a_img || '', q.b_img || '', q.c_img || '', q.d_img || '', q.e_img || '', q.f_img || '', q.g_img || '', q.h_img || '', q.i_img || '', q.j_img || '', 
+                        q.answer || ''
+                    ], (insErr) => {
+                        if (insErr) reject(insErr);
+                        else resolve();
+                    });
+                });
+            }
+
+            db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [roomId], (uErr) => {
+                if (uErr) console.error("ไม่สามารถรีเซ็ตสถานะเผยแพร่ได้:", uErr);
+            });
+
+            console.log(`📥 [ห้อง: ${roomId}] อัปโหลดข้อสอบสำเร็จ: ${questions.length} ข้อ`);
+            syncRoomToLibrary(roomId);
+            return res.json({ success: true, count: questions.length });
+        } catch (insertErr) {
+            console.error("Error inserting questions:", insertErr);
+            return res.status(500).json({ message: "เกิดข้อผิดพลาดในการบันทึกข้อสอบลงฐานข้อมูล: " + insertErr.message });
+        }
+    });
+});
+
+// อาจารย์เพิ่มข้อสอบใหม่แบบต่อท้าย (Append Questions)
+app.post('/api/teacher/add-questions', async (req, res) => {
+    const { roomId, questions } = req.body;
+    if (!roomId || !Array.isArray(questions) || questions.length === 0) {
+        return res.status(400).json({ message: "ข้อมูลห้องสอบหรือข้อสอบไม่ถูกต้อง" });
+    }
+
+    try {
+        for (const rawQ of questions) {
             const q = {};
             for (let key in rawQ) {
                 if (rawQ.hasOwnProperty(key)) {
@@ -397,73 +650,39 @@ app.post('/api/upload-questions-excel', (req, res) => {
                 }
             }
 
-            stmt.run(
-                roomId, 
-                q.question || '', 
-                q.question_img || '',
-                q.a || '', q.b || '', q.c || '', q.d || '', q.e || '', q.f || '', q.g || '', q.h || '', q.i || '', q.j || '', 
-                q.a_img || '', q.b_img || '', q.c_img || '', q.d_img || '', q.e_img || '', q.f_img || '', q.g_img || '', q.h_img || '', q.i_img || '', q.j_img || '', 
-                q.answer || ''
-            );
-        });
-        stmt.finalize();
-
-        // รีเซ็ตสถานะเป็นแบบร่างเมื่อมีการเซฟหรือนำเข้าข้อสอบ
-        db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [roomId], (err) => {
-            if (err) console.error("ไม่สามารถรีเซ็ตสถานะเผยแพร่ได้:", err);
-        });
-
-        console.log(`📥 [ห้อง: ${roomId}] อัปโหลดข้อสอบสำเร็จ: ${questions.length} ข้อ (สูงสุด 10 ช้อยส์ + รูปภาพ)`);
-        syncRoomToLibrary(roomId);
-        res.json({ success: true, count: questions.length });
-    });
-});
-
-// อาจารย์เพิ่มข้อสอบใหม่แบบต่อท้าย (Append Questions)
-app.post('/api/teacher/add-questions', (req, res) => {
-    const { roomId, questions } = req.body;
-    if (!roomId || !Array.isArray(questions) || questions.length === 0) {
-        return res.status(400).json({ message: "ข้อมูลห้องสอบหรือข้อสอบไม่ถูกต้อง" });
-    }
-
-    const stmt = db.prepare(`
-        INSERT INTO questions (
-            roomId, question, question_img, 
-            a, b, c, d, e, f, g, h, i, j, 
-            a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img, 
-            answer
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    
-    questions.forEach(rawQ => {
-        const q = {};
-        for (let key in rawQ) {
-            if (rawQ.hasOwnProperty(key)) {
-                const cleanKey = key.trim().toLowerCase();
-                const val = rawQ[key];
-                q[cleanKey] = (val !== null && val !== undefined) ? String(val).trim() : '';
-            }
+            await new Promise((resolve, reject) => {
+                db.run(`
+                    INSERT INTO questions (
+                        roomId, question, question_img, 
+                        a, b, c, d, e, f, g, h, i, j, 
+                        a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img, 
+                        answer
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `, [
+                    roomId, 
+                    q.question || '', 
+                    q.question_img || '',
+                    q.a || '', q.b || '', q.c || '', q.d || '', q.e || '', q.f || '', q.g || '', q.h || '', q.i || '', q.j || '', 
+                    q.a_img || '', q.b_img || '', q.c_img || '', q.d_img || '', q.e_img || '', q.f_img || '', q.g_img || '', q.h_img || '', q.i_img || '', q.j_img || '', 
+                    q.answer || ''
+                ], (insErr) => {
+                    if (insErr) reject(insErr);
+                    else resolve();
+                });
+            });
         }
 
-        stmt.run(
-            roomId, 
-            q.question || '', 
-            q.question_img || '',
-            q.a || '', q.b || '', q.c || '', q.d || '', q.e || '', q.f || '', q.g || '', q.h || '', q.i || '', q.j || '', 
-            q.a_img || '', q.b_img || '', q.c_img || '', q.d_img || '', q.e_img || '', q.f_img || '', q.g_img || '', q.h_img || '', q.i_img || '', q.j_img || '', 
-            q.answer || ''
-        );
-    });
-    stmt.finalize();
+        db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [roomId], (uErr) => {
+            if (uErr) console.error("ไม่สามารถรีเซ็ตสถานะเผยแพร่ได้:", uErr);
+        });
 
-    // รีเซ็ตสถานะเป็นแบบร่างเมื่อมีการเพิ่มข้อสอบ
-    db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [roomId], (err) => {
-        if (err) console.error("ไม่สามารถรีเซ็ตสถานะเผยแพร่ได้:", err);
-    });
-
-    console.log(`📥 [ห้อง: ${roomId}] เพิ่มข้อสอบใหม่สำเร็จ: ${questions.length} ข้อ`);
-    syncRoomToLibrary(roomId);
-    res.json({ success: true, count: questions.length });
+        console.log(`📥 [ห้อง: ${roomId}] เพิ่มข้อสอบใหม่สำเร็จ: ${questions.length} ข้อ`);
+        syncRoomToLibrary(roomId);
+        return res.json({ success: true, count: questions.length });
+    } catch (insertErr) {
+        console.error("Error adding questions:", insertErr);
+        return res.status(500).json({ message: "เกิดข้อผิดพลาดในการบันทึกข้อสอบลงฐานข้อมูล: " + insertErr.message });
+    }
 });
 
 // นักเรียนดึงข้อสอบไปทำ (ค้นหาจาก roomId และซ่อนเฉลย - ต้องกดยืนยันเผยแพร่ก่อน)
@@ -730,7 +949,7 @@ app.get('/api/room-settings', (req, res) => {
     const roomId = req.query.roomId;
     if (!roomId) return res.status(400).json({ message: "กรุณาระบุ roomId" });
 
-    db.get('SELECT randomize, duration, announcement, show_score, show_leaderboard, exam_title FROM teacher_rooms WHERE roomId = ?', [roomId], (err, row) => {
+    db.get('SELECT randomize, duration, announcement, show_score, show_leaderboard, exam_title, exam_code, roomName FROM teacher_rooms WHERE roomId = ?', [roomId], (err, row) => {
         if (err) return res.status(500).json({ message: err.message });
         res.json({
             randomize: row ? row.randomize : 1,
@@ -738,24 +957,38 @@ app.get('/api/room-settings', (req, res) => {
             announcement: row ? row.announcement : '',
             showScore: row ? (row.show_score !== undefined ? row.show_score : 1) : 1,
             showLeaderboard: row ? (row.show_leaderboard !== undefined ? row.show_leaderboard : 1) : 1,
-            examTitle: row ? row.exam_title : ''
+            examTitle: row ? (row.exam_title || '') : '',
+            examCode: row ? (row.exam_code || row.examCode || '') : '',
+            roomName: row ? (row.roomName || '') : ''
         });
     });
 });
 
 // อัปเดตการตั้งค่าห้องสอบ
 app.post('/api/teacher/update-room-settings', (req, res) => {
-    const { roomId, randomize, duration, announcement, showScore, showLeaderboard } = req.body;
+    const { roomId, randomize, duration, announcement, showScore, showLeaderboard, examCode, examTitle, roomName } = req.body;
     if (!roomId) return res.status(400).json({ message: "กรุณาระบุ roomId" });
 
     db.run(
-        'UPDATE teacher_rooms SET randomize = ?, duration = ?, announcement = ?, show_score = ?, show_leaderboard = ? WHERE roomId = ?',
+        `UPDATE teacher_rooms SET 
+            randomize = ?, 
+            duration = ?, 
+            announcement = ?, 
+            show_score = ?, 
+            show_leaderboard = ?, 
+            exam_code = COALESCE(?, exam_code), 
+            exam_title = COALESCE(?, exam_title), 
+            roomName = COALESCE(?, roomName) 
+        WHERE roomId = ?`,
         [
             randomize !== undefined ? randomize : 1, 
             duration !== undefined ? duration : 0, 
             announcement || '', 
             showScore !== undefined ? showScore : 1, 
             showLeaderboard !== undefined ? showLeaderboard : 1, 
+            examCode !== undefined ? examCode : '',
+            examTitle !== undefined ? examTitle : '',
+            roomName !== undefined ? roomName : '',
             roomId
         ],
         function(err) {
@@ -780,25 +1013,9 @@ app.delete('/api/delete-student-result', (req, res) => {
 // 🚨 ระบบแจ้งรายงานปัญหาจากนักศึกษา (Student Issue Reports APIs)
 // ==========================================
 
-// ส่งรายงานปัญหาจากนักศึกษา
+// ส่งรายงานปัญหาจากนักศึกษา (ปิดการใช้งานแล้ว)
 app.post('/api/report-issue', (req, res) => {
-    const { roomId, studentId, studentName, class: studentClass, issue } = req.body;
-    if (!roomId || !studentId || !studentName || !issue) {
-        return res.status(400).json({ message: "ข้อมูลรายงานไม่ครบถ้วน" });
-    }
-
-    const thaiDateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const date = new Date().toLocaleDateString('th-TH', thaiDateOptions);
-    const time = new Date().toLocaleTimeString('th-TH');
-
-    db.run(
-        'INSERT INTO student_reports (roomId, studentId, studentName, class, issue, time, date) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [roomId, studentId, studentName, studentClass || '', issue, time, date],
-        function(err) {
-            if (err) return res.status(500).json({ message: err.message });
-            res.json({ success: true });
-        }
-    );
+    return res.status(403).json({ success: false, message: "ระบบรายงานปัญหาจากนักศึกษาปิดการใช้งานแล้ว" });
 });
 
 // ดึงรายงานปัญหาทั้งหมด
@@ -1035,6 +1252,96 @@ app.post('/api/log-student-login', (req, res) => {
             res.json({ success: true });
         }
     );
+});
+
+// 👨‍🎓 API สำหรับดึงรายชื่อนักศึกษาที่กำลังทำข้อสอบอยู่ในห้องนั้นๆ (Active Students List)
+app.get('/api/teacher/active-students-list', (req, res) => {
+    const { roomId } = req.query;
+    if (!roomId) return res.status(400).json({ message: "กรุณาระบุ roomId" });
+
+    db.all(`
+        SELECT sl.studentId, sl.name, sl.class, sl.loginTime, sl.loginDate
+        FROM student_logins sl
+        WHERE sl.roomId = ? AND sl.studentId NOT IN (
+            SELECT studentId FROM exam_results WHERE roomId = ?
+        )
+        ORDER BY sl.id DESC
+    `, [roomId, roomId], (err, rows) => {
+        if (err) return res.status(500).json({ message: err.message });
+        
+        // กรองเอาเฉพาะข้อมูลนักศึกษาลายนิ้วมือล่าสุด (unique studentId)
+        const uniqueMap = new Map();
+        (rows || []).forEach(r => {
+            if (!uniqueMap.has(r.studentId)) {
+                uniqueMap.set(r.studentId, r);
+            }
+        });
+
+        res.json(Array.from(uniqueMap.values()));
+    });
+});
+
+// 👨‍🎓 API สำหรับดึงจำนวนนักศึกษาที่กำลังเข้าสอบแบบเรียลไทม์ (Active Students)
+app.get('/api/teacher/active-students', (req, res) => {
+    const { username, roomId } = req.query;
+    if (!username || username === 'undefined') return res.status(400).json({ message: "กรุณาระบุ username" });
+
+    // ดึงห้องทั้งหมดของอาจารย์ท่านนี้
+    db.all('SELECT roomId, roomName FROM teacher_rooms WHERE teacherUsername = ?', [username], (err, rooms) => {
+        if (err) return res.status(500).json({ message: err.message });
+        const roomIds = (rooms || []).map(r => r.roomId);
+        if (roomIds.length === 0) {
+            return res.json({ grandTotalActive: 0, grandTotalLoggedIn: 0, grandTotalSubmitted: 0, rooms: {} });
+        }
+
+        const placeholders = roomIds.map(() => '?').join(',');
+        const sql = `
+            SELECT sl.roomId, sl.studentId,
+            (SELECT COUNT(*) FROM exam_results er WHERE er.roomId = sl.roomId AND er.studentId = sl.studentId) as isSubmitted
+            FROM student_logins sl
+            WHERE sl.roomId IN (${placeholders})
+        `;
+
+        db.all(sql, roomIds, (err2, rows) => {
+            if (err2) return res.status(500).json({ message: err2.message });
+
+            const roomMap = {};
+            const roomSubmittedSet = {};
+            const roomLoggedInSet = {};
+
+            (rows || []).forEach(row => {
+                if (!roomLoggedInSet[row.roomId]) roomLoggedInSet[row.roomId] = new Set();
+                if (!roomSubmittedSet[row.roomId]) roomSubmittedSet[row.roomId] = new Set();
+
+                roomLoggedInSet[row.roomId].add(row.studentId);
+                if (row.isSubmitted > 0) {
+                    roomSubmittedSet[row.roomId].add(row.studentId);
+                }
+            });
+
+            let grandTotalActive = 0;
+            let grandTotalLoggedIn = 0;
+            let grandTotalSubmitted = 0;
+
+            roomIds.forEach(rId => {
+                const loggedIn = roomLoggedInSet[rId] ? roomLoggedInSet[rId].size : 0;
+                const submitted = roomSubmittedSet[rId] ? roomSubmittedSet[rId].size : 0;
+                const active = Math.max(0, loggedIn - submitted);
+
+                roomMap[rId] = { loggedIn, submitted, active };
+                grandTotalActive += active;
+                grandTotalLoggedIn += loggedIn;
+                grandTotalSubmitted += submitted;
+            });
+
+            res.json({
+                grandTotalActive,
+                grandTotalLoggedIn,
+                grandTotalSubmitted,
+                rooms: roomMap
+            });
+        });
+    });
 });
 
 // สรุปสถิติสำหรับ Super Admin Dashboard
@@ -1311,8 +1618,10 @@ function copyRoomQuestionsToTemplate(roomId, templateId) {
                 a, b, c, d, e, f, g, h, i, j,
                 a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img,
                 answer
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, (prepErr) => {
+            if (prepErr) console.error("Error preparing template_questions stmt:", prepErr.message);
+        });
         questions.forEach(q => {
             stmt.run(
                 templateId, q.question || '', q.question_img || '',
@@ -1385,7 +1694,7 @@ app.post('/api/library/update-template-questions', (req, res) => {
                     a, b, c, d, e, f, g, h, i, j,
                     a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img,
                     answer
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `);
 
             questions.forEach(q => {

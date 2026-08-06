@@ -1,13 +1,27 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Admin Dashboard - Tab-Lock Online Exam Platform</title>
+    <title>Super Admin Dashboard - Tab-Lock Online Proctoring System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        html { font-size: 125% !important; }
+        html { font-size: 100%; }
+        @media (min-width: 640px) { html { font-size: 110%; } }
+        @media (min-width: 1024px) { html { font-size: 120%; } }
+
+        @media (max-width: 768px) {
+            #sidebar {
+                position: fixed;
+                top: 0; bottom: 0; left: -280px;
+                z-index: 9999;
+                width: 260px !important;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+                transition: left 0.3s ease-in-out;
+            }
+            #sidebar.mobile-open { left: 0 !important; }
+        }
 
         body {
             font-family: 'Kanit', 'Inter', sans-serif;
@@ -152,7 +166,7 @@
             <img src="logo.png" alt="Tab-Lock Logo" class="h-8 w-8 object-cover rounded-lg shadow-sm border border-slate-100" />
             <div>
                 <h1 class="text-base font-extrabold text-slate-800 tracking-tight">Super Admin Dashboard</h1>
-                <p class="text-[10px] text-rose-600 font-bold uppercase tracking-widest">Tab-Lock Online Exam Platform</p>
+                <p class="text-[10px] text-rose-600 font-bold uppercase tracking-widest">Tab-Lock Online Proctoring System</p>
             </div>
         </div>
         <div class="flex items-center gap-4">
@@ -288,7 +302,7 @@
     </main>
 
     <footer class="border-t border-rose-100 py-5 text-center text-slate-550 text-[10px] mt-10">
-        <p>&copy; 2026 Tab-Lock Online Exam Platform Super Admin Dashboard. สงวนสิทธิ์ทั้งหมด.</p>
+        <p>&copy; 2026 Tab-Lock Online Proctoring System Super Admin Dashboard. สงวนสิทธิ์ทั้งหมด.</p>
     </footer>
 
     <script>
