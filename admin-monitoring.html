@@ -288,8 +288,8 @@
                     class="room-tab flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${r.roomId === currentRoomId ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-md shadow-rose-500/20' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}">
                     ${r.roomId !== 'ALL' ? '🏫' : ''} ${escapeHtml(displayName)}
                     ${isLive ? '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="กำลังเปิดสอบ (LIVE)"></span>' : ''}
-                    ${r.roomId !== 'ALL' ? `<span id="active-student-badge-${r.roomId}" class="hidden bg-emerald-500/20 text-emerald-800 text-[9px] font-black px-1.5 py-0.5 rounded-md">👨‍🎓 0 คน</span>` : ''}
-                    ${count > 0 ? `<span class="min-w-[18px] h-[18px] rounded-full bg-rose-500/20 text-rose-700 text-[9px] font-black flex items-center justify-center px-1">${count}</span>` : ''}
+                    <span id="active-student-badge-${r.roomId}" class="hidden bg-emerald-100 border border-emerald-300 text-emerald-900 text-[10px] font-black px-2 py-0.5 rounded-lg shadow-2xs">👨‍🎓 0 คน</span>
+                    ${count > 0 ? `<span class="min-w-[18px] h-[18px] rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center px-1.5 shadow-sm" title="พบพฤติกรรมน่าสงสัย ${count} ครั้ง">${count}</span>` : ''}
                 </button>`;
             }).join('');
 
@@ -301,11 +301,21 @@
                 const res = await fetch(`/api/teacher/active-students?username=${username}`);
                 const data = await res.json();
 
+                const totalActiveAcrossAll = data.grandTotalActive || 0;
+
+                // Update badge for ALL rooms tab
+                const allBadge = document.getElementById('active-student-badge-ALL');
+                if (allBadge) {
+                    allBadge.textContent = `👨‍🎓 รวม ${totalActiveAcrossAll} คน`;
+                    allBadge.classList.toggle('hidden', totalActiveAcrossAll === 0);
+                }
+
+                // Update badge at top header
                 let activeCount = 0;
                 if (currentRoomId === 'ALL') {
-                    activeCount = data.grandTotalActive || 0;
+                    activeCount = totalActiveAcrossAll;
                 } else {
-                    activeCount = data.rooms[currentRoomId] ? data.rooms[currentRoomId].active : 0;
+                    activeCount = data.rooms && data.rooms[currentRoomId] ? data.rooms[currentRoomId].active : 0;
                 }
 
                 const badgeEl = document.getElementById('active-students-badge');
