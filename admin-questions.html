@@ -71,15 +71,15 @@
         .nav-link {
             display: flex; align-items: center; gap: 10px;
             padding: 10px 14px; border-radius: 12px;
-            font-size: 13px; font-weight: 500;
+            font-size: 13px; font-weight: 700;
             color: #64748b; text-decoration: none;
             transition: all 0.2s ease;
         }
         .nav-link:hover { color: #1e293b; background: rgba(15,23,42,0.04); }
         .nav-link.active {
             background: linear-gradient(135deg, #06b6d4, #8b5cf6);
-            color: #ffffff; font-weight: 600;
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.2);
+            color: #ffffff; font-weight: 700;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
         }
         .nav-link svg { width: 18px; height: 18px; flex-shrink: 0; }
         #main-area {
@@ -276,7 +276,7 @@
                 <p class="text-sm text-slate-500 max-w-md mx-auto font-medium">คุณต้องการเริ่มสร้างข้อสอบด้วยวิธีการใดครับ?</p>
                 <div class="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
                     <button onclick="openExamSettingsModal()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-black px-6 py-3.5 rounded-2xl text-sm transition duration-300 shadow-lg shadow-pink-500/25 active:scale-98">
-                        <span>🆕 เริ่มสร้างข้อสอบสด</span>
+                        <span>✍️ เริ่มสร้างข้อสอบ</span>
                     </button>
                     <a href="admin-excel.html" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white font-black px-6 py-3.5 rounded-2xl text-sm transition duration-300 shadow-lg shadow-cyan-500/25 active:scale-98">
                         <span>📊 นำเข้าข้อสอบ Excel</span>

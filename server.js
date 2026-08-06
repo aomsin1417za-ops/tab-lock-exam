@@ -1250,6 +1250,33 @@ app.post('/api/log-student-login', (req, res) => {
     );
 });
 
+// 👨‍🎓 API สำหรับดึงรายชื่อนักศึกษาที่กำลังทำข้อสอบอยู่ในห้องนั้นๆ (Active Students List)
+app.get('/api/teacher/active-students-list', (req, res) => {
+    const { roomId } = req.query;
+    if (!roomId) return res.status(400).json({ message: "กรุณาระบุ roomId" });
+
+    db.all(`
+        SELECT sl.studentId, sl.name, sl.class, sl.loginTime, sl.loginDate
+        FROM student_logins sl
+        WHERE sl.roomId = ? AND sl.studentId NOT IN (
+            SELECT studentId FROM exam_results WHERE roomId = ?
+        )
+        ORDER BY sl.id DESC
+    `, [roomId, roomId], (err, rows) => {
+        if (err) return res.status(500).json({ message: err.message });
+        
+        // กรองเอาเฉพาะข้อมูลนักศึกษาลายนิ้วมือล่าสุด (unique studentId)
+        const uniqueMap = new Map();
+        (rows || []).forEach(r => {
+            if (!uniqueMap.has(r.studentId)) {
+                uniqueMap.set(r.studentId, r);
+            }
+        });
+
+        res.json(Array.from(uniqueMap.values()));
+    });
+});
+
 // 👨‍🎓 API สำหรับดึงจำนวนนักศึกษาที่กำลังเข้าสอบแบบเรียลไทม์ (Active Students)
 app.get('/api/teacher/active-students', (req, res) => {
     const { username, roomId } = req.query;
