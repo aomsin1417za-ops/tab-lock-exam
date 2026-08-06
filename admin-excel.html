@@ -308,8 +308,8 @@
                         <span class="text-cyan-700 font-semibold flex items-center gap-1.5">📄 แฟ้มข้อมูล: <strong id="file-name" class="text-slate-800 font-bold"></strong></span>
                         <span class="bg-cyan-600 text-white font-extrabold px-3 py-1 rounded-full text-[10px]" id="row-count">0 ข้อ</span>
                     </div>
-                    <button id="upload-btn" class="w-full bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-600 hover:to-indigo-600 text-white font-bold py-4 px-4 rounded-2xl transition shadow-lg shadow-cyan-500/20 active:scale-[0.99]">
-                        🚀 เริ่มนำเข้าข้อสอบเข้าสู่ห้องสอบเลย
+                    <button id="upload-btn" class="w-full bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-600 hover:to-indigo-600 text-white font-extrabold text-sm py-4 px-4 rounded-2xl transition shadow-lg shadow-cyan-500/20 active:scale-[0.99]">
+                        🚀 นำข้อสอบเข้าสู่ระบบ
                     </button>
                 </div>
             </div>
@@ -427,14 +427,23 @@
         uploadBtn.addEventListener('click', async () => {
             if (!excelData || !currentRoomId) return;
 
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = '⏳ กำลังนำข้อสอบเข้าสู่ระบบ...';
+
             try {
                 const res = await fetch('/api/upload-questions-excel', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ roomId: currentRoomId, questions: excelData })
                 });
-                const data = await res.json();
                 
+                let data;
+                try {
+                    data = await res.json();
+                } catch(jsonErr) {
+                    data = { message: `ตอบกลับจากเซิร์ฟเวอร์ไม่ถูกต้อง (HTTP ${res.status})` };
+                }
+
                 if (res.ok && data.success) {
                     alert(`✅ นำเข้าข้อสอบเข้าห้อง ${currentRoomId} สำเร็จจำนวน ${excelData.length} ข้อเรียบร้อยแล้ว!\nระบบจะพาท่านไปยังหน้าจัดการข้อสอบหลักเพื่อตรวจสอบครับ`);
                     previewArea.classList.add('hidden');
@@ -444,7 +453,11 @@
                     alert(`❌ ล้มเหลว: ${data.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล'}`);
                 }
             } catch (err) { 
-                alert('❌ ล้มเหลว กรุณาตรวจสอบว่า Node Server เปิดอยู่หรือไม่'); 
+                console.error(err);
+                alert(`❌ เกิดข้อผิดพลาดในการเชื่อมต่อ: ${err.message}`); 
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '🚀 นำข้อสอบเข้าสู่ระบบ';
             }
         });
 

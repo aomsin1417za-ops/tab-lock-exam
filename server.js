@@ -578,19 +578,65 @@ app.post('/api/upload-questions-excel', (req, res) => {
         return res.status(400).json({ message: "ข้อมูลห้องสอบหรือข้อสอบไม่ถูกต้อง" });
     }
 
-    db.run('DELETE FROM questions WHERE roomId = ?', [roomId], (err) => {
+    db.run('DELETE FROM questions WHERE roomId = ?', [roomId], async (err) => {
         if (err) return res.status(500).json({ message: err.message });
 
-        const stmt = db.prepare(`
-            INSERT INTO questions (
-                roomId, question, question_img, 
-                a, b, c, d, e, f, g, h, i, j, 
-                a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img, 
-                answer
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-        questions.forEach(rawQ => {
-            // แปลงชื่อคีย์หัวตารางให้เป็นตัวพิมพ์เล็กทั้งหมด และแปลงข้อมูลทุกช่องเป็น String
+        try {
+            for (const rawQ of questions) {
+                const q = {};
+                for (let key in rawQ) {
+                    if (rawQ.hasOwnProperty(key)) {
+                        const cleanKey = key.trim().toLowerCase();
+                        const val = rawQ[key];
+                        q[cleanKey] = (val !== null && val !== undefined) ? String(val).trim() : '';
+                    }
+                }
+
+                await new Promise((resolve, reject) => {
+                    db.run(`
+                        INSERT INTO questions (
+                            roomId, question, question_img, 
+                            a, b, c, d, e, f, g, h, i, j, 
+                            a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img, 
+                            answer
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `, [
+                        roomId, 
+                        q.question || '', 
+                        q.question_img || '',
+                        q.a || '', q.b || '', q.c || '', q.d || '', q.e || '', q.f || '', q.g || '', q.h || '', q.i || '', q.j || '', 
+                        q.a_img || '', q.b_img || '', q.c_img || '', q.d_img || '', q.e_img || '', q.f_img || '', q.g_img || '', q.h_img || '', q.i_img || '', q.j_img || '', 
+                        q.answer || ''
+                    ], (insErr) => {
+                        if (insErr) reject(insErr);
+                        else resolve();
+                    });
+                });
+            }
+
+            db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [roomId], (uErr) => {
+                if (uErr) console.error("ไม่สามารถรีเซ็ตสถานะเผยแพร่ได้:", uErr);
+            });
+
+            console.log(`📥 [ห้อง: ${roomId}] อัปโหลดข้อสอบสำเร็จ: ${questions.length} ข้อ`);
+            syncRoomToLibrary(roomId);
+            return res.json({ success: true, count: questions.length });
+        } catch (insertErr) {
+            console.error("Error inserting questions:", insertErr);
+            return res.status(500).json({ message: "เกิดข้อผิดพลาดในการบันทึกข้อสอบลงฐานข้อมูล: " + insertErr.message });
+        }
+    });
+});
+
+// อาจารย์เพิ่มข้อสอบใหม่แบบต่อท้าย (Append Questions)
+app.post('/api/teacher/add-questions', async (req, res) => {
+    const { roomId, questions } = req.body;
+    if (!roomId || !Array.isArray(questions) || questions.length === 0) {
+        return res.status(400).json({ message: "ข้อมูลห้องสอบหรือข้อสอบไม่ถูกต้อง" });
+    }
+
+    try {
+        for (const rawQ of questions) {
             const q = {};
             for (let key in rawQ) {
                 if (rawQ.hasOwnProperty(key)) {
@@ -600,73 +646,39 @@ app.post('/api/upload-questions-excel', (req, res) => {
                 }
             }
 
-            stmt.run(
-                roomId, 
-                q.question || '', 
-                q.question_img || '',
-                q.a || '', q.b || '', q.c || '', q.d || '', q.e || '', q.f || '', q.g || '', q.h || '', q.i || '', q.j || '', 
-                q.a_img || '', q.b_img || '', q.c_img || '', q.d_img || '', q.e_img || '', q.f_img || '', q.g_img || '', q.h_img || '', q.i_img || '', q.j_img || '', 
-                q.answer || ''
-            );
-        });
-        stmt.finalize();
-
-        // รีเซ็ตสถานะเป็นแบบร่างเมื่อมีการเซฟหรือนำเข้าข้อสอบ
-        db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [roomId], (err) => {
-            if (err) console.error("ไม่สามารถรีเซ็ตสถานะเผยแพร่ได้:", err);
-        });
-
-        console.log(`📥 [ห้อง: ${roomId}] อัปโหลดข้อสอบสำเร็จ: ${questions.length} ข้อ (สูงสุด 10 ช้อยส์ + รูปภาพ)`);
-        syncRoomToLibrary(roomId);
-        res.json({ success: true, count: questions.length });
-    });
-});
-
-// อาจารย์เพิ่มข้อสอบใหม่แบบต่อท้าย (Append Questions)
-app.post('/api/teacher/add-questions', (req, res) => {
-    const { roomId, questions } = req.body;
-    if (!roomId || !Array.isArray(questions) || questions.length === 0) {
-        return res.status(400).json({ message: "ข้อมูลห้องสอบหรือข้อสอบไม่ถูกต้อง" });
-    }
-
-    const stmt = db.prepare(`
-        INSERT INTO questions (
-            roomId, question, question_img, 
-            a, b, c, d, e, f, g, h, i, j, 
-            a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img, 
-            answer
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    
-    questions.forEach(rawQ => {
-        const q = {};
-        for (let key in rawQ) {
-            if (rawQ.hasOwnProperty(key)) {
-                const cleanKey = key.trim().toLowerCase();
-                const val = rawQ[key];
-                q[cleanKey] = (val !== null && val !== undefined) ? String(val).trim() : '';
-            }
+            await new Promise((resolve, reject) => {
+                db.run(`
+                    INSERT INTO questions (
+                        roomId, question, question_img, 
+                        a, b, c, d, e, f, g, h, i, j, 
+                        a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img, 
+                        answer
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `, [
+                    roomId, 
+                    q.question || '', 
+                    q.question_img || '',
+                    q.a || '', q.b || '', q.c || '', q.d || '', q.e || '', q.f || '', q.g || '', q.h || '', q.i || '', q.j || '', 
+                    q.a_img || '', q.b_img || '', q.c_img || '', q.d_img || '', q.e_img || '', q.f_img || '', q.g_img || '', q.h_img || '', q.i_img || '', q.j_img || '', 
+                    q.answer || ''
+                ], (insErr) => {
+                    if (insErr) reject(insErr);
+                    else resolve();
+                });
+            });
         }
 
-        stmt.run(
-            roomId, 
-            q.question || '', 
-            q.question_img || '',
-            q.a || '', q.b || '', q.c || '', q.d || '', q.e || '', q.f || '', q.g || '', q.h || '', q.i || '', q.j || '', 
-            q.a_img || '', q.b_img || '', q.c_img || '', q.d_img || '', q.e_img || '', q.f_img || '', q.g_img || '', q.h_img || '', q.i_img || '', q.j_img || '', 
-            q.answer || ''
-        );
-    });
-    stmt.finalize();
+        db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [roomId], (uErr) => {
+            if (uErr) console.error("ไม่สามารถรีเซ็ตสถานะเผยแพร่ได้:", uErr);
+        });
 
-    // รีเซ็ตสถานะเป็นแบบร่างเมื่อมีการเพิ่มข้อสอบ
-    db.run('UPDATE teacher_rooms SET is_published = 0 WHERE roomId = ?', [roomId], (err) => {
-        if (err) console.error("ไม่สามารถรีเซ็ตสถานะเผยแพร่ได้:", err);
-    });
-
-    console.log(`📥 [ห้อง: ${roomId}] เพิ่มข้อสอบใหม่สำเร็จ: ${questions.length} ข้อ`);
-    syncRoomToLibrary(roomId);
-    res.json({ success: true, count: questions.length });
+        console.log(`📥 [ห้อง: ${roomId}] เพิ่มข้อสอบใหม่สำเร็จ: ${questions.length} ข้อ`);
+        syncRoomToLibrary(roomId);
+        return res.json({ success: true, count: questions.length });
+    } catch (insertErr) {
+        console.error("Error adding questions:", insertErr);
+        return res.status(500).json({ message: "เกิดข้อผิดพลาดในการบันทึกข้อสอบลงฐานข้อมูล: " + insertErr.message });
+    }
 });
 
 // นักเรียนดึงข้อสอบไปทำ (ค้นหาจาก roomId และซ่อนเฉลย - ต้องกดยืนยันเผยแพร่ก่อน)
