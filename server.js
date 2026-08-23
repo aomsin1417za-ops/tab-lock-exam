@@ -729,7 +729,7 @@ app.post('/api/report-cheat', (req, res) => {
     const { roomId, studentId, name, class: studentClass, action } = req.body;
     if (!roomId || !studentId || !name) return res.status(400).json({ message: "ข้อมูลไม่ครบถ้วน" });
 
-    const time = new Date().toLocaleTimeString('th-TH');
+    const time = new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', second: '2-digit' });
     db.run('INSERT INTO cheat_logs (roomId, studentId, name, class, action, time) VALUES (?, ?, ?, ?, ?, ?)', 
         [roomId, studentId, name, studentClass || '', action || "🚨 ตรวจพบการสลับหน้าจอ", time], (err) => {
             if (err) return res.status(500).json({ message: err.message });
@@ -799,10 +799,10 @@ app.post('/api/submit-exam', (req, res) => {
             if (studentAns === correctAns && correctAns !== "") score++;
         });
 
-        // เก็บบันทึกข้อมูลวันที่แบบเต็มรูปแบบภาษาไทย (วัน วันที่ เดือน พ.ศ.)
-        const thaiDateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        // เก็บบันทึกข้อมูลวันที่แบบเต็มรูปแบบภาษาไทย (วัน วันที่ เดือน พ.ศ.) เวลาประเทศไทย (GMT+7)
+        const thaiDateOptions = { timeZone: 'Asia/Bangkok', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         const date = new Date().toLocaleDateString('th-TH', thaiDateOptions);
-        const time = new Date().toLocaleTimeString('th-TH');
+        const time = new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
         const answersJson = JSON.stringify(answers);
 
@@ -1244,8 +1244,8 @@ app.post('/api/log-student-login', (req, res) => {
     const { studentId, name, class: studentClass, roomId } = req.body;
     if (!studentId || !name || !roomId) return res.status(400).json({ message: "ข้อมูลไม่ครบถ้วน" });
 
-    const loginTime = new Date().toLocaleTimeString('th-TH');
-    const loginDate = new Date().toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const loginTime = new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const loginDate = new Date().toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     db.run('INSERT INTO student_logins (studentId, name, class, roomId, loginTime, loginDate) VALUES (?, ?, ?, ?, ?, ?)',
         [studentId, name, studentClass || '', roomId, loginTime, loginDate], (err) => {
@@ -1507,7 +1507,7 @@ app.post('/api/send-warning', (req, res) => {
     const { roomId, studentId, message } = req.body;
     if (!roomId || !studentId || !message) return res.status(400).json({ message: "ข้อมูลไม่ครบถ้วน" });
     
-    const time = new Date().toLocaleTimeString('th-TH');
+    const time = new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', second: '2-digit' });
     
     db.run('INSERT INTO student_warnings (roomId, studentId, message, status, time) VALUES (?, ?, ?, ?, ?)',
         [roomId, studentId, message, 'unread', time], function(err) {
@@ -1593,6 +1593,7 @@ function syncRoomToLibrary(roomId) {
         db.get('SELECT id FROM exam_templates WHERE teacherUsername = ? AND templateName = ?', [teacherUsername, templateName], (err, tpl) => {
             if (err) return;
             const nowStr = new Date().toLocaleDateString('th-TH', { 
+                timeZone: 'Asia/Bangkok',
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
                 hour: '2-digit', minute: '2-digit'
             });
@@ -1686,6 +1687,7 @@ app.post('/api/library/update-template-questions', (req, res) => {
 
     db.serialize(() => {
         const nowStr = new Date().toLocaleDateString('th-TH', { 
+            timeZone: 'Asia/Bangkok',
             weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
             hour: '2-digit', minute: '2-digit'
         });
