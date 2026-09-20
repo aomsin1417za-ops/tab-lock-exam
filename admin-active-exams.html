@@ -7,9 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,300&display=swap" rel="stylesheet">
     <style>
-        html { font-size: 100%; }
-        @media (min-width: 640px) { html { font-size: 110%; } }
-        @media (min-width: 1024px) { html { font-size: 120%; } }
+        html { font-size: 100%; -webkit-text-size-adjust: 100%; }
 
         @media (max-width: 768px) {
             #sidebar {
@@ -40,7 +38,7 @@
         #sidebar-toggle { position: absolute; right: 12px; top: 24px; width: 24px; height: 24px; border-radius: 50%; background: #ffffff; border: 1px solid #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s; z-index: 100; }
         #sidebar-toggle:hover { color: #1e293b; background: #f8fafc; }
         #sidebar.collapsed #sidebar-toggle { right: 0; left: 0; margin: 0 auto; top: 60px; }
-        .header-card { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 10px 20px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06); }
+        .header-card { background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 18px; padding: 8px 18px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05); }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -78,7 +76,7 @@
                 </a>
                 <a href="admin-library.html" class="nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
-                    <span>คลังข้อสอบสะสม</span>
+                    <span>คลังข้อสอบ</span>
                 </a>
                 <a href="admin-results.html" class="nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
@@ -133,6 +131,9 @@
                 <span id="active-count-badge" class="px-4 py-1.5 bg-emerald-500 text-white rounded-xl text-xs md:text-sm font-black shadow-sm">
                     กำลังโหลด...
                 </span>
+                <button onclick="window.TabLockGuide.open('active-exams')" class="bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700 text-white font-extrabold px-3 py-1.5 rounded-xl text-xs md:text-sm transition duration-300 shadow-sm active:scale-95 flex items-center gap-1.5 cursor-pointer">
+                    <span>💡 คู่มือหน้านี้</span>
+                </button>
             </div>
         </header>
 
@@ -251,7 +252,16 @@
                                     </div>
                                     <div class="flex justify-between items-center text-slate-600">
                                         <span class="font-bold flex items-center gap-1.5">✅ ส่งข้อสอบสำเร็จแล้ว:</span>
-                                        <span class="font-bold text-slate-800">${submittedCount} คน</span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-slate-800">${submittedCount} คน</span>
+                                            ${submittedCount > 0 ? `
+                                            <button onclick="resetRoomExamSession('${r.roomId}', '${escapeHtml(examTitle)}')" 
+                                                class="text-[10px] font-extrabold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-lg transition active:scale-95 flex items-center gap-1 cursor-pointer shadow-xs" 
+                                                title="รีเซ็ตผลสอบและประวัติผู้เข้าสอบของห้องนี้เป็น 0 คนเพื่อเริ่มรอบสอบใหม่">
+                                                🔄 เริ่มนับ 0 ใหม่
+                                            </button>
+                                            ` : ''}
+                                        </div>
                                     </div>
                                     <div class="flex justify-between items-center text-slate-600">
                                         <span class="font-bold flex items-center gap-1.5">🔑 รหัสข้อสอบ (EXAM CODE):</span>
@@ -285,6 +295,30 @@
             } catch (err) {
                 console.error(err);
                 container.innerHTML = `<div class="p-6 text-center text-rose-500 text-xs font-bold">ไม่สามารถดึงข้อมูลห้องสอบที่กำลังเปิดเผยแพร่ได้</div>`;
+            }
+        }
+
+        async function resetRoomExamSession(roomId, title) {
+            if (!confirm(`⚠️ ยืนยันการรีเซ็ตรอบสอบสำหรับ "${title}" (${roomId})?\n\nระบบจะล้างประวัติการส่งคำตอบและรายชื่อผู้เข้าสอบเดิมของห้องนี้ทั้งหมด เพื่อให้จำนวนผู้ส่งเริ่มต้นนับ 0 คนใหม่สำหรับการสอบรอบนี้`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/clear-results', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ roomId })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    alert(`✅ รีเซ็ตรอบการสอบของห้อง ${roomId} เรียบร้อยแล้ว (จำนวนผู้ส่งเริ่มต้นที่ 0 คน)`);
+                    await loadActiveExams();
+                } else {
+                    alert(`❌ เกิดข้อผิดพลาด: ${data.message || 'ไม่สามารถรีเซ็ตได้'}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("ไม่สามารถติดต่อเซิร์ฟเวอร์เพื่อรีเซ็ตผลสอบได้");
             }
         }
 
@@ -413,5 +447,6 @@
             </div>
         </div>
     </div>
+<script src="user-guide-system.js"></script>
 </body>
 </html>

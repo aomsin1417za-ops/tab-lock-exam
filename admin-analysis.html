@@ -7,9 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        html { font-size: 100%; }
-        @media (min-width: 640px) { html { font-size: 110%; } }
-        @media (min-width: 1024px) { html { font-size: 120%; } }
+        html { font-size: 100%; -webkit-text-size-adjust: 100%; }
 
         @media (max-width: 768px) {
             #sidebar {
@@ -112,27 +110,38 @@
         }
         .header-card {
             background: #ffffff;
-            border: 1px solid #cbd5e1;
-            border-radius: 16px;
-            padding: 10px 20px;
-            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+            border: 1.5px solid #cbd5e1;
+            border-radius: 18px;
+            padding: 8px 18px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
         }
         .glass-card {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            border: 1.5px solid #cbd5e1;
             border-radius: 20px;
             box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
         }
         select.dark-select, input.dark-input {
-            background: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #1e293b; border-radius: 10px;
-            padding: 10px 14px; font-size: 13px;
+            background: #f8fafc;
+            border: 1.5px solid #cbd5e1;
+            color: #1e293b; border-radius: 12px;
+            padding: 8px 14px; font-size: 13px;
+            font-weight: 600;
             font-family: 'Kanit', sans-serif;
-            outline: none; width: 100%; transition: border-color 0.2s;
+            outline: none; width: 100%; transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+            cursor: pointer;
         }
-        select.dark-select:focus, input.dark-input:focus { border-color: rgba(6,182,212,0.5); }
+        select.dark-select:hover, input.dark-input:hover {
+            background: #ffffff;
+            border-color: #64748b;
+        }
+        select.dark-select:focus, input.dark-input:focus {
+            background: #ffffff;
+            border-color: #06b6d4;
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+        }
         select.dark-select option { background: #ffffff; color: #1e293b; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -203,7 +212,7 @@
                 </a>
                 <a href="admin-library.html" class="nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
-                    <span>คลังข้อสอบสะสม</span>
+                    <span>คลังข้อสอบ</span>
                 </a>
                 <a href="admin-results.html" class="nav-link">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" /></svg>
