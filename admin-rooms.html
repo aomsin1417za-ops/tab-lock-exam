@@ -877,14 +877,20 @@
 
         // 4. เปิดโมดอล "+ สร้างห้องสอบ" (ขั้นตอนที่ 1, 2, 3)
         async function openCreateRoomModal() {
+            if (!courses || courses.length === 0) {
+                await loadTeacherCourses();
+            } else {
+                populateCourseSelectDropdown();
+            }
+
             document.getElementById('create-room-modal').classList.remove('hidden');
             const selectCourse = document.getElementById('modal-select-course');
             
-            if (courses.length > 0 && !selectCourse.value) {
-                selectCourse.value = courses[0].id;
-                onModalCourseChanged(courses[0].id);
+            if (courses && courses.length > 0) {
+                const targetId = selectCourse.value || courses[0].id;
+                selectCourse.value = targetId;
+                onModalCourseChanged(targetId);
             }
-            await loadExamTemplatesForModal();
         }
 
         function closeCreateRoomModal() {
