@@ -777,6 +777,8 @@
                 const qCount = room.questionCount || 0;
                 const announcement = room.announcement || 'อย่าแอบใช้ AI นะจ้ะ';
 
+                const classNameStr = room.roomName || room.className || room.class || '';
+
                 html += `
                     <div class="bg-white rounded-3xl p-6 shadow-md hover:shadow-xl border-2 ${isPub ? 'border-emerald-400' : 'border-slate-200'} transition flex flex-col justify-between space-y-4 relative">
                         
@@ -805,10 +807,17 @@
                             </div>
                         </div>
 
-                        <!-- Course & Exam Title -->
+                        <!-- Course & Exam Title & Class/Section Badge -->
                         <div>
-                            <div class="text-xs font-bold text-indigo-600 uppercase tracking-wider truncate mb-1">
-                                📚 ${escapeHtml(courseNameStr)}
+                            <div class="flex items-center gap-2 flex-wrap mb-1">
+                                <div class="text-xs font-bold text-indigo-600 uppercase tracking-wider truncate">
+                                    📚 ${escapeHtml(courseNameStr)}
+                                </div>
+                                ${classNameStr ? `
+                                    <span class="text-[11px] font-extrabold text-purple-700 bg-purple-100 border border-purple-200 px-2.5 py-0.5 rounded-lg flex items-center gap-1 shadow-2xs">
+                                        <span>🏫</span> <span>กลุ่ม/ชั้น: ${escapeHtml(classNameStr)}</span>
+                                    </span>
+                                ` : ''}
                             </div>
                             <h3 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight leading-tight">
                                 ${escapeHtml(examTitleStr)}
@@ -828,15 +837,19 @@
                             </div>
                         </div>
 
-                        <!-- 4 Stat Counters in Grid -->
-                        <div class="grid grid-cols-2 gap-2 text-xs">
-                            <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl flex flex-col">
+                        <!-- Stat Counters in Grid (Includes Class / Section) -->
+                        <div class="grid grid-cols-3 gap-2 text-xs">
+                            <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl flex flex-col justify-center">
                                 <span class="text-[10px] text-slate-400 font-bold">⏱️ เวลาสอบ</span>
-                                <span class="text-sm font-bold text-slate-800">${duration} นาที</span>
+                                <span class="text-xs sm:text-sm font-bold text-slate-800">${duration} นาที</span>
                             </div>
-                            <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl flex flex-col">
+                            <div class="p-2.5 bg-slate-50 border border-slate-100 rounded-xl flex flex-col justify-center">
                                 <span class="text-[10px] text-slate-400 font-bold">📝 จำนวนข้อสอบ</span>
-                                <span class="text-sm font-bold text-slate-800">${qCount} ข้อ</span>
+                                <span class="text-xs sm:text-sm font-bold text-slate-800">${qCount} ข้อ</span>
+                            </div>
+                            <div class="p-2.5 bg-purple-50/70 border border-purple-100 rounded-xl flex flex-col justify-center">
+                                <span class="text-[10px] text-purple-600 font-bold">🏫 กลุ่ม/ชั้นเรียน</span>
+                                <span class="text-xs font-extrabold text-purple-900 truncate" title="${escapeHtml(classNameStr || 'ทุกกลุ่มเรียน')}">${escapeHtml(classNameStr || 'ทุกกลุ่มเรียน')}</span>
                             </div>
                         </div>
 
