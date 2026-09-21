@@ -877,19 +877,26 @@
 
         // 4. เปิดโมดอล "+ สร้างห้องสอบ" (ขั้นตอนที่ 1, 2, 3)
         async function openCreateRoomModal() {
-            if (!courses || courses.length === 0) {
-                await loadTeacherCourses();
-            } else {
-                populateCourseSelectDropdown();
-            }
-
+            // เปิดโมดอลทันทีทันใดเมื่อผู้ใช้กดปุ่ม (ไม่บล็อก UI)
             document.getElementById('create-room-modal').classList.remove('hidden');
-            const selectCourse = document.getElementById('modal-select-course');
-            
-            if (courses && courses.length > 0) {
-                const targetId = selectCourse.value || courses[0].id;
-                selectCourse.value = targetId;
-                onModalCourseChanged(targetId);
+
+            try {
+                if (!courses || courses.length === 0) {
+                    courses = DEFAULT_COURSES;
+                    populateCourseSelectDropdown();
+                    loadTeacherCourses();
+                } else {
+                    populateCourseSelectDropdown();
+                }
+
+                const selectCourse = document.getElementById('modal-select-course');
+                if (courses && courses.length > 0 && selectCourse) {
+                    const targetId = selectCourse.value || courses[0].id;
+                    selectCourse.value = targetId;
+                    onModalCourseChanged(targetId);
+                }
+            } catch(e) {
+                console.error("Error opening create room modal:", e);
             }
         }
 
