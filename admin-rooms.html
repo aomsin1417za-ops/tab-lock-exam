@@ -548,8 +548,11 @@
         const username = localStorage.getItem('teacher_username') || 'admin';
         const teacherName = localStorage.getItem('teacher_name') || 'อาจารย์ผู้สอน';
 
-        document.getElementById('sidebar-teacher-name').textContent = `อาจารย์: ${teacherName}`;
-        document.getElementById('user-avatar-text').textContent = teacherName.charAt(0);
+        const sidebarTeacherEl = document.getElementById('sidebar-teacher-name');
+        if (sidebarTeacherEl) sidebarTeacherEl.textContent = `อาจารย์: ${teacherName}`;
+
+        const userAvatarEl = document.getElementById('user-avatar-text');
+        if (userAvatarEl) userAvatarEl.textContent = teacherName.charAt(0);
 
         // Sidebar Toggle
         const sidebar = document.getElementById('sidebar');

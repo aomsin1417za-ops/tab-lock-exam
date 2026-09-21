@@ -230,7 +230,8 @@
         const teacherName = localStorage.getItem('teacher_name') || 'อาจารย์ผู้สอน';
 
         if (document.getElementById('sidebar-teacher-name')) document.getElementById('sidebar-teacher-name').textContent = teacherName;
-        document.getElementById('user-avatar-text').textContent = teacherName.charAt(0);
+        const avatarElActive = document.getElementById('user-avatar-text');
+        if (avatarElActive) avatarElActive.textContent = teacherName.charAt(0);
 
         // Sidebar Toggle
         const sidebar = document.getElementById('sidebar');
