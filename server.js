@@ -900,10 +900,16 @@ app.post('/api/student/register', (req, res) => {
             [cleanStudentId, cleanFirstName, cleanLastName, cleanClass, passwordHash, now, now],
             function(insertErr) {
                 if (insertErr) return res.status(500).json({ success: false, message: insertErr.message });
-                console.log(`👨‍🎓 ลงทะเบียนนักศึกษาใหม่ (เปิดใช้งานทันที): ${cleanStudentId} (${cleanFirstName} ${cleanLastName})`);
                 res.json({
                     success: true,
-                    message: "🎉 สมัครสมาชิกสำเร็จ! บัญชีของคุณเปิดใช้งานเรียบร้อย สามารถเข้าสู่ระบบได้ทันทีครับ"
+                    message: "🎉 สมัครสมาชิกสำเร็จ! บัญชีของคุณเปิดใช้งานเรียบร้อย สามารถเข้าสู่ระบบได้ทันทีครับ",
+                    student: {
+                        studentId: cleanStudentId,
+                        firstName: cleanFirstName,
+                        lastName: cleanLastName,
+                        name: `${cleanFirstName} ${cleanLastName}`.trim(),
+                        class: cleanClass
+                    }
                 });
             }
         );
