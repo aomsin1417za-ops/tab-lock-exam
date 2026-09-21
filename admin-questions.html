@@ -650,35 +650,68 @@
         </div>
     </div>
 
-    <!-- ➕ 3.4 CREATE ROOM MODAL -->
+    <!-- ➕ 3.4 CREATE ROOM & WAITING LOUNGE WIZARD MODAL -->
     <div id="create-room-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-slate-100 flex flex-col">
-            <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="text-indigo-600 text-lg">➕</span>
-                    <h3 class="text-base font-extrabold text-slate-800">สร้างห้องสอบใหม่</h3>
+        <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-slate-100 flex flex-col">
+            <div class="px-6 py-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl">🚀</span>
+                    <div>
+                        <h3 class="text-base font-black text-slate-800">สร้างห้องสอบและเปิดห้องรอสอบ</h3>
+                        <p class="text-[11px] text-slate-500 font-medium">เลือกรายวิชาและชุดข้อสอบเพื่อเปิดห้องรอสอบ (Waiting Lounge) ให้นักศึกษาทันที</p>
+                    </div>
                 </div>
                 <button onclick="closeCreateRoomModal()" class="text-slate-400 hover:text-slate-700 text-lg font-bold">✕</button>
             </div>
             <div class="p-6 space-y-4 text-xs">
-                <div class="space-y-1">
-                    <label class="font-bold text-slate-600">📚 เลือกรายวิชาที่จะจัดสอบ</label>
-                    <select id="create-room-course-id" class="w-full p-2.5 rounded-xl border border-slate-200 font-semibold outline-none focus:border-indigo-500">
+                <!-- 1. Select Course -->
+                <div class="space-y-1.5">
+                    <label class="font-extrabold text-slate-700 flex items-center gap-1.5">
+                        <span>📚 1. เลือกรายวิชาที่จะจัดสอบ</span>
+                        <span class="text-[10px] text-rose-500 font-bold">*จำเป็น</span>
+                    </label>
+                    <select id="create-room-course-id" onchange="onCourseSelectedForNewRoom(this)" class="w-full p-2.5 rounded-xl border border-slate-200 font-semibold outline-none focus:border-indigo-500 bg-slate-50 focus:bg-white text-slate-800">
                         <option value="">กำลังโหลดรายวิชา...</option>
                     </select>
+                    <p class="text-[10px] text-slate-400">ระบบจะคัดกรองเฉพาะนักศึกษาในรายวิชานี้เท่านั้นที่มีสิทธิ์เข้าห้องสอบ</p>
                 </div>
-                <div class="space-y-1">
-                    <label class="font-bold text-slate-600">ชื่อห้องเรียน / หัวข้อวิชา</label>
-                    <input type="text" id="create-room-name" class="w-full p-2.5 rounded-xl border border-slate-200 font-semibold outline-none focus:border-indigo-500" placeholder="เช่น การเขียนโปรแกรม ม.5/1">
+
+                <!-- 2. Select Exam Set from Library -->
+                <div class="space-y-1.5">
+                    <label class="font-extrabold text-slate-700 flex items-center gap-1.5">
+                        <span>📝 2. เลือกชุดข้อสอบที่จะใช้สอบ</span>
+                        <span class="text-[10px] text-indigo-600 font-bold">(จากคลังข้อสอบ)</span>
+                    </label>
+                    <select id="create-room-template-id" onchange="onTemplateSelectedForNewRoom(this)" class="w-full p-2.5 rounded-xl border border-slate-200 font-semibold outline-none focus:border-indigo-500 bg-slate-50 focus:bg-white text-slate-800">
+                        <option value="">กำลังโหลดคลังข้อสอบ...</option>
+                    </select>
+                    <p class="text-[10px] text-slate-400">ระบบจะดึงข้อสอบชุดที่เลือกมาบรรจุลงห้องนี้ให้อัตโนมัติใน 1 วินาที</p>
                 </div>
-                <div class="space-y-1">
-                    <label class="font-bold text-slate-600">ประเภทการสอบ</label>
-                    <input type="text" id="create-room-exam-title" class="w-full p-2.5 rounded-xl border border-slate-200 font-semibold outline-none focus:border-indigo-500" placeholder="เช่น สอบเก็บคะแนนท้ายบทที่ 2">
+
+                <!-- 3. Room Name -->
+                <div class="space-y-1.5">
+                    <label class="font-extrabold text-slate-700">ชื่อห้องเรียน / หัวข้อการสอบ</label>
+                    <input type="text" id="create-room-name" class="w-full p-2.5 rounded-xl border border-slate-200 font-semibold outline-none focus:border-indigo-500 bg-slate-50 focus:bg-white text-slate-800" placeholder="เช่น วิทยาการคำนวณ ม.5/1 (สอบกลางภาค)">
+                </div>
+
+                <!-- 4. Duration & Exam Type -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                        <label class="font-extrabold text-slate-700">⏱️ เวลาทำข้อสอบ (นาที)</label>
+                        <input type="number" id="create-room-duration" value="60" min="0" max="600" class="w-full p-2.5 rounded-xl border border-slate-200 font-semibold outline-none focus:border-indigo-500 bg-slate-50 focus:bg-white text-slate-800" placeholder="เช่น 60 (0=ไม่จำกัด)">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="font-extrabold text-slate-700">🏷️ ประเภทการสอบ</label>
+                        <input type="text" id="create-room-exam-title" class="w-full p-2.5 rounded-xl border border-slate-200 font-semibold outline-none focus:border-indigo-500 bg-slate-50 focus:bg-white text-slate-800" placeholder="เช่น สอบเก็บคะแนน, กลางภาค">
+                    </div>
                 </div>
             </div>
-            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2">
-                <button onclick="closeCreateRoomModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition">ยกเลิก</button>
-                <button onclick="handleCreateRoom()" id="btn-submit-create-room" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition">สร้างห้องสอบ</button>
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button onclick="closeCreateRoomModal()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs transition">ยกเลิก</button>
+                <button onclick="handleCreateRoom()" id="btn-submit-create-room" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 text-white font-black rounded-xl text-xs sm:text-sm shadow-md shadow-emerald-600/25 transition active:scale-95 flex items-center gap-1.5 cursor-pointer">
+                    <span>🚀</span>
+                    <span>เปิดห้องรอสอบทันที (รับ PIN & QR Code)</span>
+                </button>
             </div>
         </div>
     </div>
@@ -1272,28 +1305,31 @@
         // ==========================================
         // 📱 WAITING LOUNGE (PIN & QR & LIVE STUDENTS)
         // ==========================================
-        async function openWaitingLoungeModal() {
-            if (!currentRoomId) {
+        async function openWaitingLoungeModal(targetRoomId, pinCode, roomName, examTitle) {
+            const rId = targetRoomId || currentRoomId;
+            if (!rId) {
                 alert("กรุณาเลือกห้องสอบก่อน");
                 return;
             }
 
             try {
-                const statusRes = await fetch(`/api/teacher/get-publish-status?roomId=${encodeURIComponent(currentRoomId)}`);
+                const statusRes = await fetch(`/api/teacher/get-publish-status?roomId=${encodeURIComponent(rId)}`);
                 const statusData = await statusRes.json();
-                const pin = statusData.exam_code || currentPublishedPin || '------';
+                const pin = pinCode || statusData.exam_code || currentPublishedPin || '------';
                 currentPublishedPin = pin;
 
                 const formattedPin = pin.length === 6 ? `${pin.slice(0,3)} ${pin.slice(3)}` : pin;
                 document.getElementById('pub-modal-pin').textContent = formattedPin;
 
-                const joinUrl = `${window.location.origin}/Student-login.html?room=${encodeURIComponent(currentRoomId)}&code=${encodeURIComponent(pin)}`;
+                const joinUrl = `${window.location.origin}/Student-login.html?room=${encodeURIComponent(rId)}&code=${encodeURIComponent(pin)}`;
                 document.getElementById('pub-modal-link').value = joinUrl;
 
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(joinUrl)}`;
                 document.getElementById('pub-modal-qrcode').src = qrUrl;
 
-                document.getElementById('pub-modal-room-info').textContent = `ห้อง: ${statusData.roomName || currentRoomId} ${statusData.exam_title ? '• ' + statusData.exam_title : ''}`;
+                const displayTitle = examTitle || statusData.exam_title || '';
+                const displayRoomName = roomName || statusData.roomName || rId;
+                document.getElementById('pub-modal-room-info').textContent = `ห้อง: ${displayRoomName} (${rId}) ${displayTitle ? '• ' + displayTitle : ''}`;
 
                 // Update start/stop UI
                 const isPub = statusData.is_published === 1;
@@ -1323,9 +1359,9 @@
                     if (stopBtn) stopBtn.classList.add('hidden');
                 }
 
-                await pollWaitingStudents(currentRoomId);
+                await pollWaitingStudents(rId);
                 if (waitingStudentsInterval) clearInterval(waitingStudentsInterval);
-                waitingStudentsInterval = setInterval(() => pollWaitingStudents(currentRoomId), 2000);
+                waitingStudentsInterval = setInterval(() => pollWaitingStudents(rId), 2000);
 
                 document.getElementById('publish-modal').classList.remove('hidden');
             } catch(e) {
@@ -1510,20 +1546,69 @@
         // ==========================================
         async function openCreateRoomModal() {
             const cSelect = document.getElementById('create-room-course-id');
+            const tSelect = document.getElementById('create-room-template-id');
+
             cSelect.innerHTML = '<option value="">กำลังโหลดรายวิชา...</option>';
+            tSelect.innerHTML = '<option value="">กำลังโหลดคลังข้อสอบ...</option>';
+
+            document.getElementById('create-room-name').value = '';
+            document.getElementById('create-room-exam-title').value = 'สอบเก็บคะแนน';
+            document.getElementById('create-room-duration').value = '60';
+
+            // 1. โหลดรายวิชา
             try {
                 const res = await fetch(`/api/teacher/courses?username=${encodeURIComponent(username)}`);
                 if (res.ok) {
                     const courses = await res.json();
                     if (Array.isArray(courses) && courses.length > 0) {
                         cSelect.innerHTML = '<option value="">-- ไม่ระบุรายวิชา (ทั่วไป) --</option>' +
-                            courses.map(c => `<option value="${c.id}">[${c.courseCode || 'วิชา'}] ${c.courseName} (${c.studentCount || 0} คน)</option>`).join('');
+                            courses.map(c => `<option value="${c.id}" data-code="${escapeHtml(c.courseCode)}" data-name="${escapeHtml(c.courseName)}">[${c.courseCode || 'วิชา'}] ${c.courseName} (${c.studentCount || 0} คน)</option>`).join('');
                     } else {
                         cSelect.innerHTML = '<option value="">-- ยังไม่มีวิชาในระบบ (สร้างได้ที่ "จัดการรายวิชา") --</option>';
                     }
                 }
             } catch(e) {}
+
+            // 2. โหลดชุดข้อสอบจากคลัง
+            try {
+                const resT = await fetch(`/api/library/get-templates?username=${encodeURIComponent(username)}`);
+                if (resT.ok) {
+                    const templates = await resT.json();
+                    if (Array.isArray(templates) && templates.length > 0) {
+                        tSelect.innerHTML = '<option value="">-- เลือกชุดข้อสอบจากคลัง (ดึงข้อสอบลงห้องอัตโนมัติ) --</option>' +
+                            templates.map(t => `<option value="${t.id}" data-name="${escapeHtml(t.templateName)}">📁 ${t.templateName} (${t.questionCount} ข้อ)</option>`).join('') +
+                            '<option value="none">✍️ ยังไม่เลือก (จะพิมพ์ข้อสอบเองในห้อง)</option>';
+                    } else {
+                        tSelect.innerHTML = '<option value="none">📭 ยังไม่มีข้อสอบในคลัง (จะพิมพ์ข้อสอบเองในห้อง)</option>';
+                    }
+                }
+            } catch(e) {
+                tSelect.innerHTML = '<option value="none">✍️ จะพิมพ์ข้อสอบเองในห้อง</option>';
+            }
+
             document.getElementById('create-room-modal').classList.remove('hidden');
+        }
+
+        function onCourseSelectedForNewRoom(select) {
+            const opt = select.options[select.selectedIndex];
+            if (opt && opt.value) {
+                const cName = opt.getAttribute('data-name');
+                const nameInput = document.getElementById('create-room-name');
+                if (!nameInput.value.trim() && cName) {
+                    nameInput.value = cName;
+                }
+            }
+        }
+
+        function onTemplateSelectedForNewRoom(select) {
+            const opt = select.options[select.selectedIndex];
+            if (opt && opt.value && opt.value !== 'none') {
+                const tName = opt.getAttribute('data-name');
+                const titleInput = document.getElementById('create-room-exam-title');
+                if (tName) {
+                    titleInput.value = tName;
+                }
+            }
         }
 
         function closeCreateRoomModal() {
@@ -1532,19 +1617,25 @@
 
         async function handleCreateRoom() {
             const courseId = document.getElementById('create-room-course-id').value;
-            const roomName = document.getElementById('create-room-name').value.trim();
-            const examTitle = document.getElementById('create-room-exam-title').value.trim();
+            const templateId = document.getElementById('create-room-template-id').value;
+            let roomName = document.getElementById('create-room-name').value.trim();
+            let examTitle = document.getElementById('create-room-exam-title').value.trim();
+            const duration = parseInt(document.getElementById('create-room-duration').value, 10) || 0;
 
             if (!roomName) {
-                alert("กรุณาระบุชื่อห้องเรียน / หัวข้อวิชา");
-                return;
+                roomName = examTitle || 'ห้องสอบใหม่';
+            }
+            if (!examTitle) {
+                examTitle = roomName;
             }
 
             const btn = document.getElementById('btn-submit-create-room');
+            const oldHtml = btn.innerHTML;
             btn.disabled = true;
-            btn.textContent = '⏳ กำลังสร้าง...';
+            btn.innerHTML = '⏳ กำลังสร้างห้องและเปิดห้องรอสอบ...';
 
             try {
+                // 1. สร้างห้องสอบบนเซิร์ฟเวอร์
                 const res = await fetch('/api/teacher/create-room', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1552,24 +1643,53 @@
                         username,
                         roomName,
                         examTitle,
+                        duration,
                         courseId: courseId ? parseInt(courseId, 10) : null
                     })
                 });
                 const data = await res.json();
-                if (res.ok && data.success) {
-                    closeCreateRoomModal();
-                    await loadTeacherRooms();
-                    document.getElementById('room-selector').value = data.roomId;
-                    await onRoomChange();
-                    openWaitingLoungeModal();
-                } else {
-                    alert(`❌ สร้างห้องไม่สำเร็จ: ${data.message}`);
+                if (!res.ok || !data.success) {
+                    alert(`❌ สร้างห้องไม่สำเร็จ: ${data.message || 'เกิดข้อผิดพลาด'}`);
+                    btn.disabled = false;
+                    btn.innerHTML = oldHtml;
+                    return;
                 }
+
+                const newRoomId = data.roomId;
+                const newPin = data.exam_code;
+
+                // 2. หากเลือกชุดข้อสอบจากคลัง ให้ดึงข้อสอบลงห้องทันทีใน 1 วินาที!
+                if (templateId && templateId !== 'none' && !isNaN(parseInt(templateId, 10))) {
+                    try {
+                        await fetch('/api/library/load-template', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                roomId: newRoomId,
+                                templateId: parseInt(templateId, 10)
+                            })
+                        });
+                    } catch(tErr) {
+                        console.error('Auto-load template error:', tErr);
+                    }
+                }
+
+                closeCreateRoomModal();
+
+                // 3. สลับห้องในสตูดิโอ
+                await loadTeacherRooms();
+                document.getElementById('room-selector').value = newRoomId;
+                await onRoomChange();
+
+                // 4. เปิดหน้าต่าง ห้องรอสอบ (Waiting Lounge) พร้อม PIN 6 หลัก และ QR Code ทันที!
+                openWaitingLoungeModal(newRoomId, newPin, roomName, examTitle);
+
             } catch(e) {
-                alert("เกิดข้อผิดพลาด");
+                console.error(e);
+                alert("เกิดข้อผิดพลาดในการสร้างห้องสอบ");
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'สร้างห้องสอบ';
+                btn.innerHTML = oldHtml;
             }
         }
 
