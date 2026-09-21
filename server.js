@@ -1105,7 +1105,7 @@ app.post('/api/student/check-exam-access', (req, res) => {
         }
 
         // 2. ดึงข้อมูลนักศึกษาในระบบ
-        db.get('SELECT studentId, firstName, lastName, class FROM students WHERE studentId = ? OR REPLACE(studentId, "-", "") = ?',
+        db.get("SELECT studentId, firstName, lastName, class FROM students WHERE studentId = ? OR REPLACE(studentId, '-', '') = ?",
             [cleanStudentId, normStudentId], (err2, student) => {
             if (err2) return res.status(500).json({ success: false, message: err2.message });
             if (!student) {
