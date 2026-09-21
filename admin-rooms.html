@@ -1070,13 +1070,16 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, roomId })
                 });
-                if (res.ok) {
+                const data = await res.json();
+                if (res.ok && data.success) {
                     await refreshAllRoomsData();
+                    await loadTeacherCourses();
                 } else {
-                    alert("ไม่สามารถลบห้องสอบได้");
+                    alert(`ไม่สามารถลบห้องสอบได้: ${data.message || 'เกิดข้อผิดพลาด'}`);
                 }
             } catch(e) {
                 console.error(e);
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์");
             }
         }
 
