@@ -1789,6 +1789,57 @@ app.post('/api/teacher/add-questions', async (req, res) => {
     }
 });
 
+// ==========================================
+// 📝 บันทึกข้อสอบทั้งชุดจากหน้าสร้างข้อสอบ (Replace all + sync ไปคลัง)
+// ==========================================
+app.post('/api/teacher/save-questions', async (req, res) => {
+    const { roomId, questions } = req.body;
+    if (!roomId || !Array.isArray(questions)) {
+        return res.status(400).json({ message: "ข้อมูลห้องสอบหรือข้อสอบไม่ถูกต้อง" });
+    }
+
+    // ลบข้อสอบเดิมในห้องสอบแล้ว insert ใหม่ทั้งชุด (replace strategy)
+    db.run('DELETE FROM questions WHERE roomId = ?', [roomId], async (delErr) => {
+        if (delErr) return res.status(500).json({ message: delErr.message });
+
+        if (questions.length === 0) {
+            syncRoomToLibrary(roomId);
+            return res.json({ success: true, count: 0 });
+        }
+
+        try {
+            for (const rawQ of questions) {
+                await new Promise((resolve, reject) => {
+                    db.run(`
+                        INSERT INTO questions (
+                            roomId, question, question_img,
+                            a, b, c, d, e, f, g, h, i, j,
+                            a_img, b_img, c_img, d_img, e_img, f_img, g_img, h_img, i_img, j_img,
+                            answer
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `, [
+                        roomId,
+                        rawQ.question || '',
+                        rawQ.question_img || '',
+                        rawQ.a || '', rawQ.b || '', rawQ.c || '', rawQ.d || '',
+                        rawQ.e || '', rawQ.f || '', rawQ.g || '', rawQ.h || '', rawQ.i || '', rawQ.j || '',
+                        rawQ.a_img || '', rawQ.b_img || '', rawQ.c_img || '', rawQ.d_img || '',
+                        rawQ.e_img || '', rawQ.f_img || '', rawQ.g_img || '', rawQ.h_img || '', rawQ.i_img || '', rawQ.j_img || '',
+                        rawQ.answer || ''
+                    ], (insErr) => { if (insErr) reject(insErr); else resolve(); });
+                });
+            }
+
+            console.log(`💾 [ห้อง: ${roomId}] บันทึกข้อสอบสำเร็จ: ${questions.length} ข้อ (sync ไปคลังอัตโนมัติ)`);
+            syncRoomToLibrary(roomId);
+            return res.json({ success: true, count: questions.length });
+        } catch (insertErr) {
+            console.error("save-questions insert error:", insertErr);
+            return res.status(500).json({ message: "บันทึกข้อสอบล้มเหลว: " + insertErr.message });
+        }
+    });
+});
+
 // นักเรียนดึงข้อสอบไปทำ (ค้นหาจาก roomId และซ่อนเฉลย - ต้องกดยืนยันเผยแพร่ก่อน)
 app.get('/api/get-questions', (req, res) => {
     const roomId = req.query.roomId;
@@ -2759,7 +2810,14 @@ function syncRoomToLibrary(roomId) {
         const templateName = room.exam_title || room.roomName || 'ข้อสอบไม่มีชื่อ';
         const courseId = room.courseId ? parseInt(room.courseId, 10) : 0;
 
-        db.get('SELECT id FROM exam_templates WHERE teacherUsername = ? AND templateName = ?', [teacherUsername, templateName], (err, tpl) => {
+        // ค้นหา template ด้วย teacherUsername + templateName + courseId
+        // เพื่อให้ข้อสอบชื่อเดียวกันในต่างวิชาไม่ปนกัน
+        const findSql = courseId > 0
+            ? 'SELECT id FROM exam_templates WHERE teacherUsername = ? AND templateName = ? AND courseId = ?'
+            : 'SELECT id FROM exam_templates WHERE teacherUsername = ? AND templateName = ? AND (courseId IS NULL OR courseId = 0)';
+        const findParams = courseId > 0 ? [teacherUsername, templateName, courseId] : [teacherUsername, templateName];
+
+        db.get(findSql, findParams, (err, tpl) => {
             if (err) return;
             const nowStr = new Date().toLocaleDateString('th-TH', { 
                 timeZone: 'Asia/Bangkok',
