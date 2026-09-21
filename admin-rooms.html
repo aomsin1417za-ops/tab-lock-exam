@@ -418,9 +418,12 @@
             </div>
 
             <!-- Utility Buttons -->
-            <div class="flex items-center gap-2 pt-1">
+            <div class="flex items-center gap-2 pt-1 flex-wrap sm:flex-nowrap">
                 <button onclick="toggleProjectorMode()" class="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-white font-black text-xs rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
                     <span>📺</span> ฉายจอโปรเจกเตอร์
+                </button>
+                <button onclick="openMonitoringFromModal()" class="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs rounded-xl transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span>🛡️</span> ตรวจจับพฤติกรรมสด
                 </button>
                 <button onclick="copyPublishLink()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition active:scale-95 cursor-pointer">
                     📋 คัดลอกลิงก์
@@ -715,7 +718,13 @@
                                 <span>ฉายจอ PIN & QR Code (ห้องรอสอบ)</span>
                             </button>
 
-                            <!-- Button 2: Start / Stop Exam -->
+                            <!-- Button 2: ตรวจสอบพฤติกรรมน่าสงสัย -->
+                            <a href="admin-monitoring.html?room=${encodeURIComponent(room.roomId)}" class="w-full py-2.5 bg-gradient-to-r from-rose-500 via-pink-600 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white rounded-xl text-xs font-black shadow-md transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                                <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                                <span>🛡️ ตรวจสอบพฤติกรรมน่าสงสัย</span>
+                            </a>
+
+                            <!-- Button 3 & 4: Start / Stop Exam & ดูรายชื่อ -->
                             <div class="grid grid-cols-2 gap-2">
                                 ${isPub ? `
                                     <button onclick="togglePublishExam('${room.roomId}', false)" class="py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-black shadow-sm transition active:scale-95 flex items-center justify-center gap-1 cursor-pointer">
@@ -994,6 +1003,11 @@
                 waitingStudentsInterval = null;
             }
             document.getElementById('publish-modal').classList.add('hidden');
+        }
+
+        function openMonitoringFromModal() {
+            if (!activeModalRoomId) return;
+            window.location.href = `admin-monitoring.html?room=${encodeURIComponent(activeModalRoomId)}`;
         }
 
         async function pollWaitingStudents(roomId) {
