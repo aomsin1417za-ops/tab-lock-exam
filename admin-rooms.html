@@ -1025,16 +1025,24 @@
             document.getElementById('pub-waiting-list-container').classList.toggle('hidden');
         }
 
-        // 7. สลับสถานะเปิดสอบ / หยุดสอบ
+        // 7. สลับสถานะเปิดสอบ / หยุดสอบ & ลบห้องสอบเมื่อกดหยุดสอบ
         async function togglePublishExam(roomId, shouldPublish) {
-            const actionText = shouldPublish ? "🚀 ยืนยันเริ่มการสอบทันที? (นักศึกษาจะสามารถเริ่มทำข้อสอบได้พร้อมกัน)" : "🛑 ยืนยันหยุดเผยแพร่การสอบห้องนี้?";
+            if (!shouldPublish) {
+                if (activeModalRoomId === roomId) {
+                    closePublishModal();
+                }
+                await deleteRoom(roomId);
+                return;
+            }
+
+            const actionText = "🚀 ยืนยันเริ่มการสอบทันที? (นักศึกษาจะสามารถเริ่มทำข้อสอบได้พร้อมกัน)";
             if (!confirm(actionText)) return;
 
             try {
                 const res = await fetch('/api/teacher/publish-exam', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ roomId, publish: shouldPublish })
+                    body: JSON.stringify({ roomId, publish: true })
                 });
                 const data = await res.json();
                 if (res.ok && data.success) {
@@ -1057,7 +1065,9 @@
 
         async function stopExamFromLounge() {
             if (!activeModalRoomId) return;
-            await togglePublishExam(activeModalRoomId, false);
+            const targetId = activeModalRoomId;
+            closePublishModal();
+            await deleteRoom(targetId);
         }
 
         // 8. ลบห้องสอบ
