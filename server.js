@@ -48,6 +48,8 @@ function convertToPg(sql) {
 
     let paramIndex = 1;
     converted = converted.replace(/\?/g, () => `$${paramIndex++}`);
+    converted = converted.replace(/(\$\d+)\s+IS\s+NOT\s+NULL/gi, 'CAST($1 AS TEXT) IS NOT NULL');
+    converted = converted.replace(/(\$\d+)\s+IS\s+NULL/gi, 'CAST($1 AS TEXT) IS NULL');
     return converted;
 }
 
@@ -2273,30 +2275,46 @@ app.get('/api/exam-results', (req, res) => {
     const { roomId, courseId, username } = req.query;
 
     if (courseId) {
-        db.all(`
+        const cIdNum = parseInt(courseId, 10);
+        const validId = !isNaN(cIdNum) ? cIdNum : -1;
+        const cCodeStr = String(courseId).trim();
+
+        let sql = `
             SELECT DISTINCT er.id, er.studentId, er.name, er.class, er.score, er.maxScore, er.time, er.date, er.roomId, er.answers_json, er.courseId
             FROM exam_results er
             LEFT JOIN teacher_rooms tr ON er.roomId = tr.roomId
-            WHERE er.courseId = ? 
-               OR CAST(er.courseId AS TEXT) = ?
-               OR er.courseId IN (SELECT id FROM courses WHERE id = ? OR CAST(id AS TEXT) = ? OR courseCode = ?)
-               OR tr.courseId = ? 
-               OR CAST(tr.courseId AS TEXT) = ?
-               OR tr.courseId IN (SELECT id FROM courses WHERE id = ? OR CAST(id AS TEXT) = ? OR courseCode = ?)
-               OR (
-                   ? IS NOT NULL 
-                   AND tr.teacherUsername = ? 
-                   AND (er.courseId IS NULL OR er.courseId = 0) 
-                   AND (tr.courseId IS NULL OR tr.courseId = 0)
-               )
+            WHERE (
+                er.courseId = ? 
+                OR CAST(er.courseId AS TEXT) = ?
+                OR er.courseId IN (SELECT id FROM courses WHERE id = ? OR courseCode = ?)
+                OR tr.courseId = ? 
+                OR CAST(tr.courseId AS TEXT) = ?
+                OR tr.courseId IN (SELECT id FROM courses WHERE id = ? OR courseCode = ?)
+        `;
+        const params = [
+            validId, cCodeStr,
+            validId, cCodeStr,
+            validId, cCodeStr,
+            validId, cCodeStr
+        ];
+
+        if (username) {
+            sql += `
+                OR (
+                    tr.teacherUsername = ? 
+                    AND (er.courseId IS NULL OR er.courseId = 0) 
+                    AND (tr.courseId IS NULL OR tr.courseId = 0)
+                )
+            `;
+            params.push(String(username).trim());
+        }
+
+        sql += `
+            )
             ORDER BY er.id DESC
-        `, [
-            courseId, String(courseId),
-            courseId, String(courseId), String(courseId),
-            courseId, String(courseId),
-            courseId, String(courseId), String(courseId),
-            username || null, username || null
-        ], (err, rows) => {
+        `;
+
+        db.all(sql, params, (err, rows) => {
             if (err) return res.status(500).json({ message: err.message });
             res.json(rows || []);
         });
@@ -2482,7 +2500,7 @@ app.post('/api/teacher/update-room-settings', (req, res) => {
             exam_code = COALESCE(?, exam_code), 
             exam_title = COALESCE(?, exam_title), 
             roomName = COALESCE(?, roomName),
-            courseId = CASE WHEN ? IS NOT NULL THEN ? ELSE courseId END
+            courseId = COALESCE(?, courseId)
         WHERE roomId = ?`,
         [
             randomize !== undefined ? randomize : 1, 
@@ -2490,10 +2508,9 @@ app.post('/api/teacher/update-room-settings', (req, res) => {
             announcement !== undefined ? announcement : '', 
             showScore !== undefined ? showScore : 1, 
             showLeaderboard !== undefined ? showLeaderboard : 1, 
-            examCode !== undefined ? examCode : '',
-            examTitle !== undefined ? examTitle : '',
-            roomName !== undefined ? roomName : '',
-            courseId !== undefined ? courseId : null,
+            examCode !== undefined ? examCode : null,
+            examTitle !== undefined ? examTitle : null,
+            roomName !== undefined ? roomName : null,
             courseId !== undefined ? courseId : null,
             roomId
         ],
