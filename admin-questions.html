@@ -1582,37 +1582,37 @@
     </div>
 
     <!-- 3. Course Check Confirmation Modal (แจ้งเตือนสอบถามรายวิชาก่อนเริ่มสร้างข้อสอบ) -->
-    <div id="course-check-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-all duration-300 opacity-0 pointer-events-none">
+    <div id="course-check-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-all duration-300 opacity-0 pointer-events-none" style="font-family: 'Kanit', sans-serif;">
         <div class="bg-white/95 border border-pink-200 p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full mx-4 text-center space-y-6 transform scale-95 transition-all duration-300 relative overflow-hidden" id="course-check-modal-card">
             
             <!-- Top Gradient Accent bar -->
-            <div class="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-pink-500 via-rose-500 to-sky-500"></div>
+            <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-pink-500 via-rose-500 to-sky-500"></div>
 
-            <!-- Animated Header Icon -->
+            <!-- Header Icon -->
             <div class="relative inline-block mt-2">
-                <div class="w-20 h-20 bg-gradient-to-tr from-pink-100 via-rose-100 to-sky-100 rounded-full flex items-center justify-center text-4xl mx-auto shadow-inner border border-pink-200/80">
+                <div class="w-16 h-16 bg-gradient-to-tr from-pink-100 via-rose-100 to-sky-100 rounded-full flex items-center justify-center text-3xl mx-auto shadow-inner border border-pink-200/80">
                     📚
                 </div>
             </div>
 
             <!-- Message Header -->
             <div class="space-y-2">
-                <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                <h3 class="text-xl font-bold text-slate-800 tracking-normal">
                     คุณมีรายวิชาของคุณหรือยัง?
                 </h3>
-                <p class="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed">
-                    ก่อนเริ่มสร้างข้อสอบ กรุณายืนยันว่าคุณมีรายวิชาในระบบแล้ว หรือหากยังไม่มีสามารถสร้างรายวิชาใหม่ได้ทันที
+                <p class="text-xs sm:text-sm text-slate-500 font-normal leading-relaxed">
+                    ก่อนเริ่มสร้างข้อสอบ กรุณายืนยันว่าคุณมีรายวิชาในระบบแล้ว<br class="hidden sm:inline"> หรือหากยังไม่มีสามารถสร้างรายวิชาใหม่ได้ทันที
                 </p>
             </div>
 
             <!-- Choice Action Buttons -->
             <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-                <button onclick="confirmHasCourse()" class="w-full sm:w-1/2 py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black rounded-2xl text-xs sm:text-sm transition-all duration-200 shadow-md shadow-emerald-500/25 active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                <button onclick="confirmHasCourse()" class="w-full sm:w-1/2 py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-medium rounded-2xl text-sm transition-all duration-200 shadow-md shadow-emerald-500/20 active:scale-95 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap">
                     <span>✅</span>
                     <span>มีแล้ว (สร้างข้อสอบ)</span>
                 </button>
                 
-                <a href="admin-courses.html" class="w-full sm:w-1/2 py-3.5 px-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-black rounded-2xl text-xs sm:text-sm transition-all duration-200 shadow-md shadow-indigo-500/25 active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                <a href="admin-courses.html" class="w-full sm:w-1/2 py-3 px-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-medium rounded-2xl text-sm transition-all duration-200 shadow-md shadow-indigo-500/20 active:scale-95 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap">
                     <span>➕</span>
                     <span>ยังไม่มี (สร้างรายวิชา)</span>
                 </a>
