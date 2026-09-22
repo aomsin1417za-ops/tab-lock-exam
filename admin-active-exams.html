@@ -146,7 +146,7 @@
                 <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white sidebar-online-dot online-dot"></span>
             </div>
             <div class="flex-1 min-w-0">
-                <div class="text-sm font-bold text-slate-900 truncate" id="sidebar-teacher-name">อาจารย์ผู้ดูแล</div>
+                <div class="text-sm font-bold text-slate-900 truncate" id="sidebar-teacher-name">อาจารย์: ภควันต์ แสนเสริม</div>
                 <div class="text-xs text-slate-500 font-semibold flex items-center gap-1">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> ออนไลน์ • ผู้ดูแลระบบ
                 </div>
@@ -219,11 +219,13 @@
 
     <script>
         const username = localStorage.getItem('teacher_username') || 'admin';
-        const teacherName = localStorage.getItem('teacher_name') || 'อาจารย์ผู้สอน';
+        const rawTeacherName = localStorage.getItem('teacher_name') || localStorage.getItem('teacherName') || 'ภควันต์ แสนเสริม';
+        const cleanTeacherName = rawTeacherName.replace(/^(อาจารย์[:\s]*|อ\.\s*)/, '');
+        const teacherName = cleanTeacherName;
 
-        if (document.getElementById('sidebar-teacher-name')) document.getElementById('sidebar-teacher-name').textContent = teacherName;
+        if (document.getElementById('sidebar-teacher-name')) document.getElementById('sidebar-teacher-name').textContent = `อาจารย์: ${cleanTeacherName}`;
         const avatarElActive = document.getElementById('user-avatar-text');
-        if (avatarElActive) avatarElActive.textContent = teacherName.charAt(0);
+        if (avatarElActive) avatarElActive.textContent = cleanTeacherName.charAt(0);
 
         const sidebar = document.getElementById('sidebar');
         if (sidebar) sidebar.classList.remove('collapsed');
