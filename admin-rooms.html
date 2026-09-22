@@ -764,34 +764,36 @@
 
             let html = '';
             allRooms.forEach(room => {
-                const isPub = room.is_published === 1;
-                const courseNameStr = room.courseName 
-                    ? `[${room.courseCode || 'วิชา'}] ${room.courseName}`
-                    : (courses.find(c => c.id === room.courseId)?.courseName || 'ไม่ระบุรายวิชา (ทั่วไป)');
+                try {
+                    const isPub = room.is_published === 1;
+                    const courseObj = (courses || []).find(c => String(c.id) === String(room.courseId));
+                    const courseNameStr = room.courseName 
+                        ? `[${room.courseCode || 'วิชา'}] ${room.courseName}`
+                        : (courseObj?.courseName ? `[${courseObj.courseCode || 'วิชา'}] ${courseObj.courseName}` : 'ไม่ระบุรายวิชา (ทั่วไป)');
 
-                const examTitleStr = room.exam_title || (room.roomName && !room.roomName.startsWith('ห้องสอบที่') ? room.roomName : 'สอบเก็บคะแนน');
-                const examPin = room.exam_code || '------';
-                const duration = room.duration || 60;
-                const qCount = room.questionCount || 0;
-                const announcement = room.announcement || 'อย่าแอบใช้ AI นะจ้ะ';
+                    const examTitleStr = room.exam_title || (room.roomName && !room.roomName.startsWith('ห้องสอบที่') ? room.roomName : 'สอบเก็บคะแนน');
+                    const examPin = room.exam_code || '------';
+                    const duration = room.duration || 60;
+                    const qCount = room.questionCount || 0;
+                    const announcement = room.announcement || 'อย่าแอบใช้ AI นะจ้ะ';
 
-                // กลุ่ม/ชั้นเรียนตามรายวิชาจริง เช่น VC13, TEC3N, ปวส.1/1 (ห้ามนำชื่อวิชาหรือชื่อข้อสอบมาแสดงเด็ดขาด)
-                let classNameStr = room.studentClasses || room.courseClassroom || courseObj?.studentClasses || courseObj?.description || courseObj?.class || '';
+                    // กลุ่ม/ชั้นเรียนตามรายวิชาจริง เช่น VC13, TEC3N, ปวส.1/1 (ห้ามนำชื่อวิชาหรือชื่อข้อสอบมาแสดงเด็ดขาด)
+                    let classNameStr = room.studentClasses || room.courseClassroom || courseObj?.studentClasses || courseObj?.description || courseObj?.class || '';
 
-                // หากยังไม่มี ให้ลองตรวจสอบจาก room.roomName (เฉพาะกรณีที่เป็นชื่อห้องเรียนจริง ไม่ใช่ชื่อข้อสอบ ไม่ใช่ชื่อวิชา และไม่ใช่ห้องสอบทั่วไป)
-                if (!classNameStr && room.roomName) {
-                    const rName = room.roomName.trim();
-                    const isExamTitle = rName === room.exam_title || rName.includes('แบบทดสอบ') || rName.includes('สอบปลายภาค') || rName.includes('สอบกลางภาค');
-                    const isCourseName = rName === room.courseName || (courseObj && rName === courseObj.courseName);
-                    const isGeneric = rName.startsWith('ห้องสอบที่');
-                    if (!isExamTitle && !isCourseName && !isGeneric) {
-                        classNameStr = rName;
+                    // หากยังไม่มี ให้ลองตรวจสอบจาก room.roomName (เฉพาะกรณีที่เป็นชื่อห้องเรียนจริง ไม่ใช่ชื่อข้อสอบ ไม่ใช่ชื่อวิชา และไม่ใช่ห้องสอบทั่วไป)
+                    if (!classNameStr && room.roomName) {
+                        const rName = room.roomName.trim();
+                        const isExamTitle = rName === room.exam_title || rName.includes('แบบทดสอบ') || rName.includes('สอบปลายภาค') || rName.includes('สอบกลางภาค');
+                        const isCourseName = rName === room.courseName || (courseObj && rName === courseObj.courseName);
+                        const isGeneric = rName.startsWith('ห้องสอบที่');
+                        if (!isExamTitle && !isCourseName && !isGeneric) {
+                            classNameStr = rName;
+                        }
                     }
-                }
 
-                if (!classNameStr) {
-                    classNameStr = 'ห้องเรียนตามรายวิชา';
-                }
+                    if (!classNameStr) {
+                        classNameStr = 'ห้องเรียนตามรายวิชา';
+                    }
 
                 html += `
                     <div class="bg-white rounded-3xl p-6 shadow-md hover:shadow-xl border-2 ${isPub ? 'border-emerald-400' : 'border-slate-200'} transition flex flex-col justify-between space-y-4 relative">
@@ -908,6 +910,9 @@
 
                     </div>
                 `;
+                } catch(err) {
+                    console.error("render room error:", err);
+                }
             });
 
             // Card "+ เปิดห้องสอบเพิ่ม"
