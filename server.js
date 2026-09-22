@@ -20,6 +20,7 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.text({ type: 'text/plain' }));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use(express.static(__dirname));
 
@@ -512,36 +513,67 @@ app.post('/api/teacher/login', (req, res) => {
     });
 });
 
-// ⏳ ระบบจัดการนักศึกษาที่อยู่ในห้องรอสอบ (Waiting Room Live Tracker)
-const waitingStudentsTracker = new Map(); // roomId -> Map(studentId -> { studentId, name, class, lastSeen })
+// ⏳ ระบบจัดการนักศึกษาที่อยู่ในห้องสอบ / รอสอบแบบเรียลไทม์ (Real-time Live Room Tracker)
+const activeRoomTracker = new Map(); // roomId -> Map(studentId -> { studentId, name, class, state, lastSeen })
 
-function recordWaitingStudent(roomId, studentId, name, studentClass) {
+function recordStudentActive(roomId, studentId, name, studentClass, state = 'in_exam') {
     if (!roomId || !studentId) return;
-    if (!waitingStudentsTracker.has(roomId)) {
-        waitingStudentsTracker.set(roomId, new Map());
+    const rId = String(roomId).trim();
+    const sId = String(studentId).trim();
+    if (!activeRoomTracker.has(rId)) {
+        activeRoomTracker.set(rId, new Map());
     }
-    const roomMap = waitingStudentsTracker.get(roomId);
-    roomMap.set(studentId, {
-        studentId,
+    const roomMap = activeRoomTracker.get(rId);
+    roomMap.set(sId, {
+        studentId: sId,
         name: name || 'นักศึกษา',
         class: studentClass || '',
+        state: state || 'in_exam',
         lastSeen: Date.now()
     });
 }
 
-function getWaitingStudents(roomId) {
-    if (!waitingStudentsTracker.has(roomId)) return [];
-    const roomMap = waitingStudentsTracker.get(roomId);
+function removeStudentActive(roomId, studentId) {
+    if (!roomId || !studentId) return;
+    const rId = String(roomId).trim();
+    const sId = String(studentId).trim();
+    if (activeRoomTracker.has(rId)) {
+        activeRoomTracker.get(rId).delete(sId);
+    }
+}
+
+function getActiveRoomStudents(roomId) {
+    if (!roomId) return [];
+    const rId = String(roomId).trim();
+    if (!activeRoomTracker.has(rId)) return [];
+    const roomMap = activeRoomTracker.get(rId);
     const now = Date.now();
     const active = [];
-    for (const [sId, data] of roomMap.entries()) {
-        if (now - data.lastSeen < 12000) { // ออนไลน์ถ้า heartbeat ภายใน 12 วินาที
+    const TIMEOUT_MS = 8000; // หากขาดการติดต่อเกิน 8 วินาทีถือว่าออกจากห้องสอบ
+    for (const [sId, data] of Array.from(roomMap.entries())) {
+        if (now - data.lastSeen < TIMEOUT_MS) {
             active.push(data);
         } else {
             roomMap.delete(sId);
         }
     }
     return active;
+}
+
+function getActiveRoomStudentMap(roomId) {
+    const list = getActiveRoomStudents(roomId);
+    const map = new Map();
+    list.forEach(s => map.set(String(s.studentId), s));
+    return map;
+}
+
+// Backward compatibility alias for waitingStudentsTracker
+const waitingStudentsTracker = activeRoomTracker;
+function recordWaitingStudent(roomId, studentId, name, studentClass) {
+    recordStudentActive(roomId, studentId, name, studentClass, 'waiting');
+}
+function getWaitingStudents(roomId) {
+    return getActiveRoomStudents(roomId);
 }
 
 // 🏠 API สำหรับดึงห้องสอบของอาจารย์ (หรือดึงทุกห้องในระบบหากเป็น admin)
@@ -1219,7 +1251,53 @@ app.post('/api/student/check-exam-access', (req, res) => {
     });
 });
 
-// 📊 เปรียบเทียบรายชื่อนักศึกษาในรายวิชา (course_students) กับคนที่เข้ามาสอบจริงในห้องนี้
+// 💓 Heartbeat สำหรับนักศึกษาที่กำลังสอบ หรือรอสอบ (Real-time Heartbeat)
+app.post('/api/student/heartbeat', (req, res) => {
+    let roomId = req.body && req.body.roomId;
+    let studentId = req.body && req.body.studentId;
+    let name = req.body && req.body.name;
+    let studentClass = req.body && req.body.class;
+    let state = req.body && req.body.state;
+
+    if (!roomId && typeof req.body === 'string') {
+        try {
+            const p = JSON.parse(req.body);
+            roomId = p.roomId;
+            studentId = p.studentId;
+            name = p.name;
+            studentClass = p.class;
+            state = p.state;
+        } catch(e) {}
+    }
+
+    if (!roomId || !studentId) return res.status(400).json({ success: false, message: "ข้อมูลไม่ครบถ้วน" });
+
+    recordStudentActive(roomId, studentId, name, studentClass, state || 'in_exam');
+    res.json({ success: true, active: true });
+});
+
+// 🚪 แจ้งเตือนเมื่อนักศึกษาออกจากห้องสอบ (ปิดแท็บ / กดย้อนกลับ / ออกจากระบบ)
+app.post('/api/student/leave-room', (req, res) => {
+    let roomId = req.body && req.body.roomId;
+    let studentId = req.body && req.body.studentId;
+
+    if (!roomId && typeof req.body === 'string') {
+        try {
+            const p = JSON.parse(req.body);
+            roomId = p.roomId;
+            studentId = p.studentId;
+        } catch(e) {}
+    }
+
+    if (roomId && studentId) {
+        removeStudentActive(roomId, studentId);
+        console.log(`🚪 [นักศึกษาออกจากห้องสอบ] รหัสนักศึกษา ${studentId} ออกจากห้อง ${roomId}`);
+    }
+
+    res.json({ success: true, left: true });
+});
+
+// 📊 เปรียบเทียบรายชื่อนักศึกษาในรายวิชา (course_students) กับคนที่เข้ามาสอบจริงในห้องนี้แบบ Real-time
 app.get('/api/teacher/room-roster-attendance', (req, res) => {
     const { roomId } = req.query;
     if (!roomId) return res.status(400).json({ message: "กรุณาระบุ roomId" });
@@ -1240,15 +1318,17 @@ app.get('/api/teacher/room-roster-attendance', (req, res) => {
                 const submittedMap = new Map();
                 results.forEach(r => submittedMap.set(String(r.studentId), r));
 
-                // 3. ดึงคนที่กำลังอยู่ห้องรอ/กำลังสอบในหน่วยความจำ
-                const waitingMap = waitingStudentsTracker.get(roomId) || new Map();
+                // 3. ดึงคนที่กำลังออนไลน์/กำลังสอบในหน่วยความจำสดๆ (ตรวจสอบ heartbeat ภายใน 8 วินาทีล่าสุด)
+                const activeMap = getActiveRoomStudentMap(roomId);
 
-                // 4. ดึงคนที่สร้าง session การสอบ
-                db.all('SELECT studentId, studentName, class FROM exam_sessions WHERE roomId = ?', [roomId], (err3, sessionRows) => {
-                    const activeSessions = sessionRows || [];
-                    const activeMap = new Map();
-                    activeSessions.forEach(s => activeMap.set(String(s.studentId), s));
-                    waitingMap.forEach((v, k) => activeMap.set(String(k), v));
+                // 4. ดึงประวัติคนที่เคยเข้าสู่ระบบเพื่อระบุว่าใครเคยเข้าแล้วออกไป
+                db.all('SELECT studentId, name, class FROM student_logins WHERE roomId = ?', [roomId], (err3, loginRows) => {
+                    const loggedInMap = new Map();
+                    (loginRows || []).forEach(l => {
+                        if (!loggedInMap.has(String(l.studentId))) {
+                            loggedInMap.set(String(l.studentId), l);
+                        }
+                    });
 
                     const studentStatusList = [];
                     const enrolledSet = new Set();
@@ -1260,6 +1340,7 @@ app.get('/api/teacher/room-roster-attendance', (req, res) => {
 
                         const isSubmitted = submittedMap.get(sIdStr);
                         const isActive = activeMap.get(sIdStr);
+                        const hadLoggedIn = loggedInMap.get(sIdStr);
 
                         let status = 'not_joined';
                         let statusText = '🔴 ยังไม่เข้าสอบ';
@@ -1275,8 +1356,13 @@ app.get('/api/teacher/room-roster-attendance', (req, res) => {
                             maxScore = isSubmitted.maxScore;
                         } else if (isActive) {
                             status = 'joined';
-                            statusText = '🟢 เข้าสอบแล้ว (กำลังทำ)';
+                            statusText = '🟢 อยู่ในห้องสอบ (กำลังทำ)';
                             statusBg = 'bg-indigo-50 text-indigo-700 border-indigo-200';
+                        } else if (hadLoggedIn) {
+                            // เคยเข้าห้องสอบมาแล้ว แต่ปัจจุบันออกจากห้องสอบไปแล้ว
+                            status = 'not_joined';
+                            statusText = '🔴 ออกจากห้องสอบแล้ว (ออฟไลน์)';
+                            statusBg = 'bg-amber-50 text-amber-700 border-amber-200';
                         }
 
                         const fullName = `${e.prefix || ''}${e.firstName || ''} ${e.lastName || ''}`.trim() || 'นักศึกษา';
@@ -1298,6 +1384,7 @@ app.get('/api/teacher/room-roster-attendance', (req, res) => {
                     extraJoined.forEach((val, sIdStr) => {
                         if (!enrolledSet.has(sIdStr)) {
                             const isSubmitted = submittedMap.get(sIdStr);
+                            const isActive = activeMap.get(sIdStr);
                             const name = isSubmitted ? isSubmitted.name : (val.name || val.studentName || 'นักศึกษา');
                             const cls = isSubmitted ? (isSubmitted.class || '-') : (val.class || '-');
 
@@ -1305,9 +1392,9 @@ app.get('/api/teacher/room-roster-attendance', (req, res) => {
                                 studentId: sIdStr,
                                 name,
                                 class: cls,
-                                status: isSubmitted ? 'submitted' : 'joined',
-                                statusText: isSubmitted ? '✅ ส่งข้อสอบแล้ว (นอกรายชื่อ)' : '🟢 เข้าสอบแล้ว (นอกรายชื่อ)',
-                                statusBg: isSubmitted ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-cyan-50 text-cyan-700 border-cyan-200',
+                                status: isSubmitted ? 'submitted' : (isActive ? 'joined' : 'not_joined'),
+                                statusText: isSubmitted ? '✅ ส่งข้อสอบแล้ว (นอกรายชื่อ)' : (isActive ? '🟢 อยู่ในห้องสอบ (นอกรายชื่อ)' : '🔴 ออกจากห้องสอบแล้ว'),
+                                statusBg: isSubmitted ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (isActive ? 'bg-cyan-50 text-cyan-700 border-cyan-200' : 'bg-slate-100 text-slate-600 border-slate-200'),
                                 score: isSubmitted ? isSubmitted.score : null,
                                 maxScore: isSubmitted ? isSubmitted.maxScore : null
                             });
@@ -2205,6 +2292,7 @@ app.delete('/api/clear-cheat-logs', (req, res) => {
 app.post('/api/submit-exam', (req, res) => {
     const { roomId, studentId, name, class: studentClass, answers } = req.body;
     if (!roomId || !studentId || !name || !answers) return res.status(400).json({ message: "ข้อมูลไม่ครบถ้วน" });
+    removeStudentActive(roomId, studentId);
 
     // 1. ค้นหา courseId จากห้องสอบ
     db.get('SELECT courseId, teacherUsername FROM teacher_rooms WHERE roomId = ?', [roomId], (roomErr, roomRow) => {
@@ -2731,34 +2819,46 @@ app.post('/api/log-student-login', (req, res) => {
     );
 });
 
-// 👨‍🎓 API สำหรับดึงรายชื่อนักศึกษาที่กำลังทำข้อสอบอยู่ในห้องนั้นๆ (Active Students List)
+// 👨‍🎓 API สำหรับดึงรายชื่อนักศึกษาที่กำลังทำข้อสอบอยู่ในห้องนั้นๆ (Active Students List - Real-time Live)
 app.get('/api/teacher/active-students-list', (req, res) => {
     const { roomId } = req.query;
     if (!roomId) return res.status(400).json({ message: "กรุณาระบุ roomId" });
 
+    const liveList = getActiveRoomStudents(roomId);
+    if (liveList.length === 0) {
+        return res.json([]);
+    }
+
+    const sIds = liveList.map(a => a.studentId);
+    const placeholders = sIds.map(() => '?').join(',');
+
     db.all(`
         SELECT sl.studentId, sl.name, sl.class, sl.loginTime, sl.loginDate
         FROM student_logins sl
-        WHERE sl.roomId = ? AND sl.studentId NOT IN (
-            SELECT studentId FROM exam_results WHERE roomId = ?
-        )
+        WHERE sl.roomId = ? AND sl.studentId IN (${placeholders})
         ORDER BY sl.id DESC
-    `, [roomId, roomId], (err, rows) => {
-        if (err) return res.status(500).json({ message: err.message });
-        
-        // กรองเอาเฉพาะข้อมูลนักศึกษาลายนิ้วมือล่าสุด (unique studentId)
-        const uniqueMap = new Map();
+    `, [roomId, ...sIds], (err, rows) => {
+        const infoMap = new Map();
         (rows || []).forEach(r => {
-            if (!uniqueMap.has(r.studentId)) {
-                uniqueMap.set(r.studentId, r);
-            }
+            if (!infoMap.has(r.studentId)) infoMap.set(r.studentId, r);
         });
 
-        res.json(Array.from(uniqueMap.values()));
+        const result = liveList.map(a => {
+            const dbInfo = infoMap.get(a.studentId) || {};
+            return {
+                studentId: a.studentId,
+                name: a.name || dbInfo.name || 'นักศึกษา',
+                class: a.class || dbInfo.class || '-',
+                loginTime: dbInfo.loginTime || '-',
+                loginDate: dbInfo.loginDate || '-'
+            };
+        });
+
+        res.json(result);
     });
 });
 
-// 👨‍🎓 API สำหรับดึงจำนวนนักศึกษาที่กำลังเข้าสอบแบบเรียลไทม์ (Active Students)
+// 👨‍🎓 API สำหรับดึงจำนวนนักศึกษาที่กำลังเข้าสอบแบบเรียลไทม์ (Active Students - Real-time Live)
 app.get('/api/teacher/active-students', (req, res) => {
     const { username } = req.query;
     if (!username || username === 'undefined') return res.status(400).json({ message: "กรุณาระบุ username" });
@@ -2815,7 +2915,8 @@ app.get('/api/teacher/active-students', (req, res) => {
                 roomIds.forEach(rId => {
                     const loggedIn = roomLoggedInSet[rId] ? roomLoggedInSet[rId].size : 0;
                     const submitted = roomSubmittedSet[rId] ? roomSubmittedSet[rId].size : 0;
-                    const active = Math.max(0, loggedIn - submitted);
+                    // นับจำนวนที่ออนไลน์สดจริงในขณะนี้จาก activeRoomTracker
+                    const active = getActiveRoomStudents(rId).length;
 
                     roomMap[rId] = { loggedIn, submitted, active };
                     grandTotalActive += active;

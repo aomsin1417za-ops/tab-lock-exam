@@ -643,6 +643,9 @@
                 body: JSON.stringify({ studentId: currentStudentId, name: currentStudentName, class: currentStudentClass, roomId: currentRoomId })
             }).catch(e => console.error(e));
 
+            // เริ่มส่ง Heartbeat ออนไลน์แบบเรียลไทม์
+            startStudentHeartbeat();
+
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('exam-screen').classList.remove('hidden');
 
@@ -772,6 +775,7 @@
         }
 
         async function submitExam(isAutoSubmit = false) {
+            stopStudentHeartbeat();
             if (examTimerInterval) clearInterval(examTimerInterval);
             if (announcementInterval) clearInterval(announcementInterval);
             if (warningInterval) clearInterval(warningInterval);
@@ -839,7 +843,10 @@
             publishCheckInterval = setInterval(async () => {
                 if (isExamFinished) { clearInterval(publishCheckInterval); return; }
                 try {
-                    const res = await fetch(`/api/teacher/get-publish-status?roomId=${encodeURIComponent(currentRoomId)}`);
+                    const sIdParam = encodeURIComponent(currentStudentId || '');
+                    const sNameParam = encodeURIComponent(currentStudentName || '');
+                    const sClsParam = encodeURIComponent(currentStudentClass || '');
+                    const res = await fetch(`/api/teacher/get-publish-status?roomId=${encodeURIComponent(currentRoomId)}&studentId=${sIdParam}&studentName=${sNameParam}&studentClass=${sClsParam}`);
                     if (!res.ok) return;
                     const data = await res.json();
                     if (data.is_published !== 1) {
@@ -854,6 +861,7 @@
         async function handleExamEnd(title, desc) {
             if (isExamFinished) return;
             isExamFinished = true;
+            stopStudentHeartbeat();
 
             if (examTimerInterval) clearInterval(examTimerInterval);
             if (announcementInterval) clearInterval(announcementInterval);
@@ -944,6 +952,57 @@
             if (!text) return '';
             return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
         }
+
+        // ========================================================
+        // 💓 Real-time Live Presence (Heartbeat & Leave Notification)
+        // ========================================================
+        let studentHeartbeatInterval = null;
+
+        function startStudentHeartbeat() {
+            if (studentHeartbeatInterval) clearInterval(studentHeartbeatInterval);
+            const sendHeartbeat = () => {
+                if (isExamFinished || !currentRoomId || !currentStudentId) return;
+                fetch('/api/student/heartbeat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        roomId: currentRoomId,
+                        studentId: currentStudentId,
+                        name: currentStudentName,
+                        class: currentStudentClass,
+                        state: 'in_exam'
+                    })
+                }).catch(() => {});
+            };
+            sendHeartbeat();
+            studentHeartbeatInterval = setInterval(sendHeartbeat, 3000);
+        }
+
+        function stopStudentHeartbeat() {
+            if (studentHeartbeatInterval) {
+                clearInterval(studentHeartbeatInterval);
+                studentHeartbeatInterval = null;
+            }
+        }
+
+        function notifyLeaveRoom() {
+            if (isExamFinished || !currentRoomId || !currentStudentId) return;
+            const payload = JSON.stringify({ roomId: currentRoomId, studentId: currentStudentId });
+            if (navigator.sendBeacon) {
+                const blob = new Blob([payload], { type: 'text/plain' });
+                navigator.sendBeacon('/api/student/leave-room', blob);
+            } else {
+                fetch('/api/student/leave-room', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: payload,
+                    keepalive: true
+                }).catch(() => {});
+            }
+        }
+
+        window.addEventListener('beforeunload', notifyLeaveRoom);
+        window.addEventListener('pagehide', notifyLeaveRoom);
     </script>
     <script src="user-guide-system.js"></script>
 </body>
