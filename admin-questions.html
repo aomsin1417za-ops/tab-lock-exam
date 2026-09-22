@@ -173,7 +173,7 @@
     <header class="h-16 bg-white border-b border-pink-100 px-4 md:px-6 flex items-center justify-between shrink-0 shadow-sm z-30">
         <!-- Left: Back Button & Title -->
         <div class="flex items-center gap-3">
-            <a href="dashboard.html" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500 via-rose-500 to-sky-500 hover:from-pink-600 hover:to-sky-600 text-white font-black rounded-2xl text-xs sm:text-sm transition-all duration-200 shadow-md shadow-pink-500/30 hover:shadow-lg hover:shadow-pink-500/40 active:scale-95 border border-white/20 shrink-0">
+            <a href="dashboard.html" onclick="return confirmLeaveIfUnsaved(event, 'dashboard.html')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500 via-rose-500 to-sky-500 hover:from-pink-600 hover:to-sky-600 text-white font-black rounded-2xl text-xs sm:text-sm transition-all duration-200 shadow-md shadow-pink-500/30 hover:shadow-lg hover:shadow-pink-500/40 active:scale-95 border border-white/20 shrink-0">
                 <span class="text-base leading-none">🏠</span>
                 <span>กลับแดชบอร์ดหลัก</span>
             </a>
@@ -204,6 +204,7 @@
             <!-- ชื่อชุดข้อสอบ -->
             <div class="relative flex-1 max-w-xs sm:max-w-sm hidden sm:block">
                 <input type="text" id="top-exam-title" 
+                    oninput="markAsDirty()"
                     placeholder="กรอกชื่อชุดข้อสอบ (เช่น สอบปลายภาค)..." 
                     class="w-full px-4 py-2 bg-slate-50 hover:bg-white focus:bg-white border-2 border-slate-300 focus:border-indigo-600 rounded-2xl text-xs sm:text-sm font-bold text-slate-900 outline-none transition shadow-inner">
             </div>
@@ -559,6 +560,120 @@
         let questions = [];
         let activeQuestionIndex = 0;
 
+        // Tracking unsaved changes
+        let hasUnsavedChanges = false;
+        let unsavedModalCallbacks = null;
+
+        function markAsDirty() {
+            hasUnsavedChanges = true;
+        }
+
+        function markAsClean() {
+            hasUnsavedChanges = false;
+        }
+
+        function checkHasUnsavedChanges() {
+            if (hasUnsavedChanges) return true;
+            if (questions && questions.length > 0) {
+                if (questions.length > 1) return true;
+                const q0 = questions[0];
+                if (q0) {
+                    if (q0.question && q0.question.trim() !== '') return true;
+                    if (q0.question_img) return true;
+                    if (q0.choices && q0.choices.some(c => c && c.trim() !== '')) return true;
+                    if (q0.choices_img && q0.choices_img.some(ci => ci && ci.trim() !== '')) return true;
+                }
+            }
+            return false;
+        }
+
+        function openUnsavedModal(callbacks = {}) {
+            unsavedModalCallbacks = callbacks;
+            const modal = document.getElementById('unsaved-confirm-modal');
+            const card = document.getElementById('unsaved-confirm-modal-card');
+            if (!modal || !card) return;
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            card.classList.remove('scale-95');
+            card.classList.add('scale-100');
+        }
+
+        function closeUnsavedModal() {
+            const modal = document.getElementById('unsaved-confirm-modal');
+            const card = document.getElementById('unsaved-confirm-modal-card');
+            if (!modal || !card) return;
+
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function handleDiscardUnsaved() {
+            closeUnsavedModal();
+            const cb = unsavedModalCallbacks && unsavedModalCallbacks.onDiscard;
+            unsavedModalCallbacks = null;
+            hasUnsavedChanges = false;
+            if (typeof cb === 'function') {
+                cb();
+            }
+        }
+
+        function handleContinueEditing() {
+            closeUnsavedModal();
+            const cb = unsavedModalCallbacks && unsavedModalCallbacks.onCancel;
+            unsavedModalCallbacks = null;
+            if (typeof cb === 'function') {
+                cb();
+            }
+        }
+
+        function confirmLeaveIfUnsaved(event, targetUrl) {
+            if (checkHasUnsavedChanges()) {
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                openUnsavedModal({
+                    onDiscard: () => {
+                        hasUnsavedChanges = false;
+                        window.location.href = targetUrl;
+                    },
+                    onCancel: () => {}
+                });
+                return false;
+            }
+            return true;
+        }
+
+        // Global link navigation interceptor & beforeunload
+        window.addEventListener('beforeunload', (e) => {
+            if (checkHasUnsavedChanges()) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            const anchor = e.target.closest('a');
+            if (!anchor) return;
+            if (anchor.closest('#unsaved-confirm-modal')) return;
+            const href = anchor.getAttribute('href');
+            if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+            if (anchor.target === '_blank') return;
+            
+            if (checkHasUnsavedChanges()) {
+                e.preventDefault();
+                e.stopPropagation();
+                openUnsavedModal({
+                    onDiscard: () => {
+                        hasUnsavedChanges = false;
+                        window.location.href = href;
+                    }
+                });
+            }
+        }, true);
+
         const choiceKeys = ['a', 'b', 'c', 'd'];
         const thaiKeys = ['ก', 'ข', 'ค', 'ง'];
 
@@ -699,6 +814,22 @@
 
         // เมื่ออาจารย์เปลี่ยนรายวิชาจากดรอปดาวน์
         async function onCourseChanged(courseId) {
+            const selector = document.getElementById('top-course-selector');
+            if (checkHasUnsavedChanges()) {
+                openUnsavedModal({
+                    onDiscard: async () => {
+                        hasUnsavedChanges = false;
+                        activeCourseId = courseId;
+                        if (selector) selector.value = courseId;
+                        updateCourseSideBadge();
+                        await loadExistingExamForCourse();
+                    },
+                    onCancel: () => {
+                        if (selector) selector.value = activeCourseId || '';
+                    }
+                });
+                return;
+            }
             activeCourseId = courseId;
             updateCourseSideBadge();
             await loadExistingExamForCourse();
@@ -745,6 +876,7 @@
                             activeQuestionIndex = 0;
                             renderAllQuestionsList();
                             renderActiveQuestionStage();
+                            hasUnsavedChanges = false;
                             return;
                         }
                     }
@@ -764,6 +896,7 @@
             activeQuestionIndex = 0;
             renderAllQuestionsList();
             renderActiveQuestionStage();
+            hasUnsavedChanges = false;
         }
 
         // ==========================================
@@ -904,12 +1037,14 @@
         // ==========================================
         function onQuestionTextChanged(text) {
             if (!questions[activeQuestionIndex]) return;
+            markAsDirty();
             questions[activeQuestionIndex].question = text;
             renderAllQuestionsList();
         }
 
         function onChoiceTextChanged(choiceIdx, text) {
             if (!questions[activeQuestionIndex]) return;
+            markAsDirty();
             while (questions[activeQuestionIndex].choices.length <= choiceIdx) {
                 questions[activeQuestionIndex].choices.push('');
             }
@@ -918,6 +1053,7 @@
 
         function setCorrectAnswer(key) {
             if (!questions[activeQuestionIndex]) return;
+            markAsDirty();
             questions[activeQuestionIndex].answer = key.toLowerCase();
             renderAllQuestionsList();
             renderActiveQuestionStage();
@@ -931,6 +1067,7 @@
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
+                    markAsDirty();
                     questions[activeQuestionIndex].question_img = e.target.result;
                     renderAllQuestionsList();
                     renderActiveQuestionStage();
@@ -941,6 +1078,7 @@
 
         function removeQuestionImage() {
             if (!questions[activeQuestionIndex]) return;
+            markAsDirty();
             questions[activeQuestionIndex].question_img = '';
             renderAllQuestionsList();
             renderActiveQuestionStage();
@@ -950,6 +1088,7 @@
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
+                    markAsDirty();
                     while (questions[activeQuestionIndex].choices_img.length <= choiceIdx) {
                         questions[activeQuestionIndex].choices_img.push('');
                     }
@@ -961,6 +1100,7 @@
         }
 
         function addNewQuestion() {
+            markAsDirty();
             questions.push(createEmptyQuestion());
             activeQuestionIndex = questions.length - 1;
             renderAllQuestionsList();
@@ -976,6 +1116,7 @@
 
         function duplicateQuestion(idx) {
             if (idx < 0 || idx >= questions.length) return;
+            markAsDirty();
             const cloned = JSON.parse(JSON.stringify(questions[idx]));
             questions.splice(idx + 1, 0, cloned);
             activeQuestionIndex = idx + 1;
@@ -991,6 +1132,7 @@
             if (questions.length <= 1) {
                 if (confirm("ต้องการล้างข้อสอบข้อนี้ให้เป็นกระดาษเปล่าใช่หรือไม่?")) {
                     questions[0] = createEmptyQuestion();
+                    hasUnsavedChanges = false;
                     renderAllQuestionsList();
                     renderActiveQuestionStage();
                 }
@@ -998,6 +1140,7 @@
             }
             if (!confirm(`ยืนยันลบข้อสอบข้อที่ ${idx + 1}?`)) return;
 
+            markAsDirty();
             questions.splice(idx, 1);
             if (activeQuestionIndex >= questions.length) {
                 activeQuestionIndex = questions.length - 1;
@@ -1033,6 +1176,7 @@
             // รีเซ็ตคำถามในหน้าจอให้กลับเป็นข้อสอบเปล่า 1 ข้อ
             questions = [createEmptyQuestion()];
             activeQuestionIndex = 0;
+            hasUnsavedChanges = false;
             renderAllQuestionsList();
             renderActiveQuestionStage();
 
@@ -1042,6 +1186,7 @@
         function toggleTrueFalseMode() {
             const cur = questions[activeQuestionIndex];
             if (!cur) return;
+            markAsDirty();
 
             if (cur.type === 'true_false') {
                 cur.type = 'quiz';
@@ -1058,6 +1203,7 @@
 
         function onQuestionTypeChanged(type) {
             if (!questions[activeQuestionIndex]) return;
+            markAsDirty();
             questions[activeQuestionIndex].type = type;
             if (type === 'true_false') {
                 toggleTrueFalseMode();
@@ -1069,10 +1215,12 @@
 
         function onTimeLimitChanged(sec) {
             if (!questions[activeQuestionIndex]) return;
+            markAsDirty();
             questions[activeQuestionIndex].timeLimit = parseInt(sec, 10);
         }
 
         function applyTimeToAllQuestions() {
+            markAsDirty();
             const sec = parseInt(document.getElementById('prop-time-limit').value, 10);
             questions.forEach(q => q.timeLimit = sec);
             alert(`⏱️ ตั้งเวลา ${sec === 0 ? 'ไม่จำกัด' : sec + ' วินาที'} ให้กับทุกข้อเรียบร้อยแล้ว`);
@@ -1134,6 +1282,7 @@
                 const data = await res.json();
 
                 if (res.ok && data.success) {
+                    hasUnsavedChanges = false;
                     alert(`✅ บันทึกชุดข้อสอบเข้าสู่วิชา "${courseName}" เรียบร้อยแล้ว!\n(รวมข้อสอบทั้งสิ้น ${formatted.length} ข้อ)\n\n📌 เมื่อต้องการเริ่มสอบจริง ให้ไปที่เมนู "ห้องสอบ" แล้วกด "+ สร้างห้องสอบ"`);
                 } else {
                     alert(`❌ บันทึกไม่สำเร็จ: ${data.message || 'เกิดข้อผิดพลาด'}`);
@@ -1234,6 +1383,7 @@
                     activeQuestionIndex = questions.length - parsedQuestions.length;
                     renderAllQuestionsList();
                     renderActiveQuestionStage();
+                    markAsDirty();
 
                     alert(`🎉 นำเข้าข้อสอบจากไฟล์ Excel (.xlsx) เรียบร้อยแล้วจำนวน ${parsedQuestions.length} ข้อ!`);
                 } catch(err) {
@@ -1472,6 +1622,7 @@
             activeQuestionIndex = questions.length - newQuestions.length;
             renderAllQuestionsList();
             renderActiveQuestionStage();
+            markAsDirty();
             closeAiModal();
 
             alert(`🎉 แปลงและนำเข้าข้อสอบจาก AI สำเร็จเรียบร้อยแล้วจำนวน ${newQuestions.length} ข้อ!`);
@@ -1613,6 +1764,7 @@
             activeQuestionIndex = questions.length - formatted.length;
             renderAllQuestionsList();
             renderActiveQuestionStage();
+            markAsDirty();
             closeLibraryModal();
 
             alert(`🎉 นำเข้าชุดข้อสอบสำเร็จรูปจำนวน ${formatted.length} ข้อเรียบร้อยแล้ว!`);
@@ -1651,6 +1803,7 @@
                         activeQuestionIndex = questions.length - formatted.length;
                         renderAllQuestionsList();
                         renderActiveQuestionStage();
+                        markAsDirty();
                         closeLibraryModal();
 
                         alert(`🎉 ดึงข้อสอบจากคลังสำเร็จจำนวน ${formatted.length} ข้อ!`);
@@ -1856,6 +2009,48 @@
                     <span>➕</span>
                     <span>ยังไม่มี (สร้างรายวิชา)</span>
                 </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 4. Modal: แจ้งเตือนยังไม่ได้บันทึกข้อสอบ (Unsaved Changes Modal) -->
+    <div id="unsaved-confirm-modal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm transition-all duration-300 opacity-0 pointer-events-none" style="font-family: 'Kanit', sans-serif;">
+        <div class="bg-white border-2 border-amber-300 p-6 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full mx-4 text-center space-y-6 transform scale-95 transition-all duration-300 relative overflow-hidden" id="unsaved-confirm-modal-card">
+            
+            <!-- Top Gradient Accent bar -->
+            <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-500 via-rose-500 to-pink-500"></div>
+
+            <!-- Header Icon -->
+            <div class="relative inline-block mt-2">
+                <div class="w-16 h-16 bg-gradient-to-tr from-amber-100 via-orange-100 to-rose-100 rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-inner border border-amber-200">
+                    ⚠️
+                </div>
+            </div>
+
+            <!-- Message Header -->
+            <div class="space-y-2">
+                <h3 class="text-xl font-black text-slate-800 tracking-tight">
+                    คุณยังไม่ได้บันทึกข้อสอบ
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">
+                    คุณมีการพิมพ์ นำเข้า หรือแก้ไขข้อสอบที่ยังไม่ได้กดบันทึก<br class="hidden sm:inline"> หากออกจากหน้านี้ ข้อสอบที่สร้างไว้จะสูญหาย
+                </p>
+            </div>
+
+            <!-- Choice Action Buttons: ละทิ้งการสร้างข้อสอบ VS สร้างข้อสอบต่อ -->
+            <div class="flex flex-col-reverse sm:flex-row items-center justify-center gap-3 pt-2">
+                <!-- ปุ่ม 1: ละทิ้งการสร้างข้อสอบ -->
+                <button type="button" onclick="handleDiscardUnsaved()" class="w-full sm:w-1/2 py-3 px-4 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 hover:border-rose-300 border border-slate-200 font-bold rounded-2xl text-xs sm:text-sm transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap shadow-xs">
+                    <span>🗑️</span>
+                    <span>ละทิ้งการสร้างข้อสอบ</span>
+                </button>
+                
+                <!-- ปุ่ม 2: สร้างข้อสอบต่อ -->
+                <button type="button" onclick="handleContinueEditing()" class="w-full sm:w-1/2 py-3 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-2xl text-xs sm:text-sm transition-all duration-200 shadow-md shadow-emerald-600/25 active:scale-95 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap">
+                    <span>✏️</span>
+                    <span>สร้างข้อสอบต่อ</span>
+                </button>
             </div>
 
         </div>
