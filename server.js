@@ -48,6 +48,8 @@ function convertToPg(sql) {
     }
 
     let paramIndex = 1;
+    converted = converted.replace(/GROUP_CONCAT\(DISTINCT\s+([^)]+)\)/gi, "STRING_AGG(DISTINCT CAST($1 AS TEXT), ', ')");
+    converted = converted.replace(/GROUP_CONCAT\(([^)]+)\)/gi, "STRING_AGG(CAST($1 AS TEXT), ', ')");
     converted = converted.replace(/\?/g, () => `$${paramIndex++}`);
     converted = converted.replace(/(\$\d+)\s+IS\s+NOT\s+NULL/gi, 'CAST($1 AS TEXT) IS NOT NULL');
     converted = converted.replace(/(\$\d+)\s+IS\s+NULL/gi, 'CAST($1 AS TEXT) IS NULL');
@@ -332,6 +334,19 @@ db.serialize(() => {
     db.run("ALTER TABLE exam_templates ADD COLUMN courseId INTEGER DEFAULT 0", (err) => {
         if (!err) console.log("✔ Added column 'courseId' to exam_templates table");
     });
+
+    // ซิงค์ชื่อกลุ่ม/ห้องเรียนใน teacher_rooms ให้ตรงกับห้องเรียนของรายวิชา (กรณีเคยบันทึกเป็นชื่อข้อสอบ)
+    db.run(`
+        UPDATE teacher_rooms 
+        SET roomName = (
+            SELECT COALESCE(NULLIF(c.description, ''), 'ห้องเรียนตามรายวิชา') 
+            FROM courses c 
+            WHERE c.id = teacher_rooms.courseId
+        )
+        WHERE courseId > 0 AND (roomName = exam_title OR roomName LIKE 'แบบทดสอบ%' OR roomName LIKE 'สอบ%')
+    `, (err) => {
+        if (!err) console.log("✔ Synchronized roomName with course classrooms for teacher_rooms");
+    });
     
     // อัปเกรดตารางผลสอบ (exam_results)
     db.run("ALTER TABLE exam_results ADD COLUMN class TEXT", (err) => {
@@ -585,7 +600,8 @@ app.get('/api/teacher/rooms', (req, res) => {
     if (username === 'admin') {
         const sqlQuery = `
             SELECT tr.roomId, tr.roomName, tr.exam_title, tr.exam_code, tr.is_published, tr.duration, tr.courseId, tr.teacherUsername, tr.announcement,
-                   c.courseCode, c.courseName,
+                   c.courseCode, c.courseName, c.description as courseClassroom,
+                   (SELECT GROUP_CONCAT(DISTINCT cs.class) FROM course_students cs WHERE cs.courseId = tr.courseId AND cs.class != '' AND cs.class IS NOT NULL) as studentClasses,
                    (SELECT COUNT(*) FROM questions q WHERE q.roomId = tr.roomId) as questionCount
             FROM teacher_rooms tr
             LEFT JOIN courses c ON c.id = tr.courseId
@@ -599,7 +615,8 @@ app.get('/api/teacher/rooms', (req, res) => {
 
     const sqlQuery = `
         SELECT tr.roomId, tr.roomName, tr.exam_title, tr.exam_code, tr.is_published, tr.duration, tr.courseId, tr.announcement,
-               c.courseCode, c.courseName,
+               c.courseCode, c.courseName, c.description as courseClassroom,
+               (SELECT GROUP_CONCAT(DISTINCT cs.class) FROM course_students cs WHERE cs.courseId = tr.courseId AND cs.class != '' AND cs.class IS NOT NULL) as studentClasses,
                (SELECT COUNT(*) FROM questions q WHERE q.roomId = tr.roomId) as questionCount
         FROM teacher_rooms tr
         LEFT JOIN courses c ON c.id = tr.courseId
@@ -1440,7 +1457,8 @@ app.get('/api/teacher/courses', (req, res) => {
         SELECT c.*,
             (SELECT COUNT(*) FROM course_students cs WHERE cs.courseId = c.id) as studentCount,
             (SELECT COUNT(*) FROM teacher_rooms tr WHERE tr.courseId = c.id) as roomCount,
-            (SELECT COUNT(*) FROM exam_templates et WHERE et.courseId = c.id) as examCount
+            (SELECT COUNT(*) FROM exam_templates et WHERE et.courseId = c.id) as examCount,
+            (SELECT GROUP_CONCAT(DISTINCT cs.class) FROM course_students cs WHERE cs.courseId = c.id AND cs.class != '' AND cs.class IS NOT NULL) as studentClasses
         FROM courses c
         WHERE c.teacherUsername = ? OR ? = 'admin'
         ORDER BY c.id DESC
