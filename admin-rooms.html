@@ -1176,7 +1176,7 @@
                 document.getElementById('pub-modal-pin').textContent = examCode;
                 document.getElementById('pub-modal-room-info').textContent = `${roomData.examTitle || roomData.roomName} | รหัสห้อง: ${roomId}`;
 
-                const joinUrl = `${window.location.origin}/index.html?pin=${encodeURIComponent(examCode)}`;
+                const joinUrl = `${window.location.origin}/Student-login.html?pin=${encodeURIComponent(examCode)}&roomId=${encodeURIComponent(roomId)}`;
                 document.getElementById('pub-modal-link').value = joinUrl;
                 document.getElementById('pub-modal-qrcode').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(joinUrl)}`;
 
