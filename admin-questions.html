@@ -228,15 +228,22 @@
         <!-- ---------------------------------------------------- -->
         <!-- 2.1 LEFT SIDEBAR: รายการข้อสอบ (Question Navigator)  -->
         <!-- ---------------------------------------------------- -->
-        <aside class="w-56 sm:w-64 lg:w-70 bg-white border-r-2 border-slate-200 flex flex-col shrink-0 z-20 shadow-xs">
+        <aside class="w-68 sm:w-76 lg:w-80 bg-white border-r-2 border-slate-200 flex flex-col shrink-0 z-20 shadow-xs">
             <!-- Header -->
-            <div class="p-4 border-b-2 border-slate-100 flex items-center justify-between bg-slate-50/90">
-                <span class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                    <span>📑</span> ข้อสอบทั้งหมด (<span id="total-questions-count" class="text-indigo-600">1</span>)
-                </span>
-                <span id="course-tag-badge" class="text-xs font-bold text-indigo-800 bg-indigo-100 px-2.5 py-1 rounded-lg truncate max-w-[110px]">
-                    วิชา...
-                </span>
+            <div class="p-3.5 border-b-2 border-slate-100 bg-slate-50/90 space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-xs sm:text-sm font-extrabold text-slate-900 flex items-center gap-1.5 whitespace-nowrap">
+                        <span>📑</span> ข้อสอบ (<span id="total-questions-count" class="text-indigo-600 font-black">1</span> ข้อ)
+                    </span>
+                    <button onclick="deleteAllQuestions()" title="ลบข้อสอบทั้งหมดในชุดนี้" class="text-xs font-bold text-rose-600 hover:text-white hover:bg-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-xl transition active:scale-95 flex items-center gap-1 cursor-pointer shadow-2xs">
+                        <span>🗑️</span> <span>ลบทั้งหมด</span>
+                    </button>
+                </div>
+                <div class="flex items-center">
+                    <span id="course-tag-badge" class="text-[11px] font-bold text-indigo-800 bg-indigo-100/90 border border-indigo-200 px-2.5 py-1 rounded-xl truncate w-full block shadow-2xs">
+                        วิชา...
+                    </span>
+                </div>
             </div>
 
             <!-- Scrollable Questions List -->
@@ -244,11 +251,14 @@
                 <!-- Question cards dynamically rendered -->
             </div>
 
-            <!-- Bottom Actions: + เพิ่มข้อสอบใหม่ -->
+            <!-- Bottom Actions: + เพิ่มข้อสอบใหม่ & ลบทั้งหมด -->
             <div class="p-3 border-t-2 border-slate-200 bg-white space-y-2">
                 <button onclick="addNewQuestion()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-sm sm:text-base shadow-md shadow-indigo-600/25 transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
                     <span class="text-lg leading-none font-bold">+</span>
                     <span>เพิ่มข้อสอบใหม่</span>
+                </button>
+                <button onclick="deleteAllQuestions()" class="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-xl font-bold text-xs transition active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span>🗑️</span> <span>ลบข้อสอบทั้งหมด</span>
                 </button>
 
                 <!-- Hidden Excel File Input -->
@@ -656,8 +666,9 @@
                 if (sideName) sideName.textContent = nameStr;
                 if (sideStudents) sideStudents.textContent = `นักศึกษาในรายวิชา: ${courseObj.studentCount || 0} คน`;
                 if (courseTag) {
-                    courseTag.textContent = courseObj.courseName;
-                    courseTag.className = "text-xs font-bold text-indigo-800 bg-indigo-100 px-2.5 py-1 rounded-lg truncate max-w-[140px]";
+                    courseTag.textContent = `📚 ${nameStr}`;
+                    courseTag.className = "text-[11px] font-bold text-indigo-800 bg-indigo-100/90 border border-indigo-200 px-2.5 py-1 rounded-xl truncate w-full block shadow-2xs";
+                    courseTag.title = nameStr;
                 }
                 if (container) {
                     container.className = "flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 px-3.5 py-1.5 rounded-2xl border-2 border-emerald-300 transition shadow-xs";
@@ -672,8 +683,9 @@
                 if (sideName) sideName.textContent = 'ยังไม่ได้เลือกรายวิชา';
                 if (sideStudents) sideStudents.textContent = 'กรุณาเลือกวิชาที่แถบด้านบน';
                 if (courseTag) {
-                    courseTag.textContent = '⚠️ ยังไม่เลือกวิชา';
-                    courseTag.className = "text-xs font-bold text-pink-700 bg-pink-100 border border-pink-300 px-2.5 py-1 rounded-lg truncate max-w-[150px]";
+                    courseTag.textContent = '⚠️ ยังไม่ได้เลือกรายวิชา (กรุณาเลือกด้านบน)';
+                    courseTag.className = "text-[11px] font-bold text-pink-700 bg-pink-50 border border-pink-300 px-2.5 py-1 rounded-xl truncate w-full block shadow-2xs";
+                    courseTag.title = 'กรุณาเลือกรายวิชาที่แถบด้านบน';
                 }
                 if (container) {
                     container.className = "flex items-center gap-1.5 bg-pink-50 hover:bg-pink-100 px-3.5 py-1.5 rounded-2xl border-2 border-pink-400 animate-pulse transition shadow-xs";
@@ -977,7 +989,11 @@
 
         function deleteQuestion(idx) {
             if (questions.length <= 1) {
-                alert("ต้องมีคำถามอย่างน้อย 1 ข้อในชุดข้อสอบครับ");
+                if (confirm("ต้องการล้างข้อสอบข้อนี้ให้เป็นกระดาษเปล่าใช่หรือไม่?")) {
+                    questions[0] = createEmptyQuestion();
+                    renderAllQuestionsList();
+                    renderActiveQuestionStage();
+                }
                 return;
             }
             if (!confirm(`ยืนยันลบข้อสอบข้อที่ ${idx + 1}?`)) return;
@@ -988,6 +1004,39 @@
             }
             renderAllQuestionsList();
             renderActiveQuestionStage();
+        }
+
+        async function deleteAllQuestions() {
+            if (!questions || questions.length === 0) {
+                alert("ไม่มีข้อสอบให้ลบครับ");
+                return;
+            }
+
+            const count = questions.length;
+            if (!confirm(`⚠️ ยืนยันการลบข้อสอบทั้งหมดจำนวน ${count} ข้อ?\n\nข้อสอบทั้งหมดในกระดานนี้จะถูกล้างออกและเริ่มต้นใหม่เป็นกระดาษเปล่า 1 ข้อ`)) {
+                return;
+            }
+
+            // หากมี activeRoomId ผูกอยู่ ให้ลบจากฐานข้อมูลด้วย
+            if (activeRoomId) {
+                try {
+                    await fetch('/api/teacher/delete-all-questions', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ roomId: activeRoomId })
+                    });
+                } catch(e) {
+                    console.error("Error clearing questions from DB:", e);
+                }
+            }
+
+            // รีเซ็ตคำถามในหน้าจอให้กลับเป็นข้อสอบเปล่า 1 ข้อ
+            questions = [createEmptyQuestion()];
+            activeQuestionIndex = 0;
+            renderAllQuestionsList();
+            renderActiveQuestionStage();
+
+            alert("🗑️ ลบข้อสอบทั้งหมดเรียบร้อยแล้วครับ");
         }
 
         function toggleTrueFalseMode() {
