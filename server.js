@@ -2211,7 +2211,7 @@ app.get('/api/exam-results', (req, res) => {
 
     if (courseId) {
         db.all(`
-            SELECT er.id, er.studentId, er.name, er.class, er.score, er.maxScore, er.time, er.date, er.roomId, er.answers_json, er.courseId
+            SELECT DISTINCT er.id, er.studentId, er.name, er.class, er.score, er.maxScore, er.time, er.date, er.roomId, er.answers_json, er.courseId
             FROM exam_results er
             LEFT JOIN teacher_rooms tr ON er.roomId = tr.roomId
             WHERE er.courseId = ? 
@@ -2226,7 +2226,6 @@ app.get('/api/exam-results', (req, res) => {
                    AND (er.courseId IS NULL OR er.courseId = 0) 
                    AND (tr.courseId IS NULL OR tr.courseId = 0)
                )
-            GROUP BY er.id
             ORDER BY er.id DESC
         `, [
             courseId, String(courseId),
