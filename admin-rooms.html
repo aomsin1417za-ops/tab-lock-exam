@@ -207,7 +207,7 @@
             <div class="max-w-7xl mx-auto space-y-6">
 
                 <!-- PROMINENT CENTER HERO BANNER FOR CREATING ROOMS -->
-                <div class="p-8 sm:p-10 bg-gradient-to-r from-pink-100/90 via-white to-sky-100/90 rounded-3xl border-2 border-pink-200/80 shadow-xl shadow-pink-500/10 text-center space-y-5 relative overflow-hidden my-2">
+                <div id="hero-create-banner" class="p-8 sm:p-10 bg-gradient-to-r from-pink-100/90 via-white to-sky-100/90 rounded-3xl border-2 border-pink-200/80 shadow-xl shadow-pink-500/10 text-center space-y-5 relative overflow-hidden my-2">
                     <!-- Ambient floating glows -->
                     <div class="absolute -top-16 -right-16 w-44 h-44 bg-pink-300/30 rounded-full blur-3xl pointer-events-none"></div>
                     <div class="absolute -bottom-16 -left-16 w-44 h-44 bg-sky-300/30 rounded-full blur-3xl pointer-events-none"></div>
@@ -755,16 +755,20 @@
             const container = document.getElementById('rooms-grid-container');
             const emptyState = document.getElementById('rooms-empty-state');
             const badge = document.getElementById('active-rooms-badge');
+            const heroBanner = document.getElementById('hero-create-banner');
 
-            badge.textContent = `${allRooms.length} ห้องสอบ`;
+            if (badge) badge.textContent = `${allRooms.length} ห้องสอบ`;
 
             if (!allRooms || allRooms.length === 0) {
                 container.innerHTML = '';
-                emptyState.classList.remove('hidden');
+                if (emptyState) emptyState.classList.remove('hidden');
+                if (heroBanner) heroBanner.classList.remove('hidden');
                 return;
             }
 
-            emptyState.classList.add('hidden');
+            // หากมีห้องสอบแล้ว ให้ซ่อนแบนเนอร์ศูนย์ห้องสอบ (ไอค่อนจรวด) ตามที่ผู้ใช้ระบุ แสดงแค่ห้องสอบและการ์ดเปิดห้องสอบเพิ่ม
+            if (emptyState) emptyState.classList.add('hidden');
+            if (heroBanner) heroBanner.classList.add('hidden');
 
             let html = '';
             allRooms.forEach(room => {
